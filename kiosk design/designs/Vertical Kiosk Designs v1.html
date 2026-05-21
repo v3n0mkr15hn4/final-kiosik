@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SUVIDHA — 55″ Vertical Kiosk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --indigo-900: oklch(0.28 0.10 270);
+    --indigo-700: oklch(0.38 0.13 270);
+    --indigo-500: oklch(0.55 0.14 270);
+    --indigo-300: oklch(0.78 0.06 270);
+    --indigo-100: oklch(0.93 0.025 270);
+    --saffron-700: oklch(0.62 0.15 65);
+    --saffron-500: oklch(0.74 0.15 65);
+    --saffron-300: oklch(0.86 0.09 65);
+    --saffron-100: oklch(0.95 0.04 65);
+    --dept-elec:  oklch(0.74 0.15 75);
+    --dept-gas:   oklch(0.70 0.15 35);
+    --dept-water: oklch(0.70 0.12 200);
+    --dept-waste: oklch(0.65 0.13 145);
+    --dept-health:oklch(0.68 0.14 350);
+    --dept-trans: oklch(0.66 0.13 230);
+    --ok:   oklch(0.62 0.13 150);
+    --warn: oklch(0.74 0.15 75);
+    --err:  oklch(0.58 0.18 25);
+    --ink-900: oklch(0.22 0.03 280);
+    --ink-700: oklch(0.40 0.03 280);
+    --ink-500: oklch(0.58 0.02 280);
+    --line:    oklch(0.90 0.012 80);
+    --surface-0: oklch(0.99 0.008 80);
+    --surface-1: oklch(0.975 0.012 75);
+    --surface-2: oklch(0.95 0.018 70);
+    --cream:    oklch(0.965 0.022 75);
+    --r-md: 18px; --r-lg: 28px; --r-xl: 40px;
+    --shadow-1: 0 2px 6px rgba(30,20,50,.06);
+    --shadow-2: 0 8px 24px rgba(30,20,50,.08), 0 3px 6px rgba(30,20,50,.05);
+    --shadow-3: 0 20px 60px rgba(30,20,50,.14);
+    --font-ui: "Plus Jakarta Sans", "Noto Sans", system-ui, sans-serif;
+    --font-multi: "Noto Sans", "Noto Sans Devanagari", "Noto Sans Bengali", "Noto Sans Tamil", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  html, body { margin: 0; background: #f0eee9; font-family: var(--font-ui); color: var(--ink-900); }
+
+  /* ───── VERTICAL KIOSK FRAME (1080 × 1920) ───── */
+  .vk {
+    width: 100%; height: 100%; background: var(--surface-0);
+    display: flex; flex-direction: column; overflow: hidden;
+    position: relative;
+  }
+  /* tricolor strip */
+  .vk-strip { height: 10px; background: linear-gradient(90deg, #FF9933 0 33.33%, white 33.33% 66.66%, #138808 66.66%); flex-shrink: 0; }
+
+  /* top brand bar */
+  .vk-top {
+    padding: 36px 60px 28px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-shrink: 0;
+  }
+  .vk-brand { display:flex; align-items:center; gap: 20px; }
+  .vk-brand .mk { width: 72px; height: 72px; border-radius: 20px; background: var(--indigo-700); display:grid; place-items:center; }
+  .vk-brand .nm { font-weight: 800; font-size: 32px; letter-spacing:-0.02em; color: var(--indigo-900); line-height: 1; }
+  .vk-brand .sub { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.18em; color: var(--ink-500); text-transform: uppercase; margin-top: 6px; }
+
+  .chip {
+    display:inline-flex; align-items:center; gap: 10px;
+    padding: 14px 22px; border-radius: 999px;
+    background: white; border: 1.5px solid var(--line);
+    font-size: 18px; font-weight: 500; color: var(--ink-700);
+    min-height: 56px; box-sizing: border-box;
+  }
+  .chip.act { background: var(--indigo-700); color: white; border-color: var(--indigo-700); font-weight: 600; }
+
+  /* main body */
+  .vk-body { flex: 1; padding: 24px 60px; overflow: hidden; display:flex; flex-direction: column; }
+
+  /* bottom action bar — always reachable */
+  .vk-bottom {
+    padding: 24px 60px 36px;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    background: var(--surface-1);
+    border-top: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .vk-bottom .btn { min-height: 72px; padding: 18px 28px; font-size: 18px; }
+
+  /* buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+    border-radius: 20px; padding: 22px 32px;
+    font-family: inherit; font-weight: 600; font-size: 22px;
+    border: none; cursor: pointer; min-height: 80px; box-sizing: border-box;
+    transition: transform .12s, box-shadow .12s;
+  }
+  .btn-pri { background: var(--indigo-700); color: var(--cream); box-shadow: var(--shadow-2); }
+  .btn-acc { background: var(--saffron-500); color: var(--indigo-900); }
+  .btn-ghost { background: transparent; color: var(--indigo-700); border: 2px solid var(--indigo-300); }
+  .btn-quiet { background: var(--surface-2); color: var(--ink-900); }
+  .btn-err { background: color-mix(in oklab, var(--err) 14%, white); color: var(--err); font-weight: 700; }
+  .btn-xl { min-height: 110px; font-size: 26px; padding: 28px 44px; border-radius: 28px; }
+
+  /* common */
+  .label-tag { font-family: var(--font-mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-500); font-weight: 500; }
+  .h1 { font-size: 80px; font-weight: 800; letter-spacing: -0.025em; line-height: 1.02; color: var(--indigo-900); margin: 0; text-wrap: balance; }
+  .h2 { font-size: 56px; font-weight: 800; letter-spacing: -0.022em; line-height: 1.05; color: var(--indigo-900); margin: 0; }
+  .h3 { font-size: 36px; font-weight: 700; letter-spacing: -0.015em; line-height: 1.15; color: var(--indigo-900); margin: 0; }
+  .body-l { font-size: 24px; line-height: 1.5; color: var(--ink-700); }
+  .body { font-size: 20px; line-height: 1.5; color: var(--ink-700); }
+  .meta { font-size: 16px; color: var(--ink-500); }
+
+  .card {
+    background: white; border: 1px solid var(--line);
+    border-radius: var(--r-lg); padding: 32px; box-shadow: var(--shadow-1);
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 999px;
+    font-family: var(--font-mono); font-size: 13px; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .b-ok { background: color-mix(in oklab, var(--ok) 14%, white); color: var(--ok); }
+  .b-warn { background: color-mix(in oklab, var(--warn) 18%, white); color: oklch(0.45 0.12 75); }
+  .b-info { background: var(--indigo-100); color: var(--indigo-700); }
+  .b-err { background: color-mix(in oklab, var(--err) 12%, white); color: var(--err); }
+
+  .field {
+    background: white; border: 2px solid var(--line); border-radius: 18px;
+    padding: 22px 26px; font-size: 24px; font-family: inherit;
+    width: 100%; box-sizing: border-box; min-height: 76px;
+  }
+  .field:focus { border-color: var(--indigo-500); outline: none; }
+
+  /* kiosk wash */
+  .kiosk-bg {
+    background:
+      radial-gradient(800px 800px at 100% 0%, color-mix(in oklab, var(--saffron-300) 28%, transparent), transparent 55%),
+      radial-gradient(900px 900px at 0% 100%, color-mix(in oklab, var(--indigo-100) 60%, transparent), transparent 55%),
+      var(--cream);
+  }
+
+  /* tile */
+  .tile {
+    background: white; border: 1px solid var(--line);
+    border-radius: var(--r-xl); padding: 36px;
+    display: flex; flex-direction: column; gap: 20px;
+    min-height: 240px; cursor: pointer;
+    box-shadow: var(--shadow-1); transition: transform .15s, box-shadow .15s;
+    text-align: left;
+  }
+  .tile:hover { transform: translateY(-3px); box-shadow: var(--shadow-3); }
+  .tile .icon { width: 96px; height: 96px; border-radius: 26px; display:grid; place-items:center; }
+  .tile .nm { font-weight: 700; font-size: 30px; color: var(--indigo-900); line-height: 1.15; letter-spacing: -0.01em; }
+  .tile .sub { font-size: 18px; color: var(--ink-500); line-height: 1.45; }
+
+  /* timeline */
+  .tl { display:flex; flex-direction:column; gap: 24px; position: relative; padding-left: 8px; }
+  .tl::before { content:''; position:absolute; left: 26px; top: 24px; bottom: 24px; width: 3px; background: var(--line); border-radius: 2px; }
+  .tl-item { display:flex; gap: 24px; align-items: flex-start; position:relative; z-index: 1; }
+  .tl-dot { width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0; display:grid; place-items:center; background: white; border: 3px solid var(--line); font-size: 20px; font-weight: 700; color: var(--ink-500); }
+  .tl-dot.done { background: var(--ok); border-color: var(--ok); color: white; }
+  .tl-dot.now { background: var(--indigo-700); border-color: var(--indigo-700); color: white; box-shadow: 0 0 0 8px color-mix(in oklab, var(--indigo-700) 16%, transparent); }
+
+  /* keypad */
+  .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .keypad button {
+    background: white; border: 2px solid var(--line);
+    border-radius: 22px; padding: 0; font-size: 44px; font-weight: 700;
+    cursor: pointer; font-family: var(--font-mono); color: var(--indigo-900);
+    height: 110px; transition: transform .08s;
+  }
+  .keypad button:active { transform: scale(0.97); background: var(--surface-1); }
+
+  .otp-cell {
+    width: 88px; height: 110px;
+    border: 2.5px solid var(--line); border-radius: 20px;
+    background: white; display:grid; place-items:center;
+    font-family: var(--font-mono); font-size: 48px; font-weight: 700; color: var(--indigo-900);
+  }
+  .otp-cell.act { border-color: var(--indigo-700); background: color-mix(in oklab, var(--indigo-700) 5%, white); }
+
+  .scrollbox { overflow: auto; }
+  .scrollbox::-webkit-scrollbar { display:none; }
+
+  /* receipt */
+  .receipt-row { display:flex; justify-content:space-between; padding: 16px 0; border-bottom: 1.5px dashed var(--line); }
+  .receipt-row:last-child { border-bottom: none; }
+  .receipt-row .k { color: var(--ink-500); font-size: 18px; }
+  .receipt-row .v { color: var(--ink-900); font-size: 20px; font-weight: 600; text-align: right; }
+
+  /* sos always-on */
+  .sos-fab {
+    position: absolute; right: 36px; top: 50%;
+    transform: translateY(-50%); z-index: 5;
+    width: 96px; height: 96px; border-radius: 50%;
+    background: var(--err); color: white; border: none;
+    display: grid; place-items: center; font-weight: 800;
+    box-shadow: 0 12px 32px color-mix(in oklab, var(--err) 30%, transparent);
+    cursor: pointer; font-size: 16px;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="vertical-pages.jsx"></script>
+</body>
+</html>

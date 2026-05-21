@@ -1,0 +1,65 @@
+SECURE UPLOAD FLOW - KIOSK + PHONE (V1)
+Date: 2026-04-29
+Audience: Product + Engineering
+Scope: High-level user flow only (no backend/API details)
+
+1) Goal
+Provide a secure, easy way for kiosk users to upload a file from their phone (gallery photo, camera photo, or PDF/document). The kiosk receives the file automatically and confirms success.
+
+2) Primary User Flow
+1. User arrives at kiosk.
+2. Kiosk displays a QR code with a short instruction: "Scan to upload."
+3. User scans QR with phone.
+4. Phone opens secure upload webpage.
+5. User chooses one option:
+   - Photo from gallery
+   - Camera photo
+   - PDF / Document
+6. User uploads.
+7. Kiosk automatically receives file.
+8. Kiosk displays success state and clear next steps.
+
+3) User Experience Requirements
+- QR must be large enough and high-contrast for easy scanning.
+- Mobile upload page must be fast and simple (single screen, minimal typing).
+- Provide clear progress and success indicators on both phone and kiosk.
+- Allow retry if upload fails.
+- Handle slow or lost network gracefully (non-blocking kiosk UI).
+
+4) Kiosk Screen Requirements
+- Default screen: QR code centered with short instructions.
+- Live status area: "Waiting for upload" -> "Receiving" -> "Upload complete".
+- Success view: show filename/type and timestamp.
+- Timeout handling: revert to QR screen after configurable period.
+
+5) Mobile Upload Page Requirements
+- Responsive layout for common phones.
+- Clear options for file selection:
+  - "Choose from gallery"
+  - "Take a photo"
+  - "Upload a document (PDF/DOC/etc.)"
+- Progress indicator during upload.
+- Clear success message after completion.
+
+6) Non-Functional Requirements (High-Level)
+- Secure and unique QR per session.
+- Short-lived session to prevent reuse.
+- Upload should be encrypted in transit.
+- Do not store files on the phone beyond the upload action.
+
+7) Edge Cases
+- User scans QR but does not upload (session expires; kiosk returns to idle state).
+- User selects unsupported file type (show clear error and supported list).
+- Upload interrupted (network drop; allow retry).
+- Multiple scans at once (only one active session per kiosk).
+
+8) Acceptance Criteria
+- From scan to upload completion, user can finish in under 2 minutes on typical mobile networks.
+- Kiosk shows success automatically after upload finishes.
+- Mobile page works on iOS and Android for gallery, camera, and document upload.
+
+9) Open Questions
+- What file types and size limits should we support?
+- How long should a session remain valid?
+- Should the kiosk show a preview or only a confirmation?
+- Should multiple files be allowed per session?

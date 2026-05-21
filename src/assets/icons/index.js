@@ -1,0 +1,10 @@
+export { ElectricityIcon } from './ElectricityIcon';
+export { GasIcon } from './GasIcon';
+export { MunicipalIcon } from './MunicipalIcon';
+export { HealthIcon } from './HealthIcon';
+export { TransportIcon } from './TransportIcon';
+export { SanitationIcon } from './SanitationIcon';
+export { SchemesIcon } from './SchemesIcon';
+export { FamilyIcon } from './FamilyIcon';
+export { TrackIcon } from './TrackIcon';
+export { OfficeIcon } from './OfficeIcon';

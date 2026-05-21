@@ -1,0 +1,20 @@
+{
+  "name": "SUVIDHA 2026 - Smart Urban Digital Helpdesk Assistant",
+  "short_name": "SUVIDHA 2026",
+  "description": "Touch-optimized kiosk for citizen services including Electricity, Gas, Water, Sanitation, Municipal, Transport, and Healthcare",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "portrait-primary",
+  "theme_color": "#3a3596",
+  "background_color": "#fdfbf7",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["government", "utilities", "productivity"],
+  "lang": "en-IN"
+}

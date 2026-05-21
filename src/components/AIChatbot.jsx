@@ -1,0 +1,588 @@
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { MessageCircle, X, Minus, Send, Mic, MicOff, Volume2, VolumeX, Zap } from 'lucide-react';
+import { naturalSpeak, startBargeInListener, stopBargeInListener } from '../utils/naturalVoice';
+import { stopTTS } from '../utils/ttsService';
+import { callNvidiaAI, MODELS } from '../ai/api/nvidiaApi';
+import SYSTEM_PROMPT from '../ai/prompts/systemPrompt';
+
+const extractContext = (pathname) => {
+  if (pathname.includes('electric')) return 'electricity';
+  if (pathname.includes('gas')) return 'gas';
+  if (pathname.includes('municipal') || pathname.includes('water') || pathname.includes('sanitation')) return 'municipal';
+  if (pathname.includes('healthcare')) return 'healthcare';
+  if (pathname.includes('transport')) return 'transport';
+  return '';
+};
+
+const getSuggestionsByContext = (context, t) => {
+  const suggestions = {
+    '':          [
+      t('chatbot.sugg1', 'What services are available?'),
+      t('chatbot.sugg2', 'How do I track my request?'),
+      t('chatbot.sugg3', 'Which schemes am I eligible for?'),
+    ],
+    electricity: [
+      t('chatbot.elec1', 'How to apply for new connection?'),
+      t('chatbot.elec2', 'My meter is broken or damaged'),
+      t('chatbot.elec3', 'I got a wrong electricity bill'),
+    ],
+    gas: [
+      t('chatbot.gas1', 'Apply for new gas connection'),
+      t('chatbot.gas2', 'How to view my gas bills?'),
+      t('chatbot.gas3', 'Report gas meter damage'),
+    ],
+    municipal: [
+      t('chatbot.muni1', 'Apply for new water connection'),
+      t('chatbot.muni2', 'Report road damage or potholes'),
+      t('chatbot.muni3', 'Garbage not collected in my area'),
+    ],
+    healthcare: [
+      t('chatbot.hlth1', 'Book a hospital appointment'),
+      t('chatbot.hlth2', 'Vaccination schedule near me'),
+      t('chatbot.hlth3', 'Ayushman Bharat eligibility'),
+    ],
+    transport: [
+      t('chatbot.trans1', 'Bus timings and routes'),
+      t('chatbot.trans2', 'Book a transport ticket'),
+      t('chatbot.trans3', 'Report road or traffic issue'),
+    ],
+  };
+  return suggestions[context] || suggestions[''];
+};
+
+// Full STT language map — matches ttsService
+const STT_LANG_MAP = {
+  en: 'en-IN', hi: 'hi-IN', ta: 'ta-IN', te: 'te-IN',
+  kn: 'kn-IN', ml: 'ml-IN', mr: 'mr-IN', gu: 'gu-IN',
+  bn: 'bn-IN', or: 'or-IN', pa: 'pa-IN', as: 'as-IN',
+  ur: 'hi-IN', ks: 'hi-IN', sd: 'hi-IN', mai: 'hi-IN',
+  kok: 'hi-IN', doi: 'hi-IN', ne: 'hi-IN', sa: 'hi-IN',
+  mni: 'hi-IN', sat: 'hi-IN',
+};
+
+const PROVIDER_LABELS = {
+  'NVIDIA NIM · Nemotron': '⚡ NVIDIA Nemotron Ultra',
+  'sarvam-nim': '🇮🇳 Sarvam · NVIDIA NIM',
+  'llama-nim': '⚡ Llama 3.3 · NVIDIA NIM',
+  'offline_mode': '📴 Offline mode',
+};
+
+// Conversation history for context window
+const conversationHistory = [];
+
+const AIChatbot = () => {
+  const { t, i18n } = useTranslation();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [voiceError, setVoiceError] = useState('');
+  const [isSpeakingReply, setIsSpeakingReply] = useState(false);
+  const [lastProvider, setLastProvider] = useState('');
+  const [streamingText, setStreamingText] = useState('');
+
+  const chatEndRef = useRef(null);
+  const inputRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const recognitionRef = useRef(null);
+
+  const context = extractContext(location.pathname);
+  const userLang = (i18n.language || 'en').split('-')[0];
+  const sttLangCode = STT_LANG_MAP[userLang] || 'hi-IN';
+
+  // Welcome message with natural greeting
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      const greetings = {
+        en: "Hello! I'm SUVIDHA AI — powered by NVIDIA NIM. I can help with Electricity, Gas & Municipal services in all 22 Indian languages. What do you need?",
+        hi: "नमस्ते! मैं SUVIDHA AI हूँ — NVIDIA NIM द्वारा संचालित। बिजली, गैस, पानी, और नगर सेवाओं में मदद करता हूँ। क्या चाहिए?",
+        as: "নমস্কাৰ! মই SUVIDHA AI — NVIDIA NIM চালিত। ভাৰতৰ ২২ টা ভাষাত বিদ্যুৎ, গেছ আৰু পৌৰ সেৱাত সহায় কৰিব পাৰো। কি লাগে?",
+        bn: "নমস্কার! আমি SUVIDHA AI — NVIDIA NIM চালিত। বিদ্যুৎ, গ্যাস ও পৌর সেবায় ২২ ভারতীয় ভাষায় সাহায্য করি। কী দরকার?",
+        ta: "வணக்கம்! நான் SUVIDHA AI — NVIDIA NIM மூலம். மின்சாரம், வாயு, நகர சேவைகளில் உதவுகிறேன். என்ன தேவை?",
+        te: "నమస్కారం! నేను SUVIDHA AI — NVIDIA NIM ద్వారా. విద్యుత్, గ్యాస్, మున్సిపల్ సేవలలో సహాయం చేస్తాను. ఏం కావాలి?",
+        kn: "ನಮಸ್ಕಾರ! ನಾನು SUVIDHA AI — NVIDIA NIM ನಿಂದ. ವಿದ್ಯುತ್, ಗ್ಯಾಸ್, ಮುನ್ಸಿಪಲ್ ಸೇವೆಗಳಲ್ಲಿ ಸಹಾಯ ಮಾಡುತ್ತೇನೆ. ಏನು ಬೇಕು?",
+        ml: "നമസ്കാരം! ഞാൻ SUVIDHA AI — NVIDIA NIM ഉപയോഗിക്കുന്നു. വൈദ്യുതി, ഗ്യാസ്, മുനിസിപ്പൽ സേവനങ്ങളിൽ സഹായിക്കാം. എന്ത് വേണം?",
+        gu: "નમસ્તે! હું SUVIDHA AI — NVIDIA NIM સ્ચાલિત. વીજળી, ગેસ, નગર સેવાઓ 22 ભાષામાં. શું જોઈએ?",
+        mr: "नमस्कार! मी SUVIDHA AI — NVIDIA NIM द्वारे. वीज, गॅस, महापालिका सेवांमध्ये मदत करतो. काय हवंय?",
+        pa: "ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ SUVIDHA AI ਹਾਂ — NVIDIA NIM ਚਾਲਿਤ। ਬਿਜਲੀ, ਗੈਸ, ਸ਼ਹਿਰੀ ਸੇਵਾਵਾਂ ਵਿੱਚ ਮਦਦ। ਕੀ ਚਾਹੀਦਾ?",
+        ur: "آداب! میں SUVIDHA AI ہوں — NVIDIA NIM سے۔ بجلی، گیس، بلدیاتی خدمات میں مدد کرتا ہوں۔ کیا چاہیے؟",
+        or: "ନମସ୍କାର! ମୁଁ SUVIDHA AI — NVIDIA NIM ଦ୍ୱାରା। ବିଦ୍ୟୁତ, ଗ୍ୟାସ, ନଗର ସେବାରେ ସାହାଯ୍ୟ। କ'ଣ ଦରକାର?",
+        brx: "नमस्कार! मां SUVIDHA AI — NVIDIA NIM खालामजों। बिजुली, गेस, नगर सेवायां सिबियाय। मां खामानि लागोन?",
+      };
+      const welcomeText = greetings[userLang] || greetings.en;
+      setMessages([{
+        id: 1, type: 'bot',
+        text: welcomeText,
+        timestamp: new Date(),
+        provider: 'local',
+      }]);
+      // Read welcome aloud
+      setTimeout(() => naturalSpeak(welcomeText, { language: userLang }), 400);
+    }
+  }, [isOpen, messages.length, userLang]);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // When chatbot opens, stop any ongoing TTS (barge-in to chat)
+  useEffect(() => {
+    if (isOpen) {
+      stopTTS();
+      stopBargeInListener();
+    }
+  }, [isOpen]);
+
+  // Execute AI action returned from NVIDIA NIM
+  const executeAction = useCallback((action) => {
+    if (!action?.type) return;
+    switch (action.type) {
+      case 'NAVIGATE_PAGE':
+        if (action.path) {
+          setTimeout(() => { navigate(action.path); setIsOpen(false); }, 800);
+        }
+        break;
+      case 'SWITCH_LANGUAGE':
+        if (action.language) {
+          i18n.changeLanguage(action.language);
+          sessionStorage.setItem('userLanguage', action.language);
+        }
+        break;
+      case 'TRACK_APPLICATION':
+        navigate(`/track-status?q=${encodeURIComponent(action.query || '')}`);
+        setIsOpen(false);
+        break;
+      case 'EMERGENCY_ALERT':
+        window.dispatchEvent(new CustomEvent('suvidha:open-emergency'));
+        break;
+      case 'ESCALATE_HUMAN':
+        window.dispatchEvent(new CustomEvent('suvidha:escalate'));
+        break;
+      default:
+        break;
+    }
+  }, [navigate, i18n]);
+
+  const callNvidiaChat = useCallback(async (userMessage, onChunk) => {
+    // Build messages array with rolling 10-turn context
+    conversationHistory.push({ role: 'user', content: userMessage });
+    if (conversationHistory.length > 20) conversationHistory.splice(0, 2);
+
+    const pageContext = extractContext(location.pathname);
+    const contextNote = pageContext
+      ? `[User is on: ${pageContext} department page. Path: ${location.pathname}]`
+      : `[User is on: ${location.pathname}]`;
+
+    const systemWithContext = SYSTEM_PROMPT + `\n\n## CURRENT SESSION\nLanguage: ${userLang}\nPage context: ${contextNote}\nCitizen: ${sessionStorage.getItem('userName') || 'Guest'}`;
+
+    const messages = [
+      { role: 'system', content: systemWithContext },
+      ...conversationHistory.slice(-10),
+    ];
+
+    try {
+      setLastProvider('NVIDIA NIM · Nemotron');
+      const aiResp = await callNvidiaAI(messages, {
+        model: MODELS.PRIMARY,
+        stream: true,
+        onChunk,
+        temperature: 0.35,
+        maxTokens: 500,
+      });
+
+      // Push assistant reply to history
+      const replyText = typeof aiResp === 'object' ? aiResp.response || '' : String(aiResp);
+      conversationHistory.push({ role: 'assistant', content: replyText });
+
+      return aiResp;
+    } catch {
+      return { response: t('chatbot.error', 'Service temporarily unavailable. Please use the menu.'), intent: 'error', action: null };
+    }
+  }, [location.pathname, userLang, t]);
+
+  const sendMessage = useCallback(async (text) => {
+    if (!text.trim() || isTyping) return;
+
+    stopTTS();
+    stopBargeInListener();
+
+    const userMsg = { id: Date.now(), type: 'user', text: text.trim(), timestamp: new Date() };
+    setMessages(prev => [...prev, userMsg]);
+    setInput('');
+    setIsTyping(true);
+    setStreamingText('');
+
+    // Streaming bot placeholder
+    const botId = Date.now() + 1;
+    setMessages(prev => [...prev, { id: botId, type: 'bot', text: '', streaming: true, timestamp: new Date() }]);
+
+    let finalResponse = null;
+    let accumulated = '';
+
+    finalResponse = await callNvidiaChat(text.trim(), (chunk, full) => {
+      accumulated = full;
+      setStreamingText(full);
+      setMessages(prev => prev.map(m =>
+        m.id === botId ? { ...m, text: full } : m
+      ));
+    });
+
+    // Finalise — extract clean response text and action
+    const replyText = (typeof finalResponse === 'object' ? finalResponse?.response : finalResponse)
+      || accumulated
+      || t('chatbot.error', 'No response. Please try again.');
+
+    const action = typeof finalResponse === 'object' ? finalResponse?.action : null;
+    const suggestions = typeof finalResponse === 'object' ? finalResponse?.suggestions : null;
+    const provider = lastProvider || 'NVIDIA NIM';
+
+    setMessages(prev => prev.map(m =>
+      m.id === botId
+        ? { ...m, text: replyText, streaming: false, action, suggestions, provider }
+        : m
+    ));
+    setIsTyping(false);
+    setStreamingText('');
+
+    // Execute navigation/language actions from AI
+    if (action) executeAction(action);
+
+    // Speak reply + enable barge-in
+    naturalSpeak(replyText, { language: finalResponse?.language || userLang, priority: 'normal' })
+      .then(() => {
+        startBargeInListener((spokenText) => {
+          stopBargeInListener();
+          sendMessage(spokenText);
+        }, userLang);
+      }).catch(() => {});
+  }, [isTyping, i18n.language, userLang, callNvidiaChat, executeAction, lastProvider, t]);
+
+  const handleSend = () => sendMessage(input);
+  const handleSuggestionClick = (suggestion) => sendMessage(suggestion);
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+  };
+
+  // ── Sarvam STT Voice Input ───────────────────────────────────────────────
+  const stopListening = useCallback(() => {
+    setIsListening(false);
+    if (recognitionRef.current) { try { recognitionRef.current.stop(); } catch { /* ok */ } recognitionRef.current = null; }
+    if (mediaRecorderRef.current?.state === 'recording') mediaRecorderRef.current.stop();
+  }, []);
+
+  const processAudioBlob = useCallback(async (blob) => {
+    try {
+      setVoiceError('');
+      const formData = new FormData();
+      formData.append('file', blob, 'recording.webm');
+      formData.append('language_code', sttLangCode);
+
+      const resp = await fetch('/api/sarvam/speech-to-text', {
+        method: 'POST', body: formData,
+        signal: AbortSignal.timeout(15000),
+      });
+
+      if (!resp.ok) throw new Error(`STT HTTP ${resp.status}`);
+      const data = await resp.json();
+      const transcriptText = data.transcript || data.text || '';
+
+      if (transcriptText.trim()) {
+        setInput(transcriptText);
+        setTimeout(() => sendMessage(transcriptText), 500);
+      } else {
+        setVoiceError(t('chatbot.noSpeech', 'No speech detected. Please try again.'));
+      }
+    } catch (err) {
+      setVoiceError(t('chatbot.voiceError', 'Voice recognition failed. Please type your question.'));
+      console.error('[Chatbot STT]', err.message);
+    }
+  }, [sttLangCode, t, sendMessage]);
+
+  const startListening = useCallback(async () => {
+    setVoiceError('');
+    setIsListening(true);
+    stopTTS(); // Stop any TTS immediately when user presses mic (barge-in)
+    stopBargeInListener();
+
+    // Try browser Web Speech API first
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRec) {
+      const recognition = new SpeechRec();
+      recognitionRef.current = recognition;
+      recognition.lang = sttLangCode;
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 3;
+
+      recognition.onresult = (e) => {
+        const text = e.results?.[0]?.[0]?.transcript || '';
+        setIsListening(false);
+        if (text.trim()) {
+          setInput(text);
+          setTimeout(() => sendMessage(text), 400);
+        } else {
+          setVoiceError(t('chatbot.noSpeech', 'No speech detected.'));
+        }
+      };
+
+      recognition.onerror = () => {
+        setIsListening(false);
+        setVoiceError(t('chatbot.voiceError', 'Voice recognition failed.'));
+      };
+
+      recognition.onend = () => setIsListening(false);
+      recognition.start();
+      setTimeout(() => { if (recognitionRef.current) { try { recognition.stop(); } catch { /* ok */ } } }, 9000);
+      return;
+    }
+
+    // Fallback: MediaRecorder → Sarvam STT
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      mediaRecorderRef.current = recorder;
+      audioChunksRef.current = [];
+
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
+      recorder.onstop = () => {
+        stream.getTracks().forEach(t => t.stop());
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        setIsListening(false);
+        processAudioBlob(blob);
+      };
+
+      recorder.start();
+      setTimeout(() => { if (recorder.state === 'recording') recorder.stop(); }, 9000);
+    } catch {
+      setIsListening(false);
+      setVoiceError(t('chatbot.micError', 'Microphone access denied.'));
+    }
+  }, [sttLangCode, t, processAudioBlob, sendMessage]);
+
+  const toggleVoice = () => {
+    if (isListening) stopListening();
+    else startListening();
+  };
+
+  const readLastReply = () => {
+    const lastBot = [...messages].reverse().find(m => m.type === 'bot');
+    if (!lastBot) return;
+    setIsSpeakingReply(true);
+    naturalSpeak(lastBot.text, { language: i18n.language, interrupt: true })
+      .finally(() => setIsSpeakingReply(false));
+  };
+
+  const stopSpeaking = () => {
+    stopTTS();
+    stopBargeInListener();
+    setIsSpeakingReply(false);
+  };
+
+  const hiddenPaths = ['/', '/login'];
+  if (hiddenPaths.includes(location.pathname)) return null;
+
+  const providerLabel = PROVIDER_LABELS[lastProvider] || 'Sarvam AI · NVIDIA NIM';
+
+  return (
+    <>
+      {/* Floating button */}
+      {!isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-24 right-4 z-50 w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-100 transition-transform touch-manipulation"
+          aria-label="Open AI Assistant"
+          title="Ask SUVIDHA AI"
+        >
+          <MessageCircle className="w-8 h-8 text-white" />
+          <span className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 text-white text-xs font-bold rounded-full flex items-center justify-center border-2 border-white">AI</span>
+        </button>
+      )}
+
+      {/* Chat panel */}
+      {isOpen && (
+        <div
+          className={`fixed right-4 z-50 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col transition-all duration-300 ${
+            isMinimized ? 'bottom-24 w-72 h-14' : 'bottom-4 w-[420px] h-[580px]'
+          }`}
+          style={{ maxHeight: 'calc(100vh - 100px)' }}
+          role="dialog"
+          aria-label="SUVIDHA AI Assistant"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-t-2xl flex-shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center">
+                <MessageCircle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-sm">SUVIDHA AI</h3>
+                {!isMinimized && (
+                  <p className="text-xs opacity-80">
+                    {isListening ? '🔴 Listening...' : providerLabel || `${sttLangCode} · Voice enabled`}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
+              {/* Stop speaking */}
+              {isSpeakingReply && (
+                <button onClick={stopSpeaking} className="p-1.5 rounded-lg hover:bg-white/20 transition-colors" aria-label="Stop speaking">
+                  <VolumeX className="w-4 h-4" />
+                </button>
+              )}
+              <button onClick={() => setIsMinimized(!isMinimized)} className="p-1.5 rounded-lg hover:bg-white/20 transition-colors" aria-label={isMinimized ? 'Maximize' : 'Minimize'}>
+                <Minus className="w-4 h-4" />
+              </button>
+              <button onClick={() => { setIsOpen(false); setIsMinimized(false); stopListening(); stopTTS(); }} className="p-1.5 rounded-lg hover:bg-white/20 transition-colors" aria-label="Close chatbot">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {!isMinimized && (
+            <>
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-3" role="log" aria-live="polite" aria-label="Chat messages">
+                {messages.map((msg) => (
+                  <div key={msg.id} className={`flex flex-col ${msg.type === 'user' ? 'items-end' : 'items-start'}`}>
+                    <div className={`max-w-[90%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                      msg.type === 'user'
+                        ? 'bg-blue-600 text-white rounded-br-md'
+                        : 'bg-gray-100 text-gray-800 rounded-bl-md'
+                    }`}>
+                      {msg.text}
+                      {msg.streaming && (
+                        <span className="inline-block w-1.5 h-3.5 bg-indigo-500 rounded-sm ml-0.5 animate-pulse align-middle" />
+                      )}
+                    </div>
+                    {/* AI-suggested quick replies */}
+                    {msg.type === 'bot' && !msg.streaming && msg.suggestions?.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-1.5 max-w-[90%]">
+                        {msg.suggestions.map((s, i) => (
+                          <button key={i} onClick={() => handleSuggestionClick(s)}
+                            className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-medium hover:bg-indigo-100 transition-colors touch-manipulation border border-indigo-200">
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {/* Provider badge on last bot message */}
+                    {msg.type === 'bot' && !msg.streaming && msg.provider && (
+                      <div className="flex items-center gap-1 mt-0.5 text-[10px] text-gray-400">
+                        <Zap size={9} className="text-green-500" />
+                        {PROVIDER_LABELS[msg.provider] || msg.provider}
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {isTyping && !messages.some(m => m.streaming) && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-bl-md">
+                      <div className="flex gap-1.5 items-center">
+                        <span className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                        <span className="text-xs text-gray-400 ml-1">NVIDIA thinking…</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Context suggestions when idle */}
+                {!isTyping && messages.length > 0 && messages[messages.length - 1]?.type === 'bot' && !messages[messages.length - 1]?.suggestions?.length && (
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {getSuggestionsByContext(context, t).map((s, i) => (
+                      <button key={i} onClick={() => handleSuggestionClick(s)}
+                        className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-xs font-medium hover:bg-blue-100 active:bg-blue-200 transition-colors touch-manipulation border border-blue-200">
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <div ref={chatEndRef} />
+              </div>
+
+              {/* Voice error */}
+              {voiceError && (
+                <div className="px-4 pb-1">
+                  <p className="text-xs text-red-500 text-center">{voiceError}</p>
+                </div>
+              )}
+
+              {/* Input area */}
+              <div className="p-3 border-t border-gray-100 flex-shrink-0">
+                <div className="flex gap-2 items-center">
+                  {/* Mic button */}
+                  <button
+                    onClick={toggleVoice}
+                    disabled={isTyping}
+                    title={isListening ? 'Stop listening' : `Speak in ${sttLangCode}`}
+                    className={`p-2.5 rounded-xl transition-all touch-manipulation flex-shrink-0 ${
+                      isListening
+                        ? 'bg-red-500 text-white animate-pulse scale-110'
+                        : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200 active:scale-95'
+                    } disabled:opacity-50`}
+                    aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
+                  >
+                    {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                  </button>
+
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder={isListening ? t('chatbot.listening', 'Listening...') : t('chatbot.placeholder', 'Ask anything about government services...')}
+                    className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    disabled={isTyping || isListening}
+                    maxLength={500}
+                  />
+
+                  {/* Read last reply aloud */}
+                  {messages.some(m => m.type === 'bot' && m.id !== 1) && !isSpeakingReply && (
+                    <button
+                      onClick={readLastReply}
+                      className="p-2.5 rounded-xl bg-green-100 text-green-700 hover:bg-green-200 active:scale-95 transition-colors touch-manipulation flex-shrink-0"
+                      aria-label="Read reply aloud"
+                      title="Read last reply aloud"
+                    >
+                      <Volume2 className="w-5 h-5" />
+                    </button>
+                  )}
+
+                  {/* Send */}
+                  <button
+                    onClick={handleSend}
+                    disabled={!input.trim() || isTyping || isListening}
+                    className="p-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed active:scale-95 transition-colors touch-manipulation flex-shrink-0"
+                    aria-label="Send message"
+                  >
+                    <Send className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <p className="text-center text-xs text-gray-400 mt-1.5">
+                  {isListening
+                    ? `Listening in ${sttLangCode} · Tap mic to stop`
+                    : 'Voice · Text · EN / हिंदी / অসমীয়া · Interrupt anytime'}
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </>
+  );
+};
+
+export default AIChatbot;

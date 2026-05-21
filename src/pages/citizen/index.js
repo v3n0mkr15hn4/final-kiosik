@@ -1,0 +1,10 @@
+export { default as CitizenLanding } from '../Landing';
+export { default as CitizenHome } from '../Home';
+export { default as CitizenLogin } from '../Login';
+export { default as CitizenTrackStatus } from '../TrackStatus';
+export { default as CitizenReceipt } from '../Receipt';
+export { default as CitizenElectricity } from '../Electricity';
+export { default as CitizenWater } from '../Water';
+export { default as CitizenHealthcare } from '../Healthcare';
+export { default as CitizenMunicipal } from '../Municipal';
+export { default as CitizenTransport } from '../Transport';

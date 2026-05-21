@@ -1,0 +1,294 @@
+SUVIDHA 2026 — Implementation Status vs Tentative Software Flow
+Date: 2026-04-11
+Repo: kiosk-hackathon-2026
+
+How this report was produced
+- Based on static code inspection of the current workspace.
+- “Implemented” means there is a working UI route/component and/or backend endpoint in the repo.
+- “Partially implemented” means there is a close equivalent (often a generic form) but key fields/logic from the spec are missing.
+- “Not implemented” means there is no obvious UI flow/page and no backend route supporting it.
+
+Key entry points / pages found
+- Landing + Language picker: src/pages/Landing.jsx
+- Aadhaar login: src/pages/Login.jsx
+- Mode selection (accessibility mode): src/pages/ModeSelection.jsx
+- Home service grid: src/pages/Home.jsx
+- Department request forms: src/pages/Electricity.jsx, src/pages/Gas.jsx, src/pages/Municipal.jsx (+ Water/Sanitation/Transport/Healthcare)
+- Complaint registration: src/pages/Complaints.jsx
+- Track status: src/pages/TrackStatus.jsx
+- Receipt: src/pages/Receipt.jsx
+- Admin dashboard: src/pages/Dashboard.jsx
+- i18n: src/i18n/index.js, src/utils/languageConfig.js, src/utils/translationService.js
+- Backend routes: server/routes/*.js (notably services.js, complaints.js, track.js, notifications.js, sarvam.js)
+
+================================================================================
+HOME PAGE — Language & Organization Selection
+================================================================================
+
+1) Language selection supporting English, Hindi, Assamese
+Status: PARTIALLY IMPLEMENTED
+Evidence:
+- UI language picker exists on Landing: src/pages/Landing.jsx
+- i18n supports English + Hindi + Tamil static locales: src/i18n/locales/{en,hi,ta}.json
+- Assamese is present in the supported-language list as code "as": src/utils/languageConfig.js
+Notes / gaps vs spec:
+- The app’s primary languages shown by default are EN/HI/BN/TA/TE/MR (Assamese is in the “other languages” expandable list).
+- Assamese is not a static locale file and is translated via “bridge” logic (Bengali) using Sarvam translate API; STT/TTS for Assamese is marked unsupported in config.
+
+2) Must select preferred language before proceeding
+Status: PARTIALLY IMPLEMENTED
+Evidence:
+- Landing shows language picker before Guest/Citizen actions: src/pages/Landing.jsx
+Notes / gaps vs spec:
+- Language selection is optional; user can proceed without selecting.
+
+3) Show 3 organizations as distinct selectable options (e.g., Electricity, Gas, Municipality)
+Status: PARTIALLY IMPLEMENTED
+Evidence:
+- Home includes Electricity, Gas, Municipal as selectable tiles: src/pages/Home.jsx
+Notes / gaps vs spec:
+- Home currently shows many more services (Water, Sanitation, Transport, Healthcare, Complaints, Schemes, Track Status, Office Locator, Family Profile).
+- There is no “exactly 3 organizations only” home screen.
+
+4) Allow user to select only one organization at a time
+Status: IMPLEMENTED
+Evidence:
+- Home tiles are single-tap navigation actions: src/pages/Home.jsx
+
+5) On organization selection, route to the organization-specific authentication or service entry screen
+Status: IMPLEMENTED
+Evidence:
+- Routing is defined in src/App.jsx
+- Electricity/Gas/Municipal pages are protected by CitizenRoute (guests get a login gate): src/App.jsx
+
+6) Selected language persists throughout the session and is applied on subsequent screens
+Status: IMPLEMENTED
+Evidence:
+- i18next browser detector caches in localStorage: src/i18n/index.js
+- changeLanguageSafe persists to sessionStorage("userLanguage"): src/i18n/index.js
+
+================================================================================
+PART 1 — ELECTRICITY MODULE
+================================================================================
+
+(Overall note)
+- The repo implements Electricity as a generic “choose category -> fill request form -> receipt” flow.
+- It does NOT implement separate, specialized submodules for each electricity feature (new connection, load enhancement, meter replacement, etc.).
+Evidence: src/pages/Electricity.jsx, src/utils/constants.js (serviceCategories.electricity)
+
+1) Welcome Screen & User Login
+Status: PARTIALLY IMPLEMENTED (implemented at system level, not electricity-specific)
+Evidence:
+- Welcome/Landing: src/pages/Landing.jsx
+- Login (Aadhaar): src/pages/Login.jsx
+Notes / gaps vs spec:
+- Electricity-specific login using “multiple identifiers” (e.g., Consumer No + OTP) is not present.
+
+Step 1 (Detailed) — Consumer authentication, OTP verification, session mgmt, controlled access
+- Multiple identifiers (consumer number / CA / legacy / etc.)
+  Status: NOT IMPLEMENTED
+  Evidence: Login is Aadhaar-only: src/pages/Login.jsx
+- OTP-based verification
+  Status: IMPLEMENTED
+  Evidence: OTP flow exists: src/pages/Login.jsx
+- Secure session management (timeout / route guards)
+  Status: PARTIALLY IMPLEMENTED
+  Evidence: inactivity auto-logout + route protection: src/App.jsx
+  Notes / gaps vs spec: session is browser sessionStorage-based (demo style), not a full hardened kiosk session with server-side session revocation.
+- Controlled access to modules
+  Status: IMPLEMENTED
+  Evidence: ProtectedRoute/CitizenRoute guards: src/App.jsx
+
+2) New connection and load extension requests
+Status: PARTIALLY IMPLEMENTED
+Evidence:
+- Electricity categories include “newConnection” and “loadChange”: src/utils/constants.js
+- Generic request submission form: src/pages/Electricity.jsx
+- Document upload (QR-based): src/components/QRUpload (used from Electricity.jsx)
+- Reference ID generated and stored into receipt: src/utils/helpers.js + src/pages/Receipt.jsx
+Notes / gaps vs spec:
+- No dedicated “load requirement” fields (sanctioned load, phase, kW, etc.).
+- No separate new connection vs load enhancement forms/workflows.
+
+3) Meter replacement (malfunction/damage) and shifting services
+Status: NOT IMPLEMENTED (only a generic “meterIssue” category exists)
+Evidence:
+- Electricity has “meterIssue” category only: src/utils/constants.js
+- No shifting service category/flow, no TAT/severity prioritization UI, no maintenance team assignment UI.
+
+4) Complaint registration (specific electricity grievance categories)
+Status: NOT IMPLEMENTED (spec categories)
+Evidence:
+- Complaint module exists but categories differ: src/utils/constants.js (complaintTypes) + src/pages/Complaints.jsx
+What exists instead:
+- Generic civic complaint categories: road damage, streetlight, water logging, encroachment, pollution, public safety, other.
+- Photo/file upload + geo-location capture exist.
+Notes / gaps vs spec:
+- Missing electricity complaint categories list (Incorrect Bill, Delay in Connection Approval, etc.).
+- No explicit SLA timer/visibility fields.
+
+5) Credential management / Update consumer info
+Status: NOT IMPLEMENTED
+Evidence:
+- No page found for updating citizen profile (mobile/email/address) with verification/audit trail.
+- FamilyProfile is for dependents only, not consumer credential management: src/pages/FamilyProfile.jsx
+
+6) Track Request
+Status: PARTIALLY IMPLEMENTED
+Evidence:
+- Track by Request ID or Mobile with timeline: src/pages/TrackStatus.jsx
+- Backend route exists: server/routes/track.js
+Notes / gaps vs spec:
+- SLA visibility is not displayed.
+- “Print/download current status” is not implemented as a dedicated action (there is no print button on TrackStatus).
+
+7) Receipt generation, printing and emailing
+Status: PARTIALLY IMPLEMENTED
+Evidence:
+- Receipt UI + Print: src/pages/Receipt.jsx + src/utils/helpers.js (printReceipt)
+- “Send to phone” via SMS/WhatsApp: src/components/SendToPhone.jsx
+- Backend notification logging route: server/routes/notifications.js
+Notes / gaps vs spec:
+- Email delivery is not implemented.
+- “Thermal printer support” is not explicitly integrated; current printing is browser print.
+
+================================================================================
+PART 2 — ASSAM GAS DEPARTMENT MODULE
+================================================================================
+
+(Overall note)
+- Gas is also implemented as a generic category + form + receipt flow.
+Evidence: src/pages/Gas.jsx, src/utils/constants.js (serviceCategories.gas)
+
+1) Welcome Screen & User Login
+Status: PARTIALLY IMPLEMENTED (system-level)
+Evidence: src/pages/Landing.jsx, src/pages/Login.jsx
+Notes / gaps vs spec:
+- Spec wants CA Number / Legacy Number login; current implementation is Aadhaar-only.
+
+2) Main Menu & Service Navigation
+Status: PARTIALLY IMPLEMENTED
+Evidence:
+- Home service grid + dedicated Gas page category selection: src/pages/Home.jsx, src/pages/Gas.jsx
+Notes / gaps vs spec:
+- No Gas-specific “main menu” that includes bill viewing, edit credentials, etc.
+
+3) New Gas Connection / Connection Change Request (multiple request types)
+Status: PARTIALLY IMPLEMENTED
+Evidence:
+- Gas categories include newConnection, transferConnection, surrenderConnection, billingIssue, leakageComplaint, cylinderRefill, otherIssue: src/utils/constants.js
+- Request form + document upload: src/pages/Gas.jsx
+Notes / gaps vs spec:
+- Missing many listed gas request types (meter installation/replacement, reconnect/disconnect, postpaid->prepaid, pipeline inspection, maintenance scheduling).
+
+4) Register Complaint (text/voice input)
+Status: PARTIALLY IMPLEMENTED
+Evidence:
+- Complaint registration exists with text input + photo upload: src/pages/Complaints.jsx
+Notes / gaps vs spec:
+- Voice input for complaint text is not implemented.
+- Gas-specific complaint categories are not modeled.
+
+5) Track Complaint / Service Request
+Status: PARTIALLY IMPLEMENTED
+Evidence: src/pages/TrackStatus.jsx
+Notes / gaps vs spec: no explicit “remarks”, SLA clock, or department/officer info in the UI.
+
+6) Edit Credentials / Consumer Profile
+Status: NOT IMPLEMENTED
+Evidence: no profile edit page found.
+
+7) Receipt Generation
+Status: PARTIALLY IMPLEMENTED
+Evidence: src/pages/Receipt.jsx, src/components/SendToPhone.jsx, server/routes/notifications.js
+Notes / gaps vs spec: no email.
+
+================================================================================
+PART 3 — MUNICIPAL DEPARTMENT MODULE
+================================================================================
+
+1) Welcome Screen & User Login
+Status: PARTIALLY IMPLEMENTED (system-level)
+Evidence: src/pages/Landing.jsx, src/pages/Login.jsx
+Notes / gaps vs spec:
+- Spec includes mobile OTP and Aadhaar-based verification; current is Aadhaar-only (with OTP/QR/biometric after Aadhaar).
+
+2) New Water Connection / Connection Upgrade
+Status: PARTIALLY IMPLEMENTED (exists, but under Water department, not Municipal)
+Evidence:
+- Water department page exists with newConnection category: src/pages/Water.jsx, src/utils/constants.js
+Notes / gaps vs spec:
+- Municipal module itself does not include water connection workflows.
+
+3) Register Municipal Grievances (category list)
+Status: PARTIALLY IMPLEMENTED
+Evidence:
+- Complaint module exists: src/pages/Complaints.jsx
+Notes / gaps vs spec:
+- Implemented complaint categories do not match the municipal list (e.g., no sewage overflow, garbage collection irregularity, water quality complaints, property tax errors).
+
+4) Receipt Generation
+Status: PARTIALLY IMPLEMENTED
+Evidence: src/pages/Receipt.jsx
+Notes / gaps vs spec:
+- Receipts are generic; there are no distinct receipt templates for property tax payment, etc.
+
+5) Track Request / Complaint
+Status: PARTIALLY IMPLEMENTED
+Evidence: src/pages/TrackStatus.jsx
+Notes / gaps vs spec:
+- Does not show assigned officer/department details.
+- No explicit “Escalated” state in statusConfig.
+
+6) Credential Management / Update Profile
+Status: NOT IMPLEMENTED
+Evidence: no citizen profile edit page with OTP verification / masked Aadhaar display / audit trail found.
+
+================================================================================
+OTHER REQUIREMENTS (from your list)
+================================================================================
+
+AI Chatbot
+Status: NOT IMPLEMENTED
+Evidence:
+- No chatbot page/component found in src/pages or src/components by inspection.
+
+UI suitable for kiosk (touch-friendly)
+Status: IMPLEMENTED
+Evidence:
+- Large touch targets, touch-manipulation, kiosk typography: src/pages/Home.jsx and shared components.
+- PWA shell exists (manifest + service worker referenced in README and App): src/App.jsx, public/sw.js (see repo).
+
+Accessibility for blind and elderly
+Status: IMPLEMENTED
+Evidence:
+- AccessibilityProvider with modes (Normal/Blind/Elderly): src/components/AccessibilityProvider
+- Screen reader overlay: src/components/ScreenReaderOverlay
+- Voice navigation + wake word: src/components/VoiceNavigation, src/components/WakeWordListener
+- Auto mode detection from Aadhaar: src/pages/Login.jsx + src/utils/aadhaarDatabase
+
+Admin Dashboard
+Status: IMPLEMENTED
+Evidence:
+- Admin route + dashboard page: src/App.jsx, src/pages/Dashboard.jsx
+- Backend admin routes: server/routes/admin.js
+
+Security / compliance (high-level)
+Status: PARTIALLY IMPLEMENTED
+Evidence:
+- Inactivity auto-logout: src/App.jsx
+- Compliance docs present: COMPLIANCE_REPORT.txt, THREAT_MODEL.md
+- Client-side input sanitation helpers mentioned in README; backend includes structured routes + SQLite persistence.
+Notes / gaps vs spec:
+- “Government IT and data security norms” are broader than what can be verified from a demo repo; treat as demonstrative rather than certified.
+
+================================================================================
+OUT OF SCOPE / EXTRA FEATURES PRESENT (implemented but not requested in your flow)
+================================================================================
+- Scheme discovery: src/pages/SchemeDiscovery.jsx
+- Office locator: src/pages/OfficeLocator.jsx
+- Family profile/dependents: src/pages/FamilyProfile.jsx
+- Emergency overlay + alerts: src/components/EmergencyAlertBanner, src/components/EmergencyQuickAccess
+- Offline-first queue + sync endpoints: server/routes/sync.js + frontend offline utilities (see README)
+
+End of report.

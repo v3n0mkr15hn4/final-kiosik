@@ -1,0 +1,512 @@
+/* ──────────────────────────────────────────────────────────────────
+   SUVIDHA Vertical Kiosk — Layout Primitives
+   Verbatim port from `kiosk design/designs/SUVIDHA Vertical Kiosk v2.html`
+   <style> block (lines 47–135). Read tokens from tokens.css.
+   ────────────────────────────────────────────────────────────────── */
+
+/* ── Kiosk stage (dev) ──────────────────────────────────────────────
+   The kiosk is designed for a 55″ portrait screen at exactly 1080×1920.
+   In any other browser window, we render the shell at its native
+   design dimensions and use a CSS transform to scale it to fit.
+   The trick: a `.vk-stage` wrapper takes the SCALED size (so layout
+   reserves the right amount of space and the page doesn't scroll),
+   while the inner `.vk` is transform-scaled with top-left origin.
+   --kiosk-scale is recalculated by useKioskScale() on resize.
+   ────────────────────────────────────────────────────────────────── */
+body:has(.vk) {
+  background: #14101f;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+body:has(.vk) #root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: auto;
+  min-height: 100vh;
+}
+
+/* ── Shell ───────────────────────────────────────────────────────── */
+.vk {
+  width: 1080px;
+  height: 1920px;
+  flex-shrink: 0;
+  background: var(--surface-0);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  font-family: var(--font-ui);
+  color: var(--ink-900);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  transform-origin: top left;
+  transform: scale(var(--kiosk-scale, 1));
+  /* The wrapper trick: occupy only the scaled visible space so the
+     body's flex centering works on the visible (scaled) box.          */
+  margin-right: calc(1080px * (var(--kiosk-scale, 1) - 1));
+  margin-bottom: calc(1920px * (var(--kiosk-scale, 1) - 1));
+}
+
+.vk-strip {
+  height: 10px;
+  background: linear-gradient(90deg,
+    #FF9933 0 33.33%,
+    white 33.33% 66.66%,
+    #138808 66.66%);
+  flex-shrink: 0;
+}
+
+.vk-top {
+  padding: 28px 56px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 18px;
+}
+
+.vk-brand {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.vk-brand .mk {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: var(--indigo-700);
+  display: grid;
+  place-items: center;
+}
+.vk-brand .nm {
+  font-weight: 800;
+  font-size: 28px;
+  letter-spacing: -0.02em;
+  color: var(--indigo-900);
+  line-height: 1;
+}
+.vk-brand .sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--ink-500);
+  text-transform: uppercase;
+  margin-top: 5px;
+}
+
+.vk-body {
+  flex: 1;
+  padding: 16px 56px 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.vk-bottom {
+  padding: 22px 56px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface-1);
+  border-top: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+/* ── Status row (weather/AQI/clock/connectivity) ─────────────────── */
+.vk-status {
+  padding: 0 56px 18px;
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  flex-shrink: 0;
+}
+.stat {
+  background: white;
+  border: 1.5px solid var(--line);
+  border-radius: 18px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  box-sizing: border-box;
+}
+.stat .lbl {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--ink-500);
+  text-transform: uppercase;
+}
+.stat .val {
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--indigo-900);
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.stat .ico {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.stat-weather .ico {
+  background: color-mix(in oklab, var(--saffron-500) 22%, white);
+  color: var(--saffron-700);
+}
+.stat-aqi-good .ico {
+  background: color-mix(in oklab, var(--ok) 22%, white);
+  color: var(--ok);
+}
+.stat-aqi-mod .ico {
+  background: color-mix(in oklab, var(--warn) 28%, white);
+  color: oklch(0.45 0.12 75);
+}
+.stat-aqi-poor .ico {
+  background: color-mix(in oklab, var(--err) 18%, white);
+  color: var(--err);
+}
+.stat-clock .ico {
+  background: var(--surface-2);
+  color: var(--ink-700);
+}
+.stat-net .ico {
+  background: color-mix(in oklab, var(--ok) 18%, white);
+  color: var(--ok);
+}
+.stat-net.offline .ico {
+  background: color-mix(in oklab, var(--err) 18%, white);
+  color: var(--err);
+}
+
+/* ── Chips ───────────────────────────────────────────────────────── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: white;
+  border: 1.5px solid var(--line);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink-700);
+  min-height: 50px;
+  box-sizing: border-box;
+  cursor: pointer;
+  font-family: inherit;
+}
+.chip.act {
+  background: var(--indigo-700);
+  color: white;
+  border-color: var(--indigo-700);
+  font-weight: 600;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: 20px;
+  padding: 22px 32px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 22px;
+  border: none;
+  cursor: pointer;
+  min-height: 80px;
+  box-sizing: border-box;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.btn:active { transform: scale(0.97); }
+.btn-pri {
+  background: var(--indigo-700);
+  color: var(--cream);
+  box-shadow: var(--shadow-2);
+}
+.btn-acc {
+  background: var(--saffron-500);
+  color: var(--indigo-900);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--indigo-700);
+  border: 2px solid var(--indigo-300);
+}
+.btn-quiet {
+  background: var(--surface-2);
+  color: var(--ink-900);
+}
+.btn-err {
+  background: color-mix(in oklab, var(--err) 14%, white);
+  color: var(--err);
+  font-weight: 700;
+}
+.btn-xl {
+  min-height: 110px;
+  font-size: 26px;
+  padding: 28px 44px;
+  border-radius: 28px;
+}
+
+/* ── Typography ──────────────────────────────────────────────────── */
+.label-tag {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-500);
+  font-weight: 500;
+}
+.h1 {
+  font-size: 80px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.02;
+  color: var(--indigo-900);
+  margin: 0;
+  text-wrap: balance;
+}
+.h2 {
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: -0.022em;
+  line-height: 1.05;
+  color: var(--indigo-900);
+  margin: 0;
+}
+.h3 {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  color: var(--indigo-900);
+  margin: 0;
+}
+.body-l {
+  font-size: 24px;
+  line-height: 1.5;
+  color: var(--ink-700);
+}
+.body {
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--ink-700);
+}
+.meta {
+  font-size: 16px;
+  color: var(--ink-500);
+}
+
+/* ── Cards + tiles ───────────────────────────────────────────────── */
+.card {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 32px;
+  box-shadow: var(--shadow-1);
+}
+
+.tile {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 220px;
+  cursor: pointer;
+  box-shadow: var(--shadow-1);
+  transition: transform 0.15s, box-shadow 0.15s;
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+}
+.tile:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-3);
+}
+.tile:active { transform: scale(0.98); }
+.tile .nm {
+  font-weight: 700;
+  font-size: 30px;
+  color: var(--indigo-900);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.tile .sub {
+  font-size: 18px;
+  color: var(--ink-500);
+  line-height: 1.45;
+}
+
+/* ── Badges ──────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.b-ok   { background: color-mix(in oklab, var(--ok) 14%, white);   color: var(--ok); }
+.b-warn { background: color-mix(in oklab, var(--warn) 18%, white); color: oklch(0.45 0.12 75); }
+.b-info { background: var(--indigo-100); color: var(--indigo-700); }
+.b-err  { background: color-mix(in oklab, var(--err) 12%, white);  color: var(--err); }
+
+/* ── Form field ──────────────────────────────────────────────────── */
+.field {
+  background: white;
+  border: 2px solid var(--line);
+  border-radius: 18px;
+  padding: 22px 26px;
+  font-size: 24px;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 76px;
+  color: var(--ink-900);
+}
+.field:focus {
+  border-color: var(--indigo-500);
+  outline: none;
+}
+
+/* ── Numeric keypad ──────────────────────────────────────────────── */
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.keypad button {
+  background: white;
+  border: 2px solid var(--line);
+  border-radius: 22px;
+  padding: 0;
+  font-size: 44px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  color: var(--indigo-900);
+  height: 110px;
+  transition: transform 0.08s, background 0.08s;
+}
+.keypad button:active {
+  transform: scale(0.97);
+  background: var(--surface-1);
+}
+
+/* ── OTP cells ───────────────────────────────────────────────────── */
+.otp-cell {
+  width: 88px;
+  height: 110px;
+  border-radius: 18px;
+  border: 2px solid var(--line);
+  background: white;
+  display: grid;
+  place-items: center;
+  font-size: 56px;
+  font-weight: 800;
+  color: var(--indigo-900);
+  font-family: var(--font-mono);
+}
+.otp-cell.act {
+  border-color: var(--indigo-700);
+  background: color-mix(in oklab, var(--indigo-700) 5%, white);
+}
+
+/* ── Timeline ────────────────────────────────────────────────────── */
+.tl {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  position: relative;
+  padding-left: 8px;
+}
+.tl::before {
+  content: '';
+  position: absolute;
+  left: 26px;
+  top: 24px;
+  bottom: 24px;
+  width: 3px;
+  background: var(--line);
+  border-radius: 2px;
+}
+.tl-item {
+  display: flex;
+  gap: 22px;
+  align-items: flex-start;
+  position: relative;
+  z-index: 1;
+}
+.tl-dot {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: white;
+  border: 3px solid var(--line);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink-500);
+}
+.tl-dot.done {
+  background: var(--ok);
+  border-color: var(--ok);
+  color: white;
+}
+.tl-dot.now {
+  background: var(--indigo-700);
+  border-color: var(--indigo-700);
+  color: white;
+  box-shadow: 0 0 0 8px color-mix(in oklab, var(--indigo-700) 16%, transparent);
+}
+
+/* ── Receipt row ─────────────────────────────────────────────────── */
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1.5px dashed var(--line);
+}
+.receipt-row:last-child { border-bottom: none; }
+.receipt-row .k { color: var(--ink-500); font-size: 18px; }
+.receipt-row .v { color: var(--ink-900); font-size: 20px; font-weight: 600; text-align: right; }
+
+/* ── Placeholder image (striped) ─────────────────────────────────── */
+.placeholder-img {
+  background: repeating-linear-gradient(45deg,
+    var(--surface-2),
+    var(--surface-2) 10px,
+    white 10px,
+    white 20px);
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-500);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}

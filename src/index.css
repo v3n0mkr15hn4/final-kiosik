@@ -1,0 +1,561 @@
+/* @import MUST be first — PostCSS requirement */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* New design system (Phase 1+) */
+@import './design/tokens.css';
+@import './design/primitives.css';
+
+/* ═══════════════════════════════════════════════════════════
+   SUVIDHA 2026 — Global Stylesheet
+   ═══════════════════════════════════════════════════════════ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base reset ─────────────────────────────────────────── */
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  /* NO overflow:hidden — breaks scrollable kiosk pages */
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', 'Noto Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+
+/* ── Government / enterprise colour tokens ─────────────── */
+:root {
+  --gov-blue:          #003366;
+  --gov-blue-light:    #0066cc;
+  --gov-blue-mid:      #1B3A8A;
+  --gov-orange:        #FF6600;
+  --gov-saffron:       #FF9933;
+  --gov-green:         #138808;
+  --gov-gold:          #C9A84C;
+  --gov-navy:          #000080;
+
+  --surface:           #ffffff;
+  --surface-alt:       #f5f7fb;
+  --border:            #e5e7eb;
+  --border-strong:     #cbd5e1;
+
+  --text-primary:      #0f172a;
+  --text-secondary:    #475569;
+  --text-muted:        #94a3b8;
+
+  --shadow-sm:         0 1px 3px rgba(0,51,102,0.08);
+  --shadow-md:         0 4px 20px rgba(0,51,102,0.14);
+  --shadow-lg:         0 8px 32px rgba(0,51,102,0.22);
+  --shadow-hover:      0 8px 30px rgba(0,51,102,0.25);
+
+  --radius-card:       12px;
+  --radius-card-lg:    16px;
+  --radius-pill:       9999px;
+
+  --transition-fast:   150ms ease;
+  --transition-med:    250ms ease;
+  --transition-slow:   350ms ease;
+}
+
+/* ── Kiosk-scale typography helpers ───────────────────── */
+@layer utilities {
+  .text-kiosk-sm   { font-size: 18px; line-height: 1.4; }
+  .text-kiosk-base { font-size: 20px; line-height: 1.45; }
+  .text-kiosk-lg   { font-size: 24px; line-height: 1.4; }
+  .text-kiosk-xl   { font-size: 28px; line-height: 1.35; }
+  .text-kiosk-2xl  { font-size: 32px; line-height: 1.3; }
+  .text-kiosk-3xl  { font-size: 40px; line-height: 1.2; }
+  .text-kiosk-4xl  { font-size: 48px; line-height: 1.15; }
+}
+
+/* ── Kiosk card component ──────────────────────────────── */
+@layer components {
+  .kiosk-card {
+    background: var(--surface);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+    transition: box-shadow var(--transition-med), transform var(--transition-med);
+  }
+  .kiosk-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  .kiosk-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--gov-blue);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-card);
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+  }
+  .kiosk-btn-primary:hover {
+    background: var(--gov-blue-light);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+  .kiosk-btn-primary:active { transform: scale(0.97); }
+
+  .kiosk-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.25rem;
+    background: transparent;
+    color: var(--gov-blue);
+    border: 1.5px solid var(--gov-blue);
+    border-radius: var(--radius-card);
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+  .kiosk-btn-secondary:hover {
+    background: var(--gov-blue);
+    color: #ffffff;
+  }
+
+  .kiosk-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.65rem;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .kiosk-badge-blue  { background: #dbeafe; color: #1d4ed8; }
+  .kiosk-badge-green { background: #dcfce7; color: #166534; }
+  .kiosk-badge-amber { background: #fef3c7; color: #92400e; }
+  .kiosk-badge-red   { background: #fee2e2; color: #991b1b; }
+}
+
+/* ── Emergency alert bar ────────────────────────────────── */
+.emergency-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, #7f1d1d, #991b1b);
+  color: #fecaca;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* ── Government header ──────────────────────────────────── */
+.gov-header {
+  background: linear-gradient(135deg, var(--gov-blue) 0%, var(--gov-blue-mid) 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+/* ── Bottom navigation (kiosk) ──────────────────────────── */
+.kiosk-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 20px rgba(0,51,102,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0.5rem 0;
+  height: 64px;
+}
+
+/* ── Animated state helpers ─────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@keyframes slideInLeft {
+  from { transform: translateX(-24px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+@keyframes rtPulse {
+  0%,100% { transform: scale(1);    opacity: 0.75; }
+  50%     { transform: scale(1.25); opacity: 0.35; }
+}
+
+.animate-fade-in     { animation: fadeIn      0.3s ease-in-out; }
+.animate-slide-up    { animation: slideUp     0.3s ease-out; }
+.animate-slide-left  { animation: slideInLeft 0.25s ease-out; }
+
+/* ── Touch / interactive helpers ───────────────────────── */
+.touch-manipulation { touch-action: manipulation; }
+.select-none        { user-select: none; }
+
+/* ── Scrollbar styling ─────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ── RTL support ────────────────────────────────────────── */
+[dir="rtl"]    { direction: rtl; }
+.direction-rtl { direction: rtl; unicode-bidi: embed; }
+
+/* ══════════════════════════════════════════════════════════
+   OFFICE LOCATOR PAGE — isolated full-viewport flex layout
+   ══════════════════════════════════════════════════════════ */
+
+.office-locator-layout {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #f5f7fb;
+}
+
+/* Left sidebar */
+.office-sidebar {
+  width: 380px;
+  min-width: 320px;
+  max-width: 420px;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  z-index: 10;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.25s ease, min-width 0.25s ease;
+}
+.office-sidebar::-webkit-scrollbar { width: 4px; }
+.office-sidebar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
+.office-sidebar.collapsed {
+  width: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Right map area */
+.office-map-area {
+  flex: 1;
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Override map's hardcoded 100vw/100vh inside the flex container */
+.office-map-area .map-container {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ── Office card ────────────────────────────────────────── */
+.office-card {
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: #ffffff;
+  transition: all 0.18s ease;
+  cursor: pointer;
+}
+.office-card:hover {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  box-shadow: 0 2px 12px rgba(37,99,235,0.10);
+  transform: translateY(-1px);
+}
+.office-card.active {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.20);
+}
+
+/* ── Category filter pills ──────────────────────────────── */
+.cat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1.5px solid #e5e7eb;
+  background: #f8fafc;
+  color: #374151;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.cat-pill:hover { border-color: #93c5fd; background: #eff6ff; color: #1d4ed8; }
+.cat-pill.active { background: #1d4ed8; border-color: #1d4ed8; color: #ffffff; }
+
+/* ── Sidebar search input ───────────────────────────────── */
+.sidebar-search {
+  width: 100%;
+  padding: 10px 14px 10px 40px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  background: #f8fafc;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.sidebar-search:focus {
+  border-color: #3b82f6;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+
+/* ── Sidebar select ─────────────────────────────────────── */
+.sidebar-select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  background: #f8fafc;
+  color: #374151;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  padding-right: 32px;
+}
+.sidebar-select:focus {
+  border-color: #3b82f6;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+
+/* ── Navigate button ────────────────────────────────────── */
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  background: #1d4ed8;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.nav-btn:hover  { background: #1e40af; }
+.nav-btn:active { transform: scale(0.96); }
+
+/* ── Status dots ────────────────────────────────────────── */
+.status-dot-open   { width:8px; height:8px; border-radius:50%; background:#22c55e; display:inline-block; flex-shrink:0; }
+.status-dot-closed { width:8px; height:8px; border-radius:50%; background:#ef4444; display:inline-block; flex-shrink:0; }
+
+/* ── Sidebar toggle ─────────────────────────────────────── */
+.sidebar-toggle {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  z-index: 20;
+  width: 20px;
+  height: 56px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.08);
+  transition: background 0.15s;
+}
+.sidebar-toggle:hover { background: #f0f7ff; }
+
+/* ── Generic map container ──────────────────────────────── */
+.map-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Responsive: tablet ─────────────────────────────────── */
+@media (max-width: 900px) {
+  .office-sidebar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 40;
+    width: 320px;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+  }
+  .office-sidebar.collapsed {
+    transform: translateX(-100%);
+    width: 320px;
+  }
+  .office-map-area { width: 100vw; }
+}
+
+/* ── Responsive: mobile ─────────────────────────────────── */
+@media (max-width: 540px) {
+  .office-sidebar { width: 100vw; max-width: 100vw; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   SUVIDHA AI — Voice Assistant Animations & Utilities
+   ══════════════════════════════════════════════════════════ */
+
+/* Orb pulse (listening / speaking) */
+@keyframes orbPulse {
+  0%, 100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(99,102,241,0.4); }
+  50%       { transform: scale(1.06); box-shadow: 0 0 0 16px rgba(99,102,241,0); }
+}
+.animate-pulse-orb {
+  animation: orbPulse 2s ease-in-out infinite;
+}
+
+/* Listening orb pulse (emerald) */
+@keyframes orbPulseGreen {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0.5); }
+  50%       { box-shadow: 0 0 0 20px rgba(52,211,153,0); }
+}
+
+/* Slow spin for particle ring */
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.animate-spin-slow { animation: spinSlow 4s linear infinite; }
+
+/* Fade-in-up for transcript messages */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.25s ease-out forwards;
+}
+
+/* Fade-in (already defined above for non-AI use, keep compatible) */
+@keyframes fadeInAI {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-fade-in { animation: fadeInAI 0.2s ease-in-out; }
+
+/* Waveform bar bounce */
+@keyframes waveBar {
+  0%, 100% { transform: scaleY(0.3); }
+  50%       { transform: scaleY(1); }
+}
+
+/* Thinking dots */
+@keyframes thinkDot {
+  0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+  40%           { transform: scale(1);   opacity: 1; }
+}
+
+/* Panel slide-up (AI overlay opening) */
+@keyframes panelSlideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.animate-panel-up { animation: panelSlideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1); }
+
+/* Gentle float for idle orb */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+.animate-float { animation: float 3s ease-in-out infinite; }
+
+/* ── High-contrast accessibility mode ──────────────────── */
+.high-contrast,
+.high-contrast * {
+  --text-primary:   #ffffff !important;
+  --text-secondary: #f0f0f0 !important;
+  --surface:        #000000 !important;
+  --border:         #ffffff !important;
+}
+.high-contrast body {
+  background: #000 !important;
+  color: #fff !important;
+}
+.high-contrast .kiosk-card {
+  background: #111 !important;
+  border-color: #fff !important;
+  color: #fff !important;
+}
+.high-contrast button,
+.high-contrast a {
+  outline: 2px solid #fff !important;
+}
+
+/* ── ARIA live region (screen reader only) ─────────────── */
+#suvidha-aria-live {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}
+
+/* ── AI overlay backdrop blur fix for Safari ───────────── */
+@supports not (backdrop-filter: blur(12px)) {
+  .backdrop-blur-xl,
+  .backdrop-blur-sm {
+    background-color: rgba(15, 23, 42, 0.95) !important;
+  }
+}
+
+/* ── Voice field highlight ring ─────────────────────────── */
+[data-voice-field]:focus {
+  outline: 3px solid #6366f1;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px rgba(99,102,241,0.15);
+}
+
+/* ── Tailwind custom pulse-slow ─────────────────────────── */
+@keyframes pulseSlow {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+.animate-pulse-slow { animation: pulseSlow 2.5s cubic-bezier(0.4,0,0.6,1) infinite; }
+

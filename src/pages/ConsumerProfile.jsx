@@ -1,0 +1,385 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { User, Eye, EyeOff, Save, ArrowLeft, Clock, CheckCircle,  } from 'lucide-react';
+import {
+  Button,
+  Input,
+  Modal,
+  LoadingSpinner,
+} from '../components';
+import { VK } from '../components/kiosk';
+import { generateRequestId, getCurrentTimestamp } from '../utils/helpers';
+import { addReceipt } from '../utils/receipts';
+
+/**
+ * Consumer Profile / Credential Management — shared across all departments
+ * Receives ?org=electricity|gas|municipal
+ */
+const ConsumerProfile = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const org = searchParams.get('org') || 'electricity';
+
+  const themeColors = {
+    electricity: { bg: 'from-amber-50', border: 'border-amber-200', accent: 'text-amber-700', btn: 'bg-amber-500', ring: 'ring-amber-200' },
+    gas: { bg: 'from-red-50', border: 'border-red-200', accent: 'text-red-700', btn: 'bg-red-500', ring: 'ring-red-200' },
+    municipal: { bg: 'from-indigo-50', border: 'border-indigo-200', accent: 'text-indigo-700', btn: 'bg-indigo-500', ring: 'ring-indigo-200' },
+  };
+  const theme = themeColors[org] || themeColors.electricity;
+
+  // Mock profile data
+  const [profileData, setProfileData] = useState({
+    name: sessionStorage.getItem('userName') || 'Rajesh Kumar',
+    mobile: sessionStorage.getItem('userMobile') || '9876543210',
+    email: 'rajesh.k@email.com',
+    address: '42, MG Road, Ward 3',
+    aadhaar: '9999-8888-7777',
+    consumerNumber: 'ELEC-GHY-2024-001234',
+  });
+
+  const [showMasked, setShowMasked] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState({ ...profileData });
+  const [mobileChanged, setMobileChanged] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  // Audit trail — fetched from backend API
+  const [auditTrail, setAuditTrail] = useState([]);
+
+  useEffect(() => {
+    const uid = sessionStorage.getItem('aadhaarUid') || 'demo';
+    fetch(`/api/citizen/audit-trail/${uid}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.success && data.entries) {
+          setAuditTrail(data.entries.map(e => ({
+            date: e.date?.split('T')[0] || e.date,
+            action: e.action,
+            by: e.changed_by || 'System',
+          })));
+        }
+      })
+      .catch(() => {
+        // Fallback if server is unavailable
+        setAuditTrail([
+          { date: '2026-04-22', action: 'Mobile number updated to ****3210', by: 'Self-service (Kiosk)' },
+          { date: '2026-03-15', action: 'Email address updated', by: 'Self-service (Kiosk)' },
+          { date: '2026-02-01', action: 'Address updated via consumer portal', by: 'Admin - Shri R.K. Baruah' },
+          { date: '2025-12-10', action: 'Consumer profile created via Aadhaar verification', by: 'System Registration' },
+        ]);
+      });
+  }, []);
+
+  const maskValue = (value, type) => {
+    if (!showMasked) return value;
+    if (type === 'mobile') return `91****${value.slice(-4)}`;
+    if (type === 'email') {
+      const [name, domain] = value.split('@');
+      return `${name.slice(0, 2)}***@${domain}`;
+    }
+    if (type === 'aadhaar') return `XXXX-XXXX-${value.slice(-4)}`;
+    return value;
+  };
+
+  const handleEditChange = (field, value) => {
+    setEditData(prev => ({ ...prev, [field]: value }));
+    if (field === 'mobile' && value !== profileData.mobile) {
+      setMobileChanged(true);
+      setOtpVerified(false);
+      setOtpSent(false);
+    } else if (field === 'mobile') {
+      setMobileChanged(false);
+    }
+  };
+
+  const handleSendOTP = () => {
+    setOtpSent(true);
+    // Demo: auto-accept OTP 123456
+  };
+
+  const handleVerifyOTP = () => {
+    if (otp === '123456') {
+      setOtpVerified(true);
+    }
+  };
+
+  const handleSave = () => {
+    if (mobileChanged && !otpVerified) {
+      alert('Please verify OTP for mobile number change');
+      return;
+    }
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmSave = () => {
+    setShowConfirmModal(false);
+    setLoading(true);
+    setTimeout(() => {
+      setProfileData({ ...editData });
+      setIsEditing(false);
+      setLoading(false);
+
+      const receiptData = {
+        requestId: generateRequestId(),
+        citizenName: editData.name,
+        mobile: editData.mobile,
+        serviceType: org,
+        serviceCategory: 'Profile Update',
+        timestamp: getCurrentTimestamp(),
+        status: 'submitted',
+      };
+      addReceipt(receiptData);
+      navigate(`/receipt?org=${encodeURIComponent(receiptData.serviceType)}&id=${encodeURIComponent(receiptData.requestId)}`);
+    }, 1000);
+  };
+
+  const backPath =
+    org === 'gas'
+      ? '/gas-menu'
+      : org === 'municipal'
+        ? '/municipal-menu'
+        : org === 'electricity'
+          ? '/electricity-menu'
+          : '/home';
+
+  if (loading) {
+    return (
+      <VK bg="var(--surface-1)">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+          <LoadingSpinner size="large" message={t('app.loading')} />
+        </div>
+      </VK>
+    );
+  }
+
+  return (
+    <VK bg="var(--surface-1)">
+      <div style={{ maxWidth: 800, margin: '0 auto' }}>
+        {/* Title */}
+        <div className="text-center mb-8">
+          <div className={`inline-flex items-center justify-center w-16 h-16 ${theme.btn} rounded-full mb-4`}>
+            <User className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-kiosk-2xl font-bold text-gray-800">
+            {t('profile.title', 'Consumer Profile')}
+          </h1>
+          <p className="text-kiosk-base text-gray-500 mt-1">
+            {t('profile.subtitle', 'View and update your consumer information')}
+          </p>
+        </div>
+
+        {/* Profile Card */}
+        <div className="bg-white rounded-kiosk-lg shadow-kiosk p-6 md:p-8 mb-6">
+          {/* Toggle Mask + Edit */}
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={() => setShowMasked(!showMasked)}
+              className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-gray-800 transition-colors touch-manipulation"
+            >
+              {showMasked ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+              {showMasked ? 'Show Details' : 'Hide Details'}
+            </button>
+            {!isEditing ? (
+              <Button variant="outline" size="small" onClick={() => { setIsEditing(true); setEditData({ ...profileData }); }}>
+                Edit Profile
+              </Button>
+            ) : (
+              <Button variant="ghost" size="small" onClick={() => { setIsEditing(false); setMobileChanged(false); }}>
+                Cancel
+              </Button>
+            )}
+          </div>
+
+          <div className="space-y-5">
+            {/* Name */}
+            <div className={`flex items-center gap-4 p-4 rounded-xl ${isEditing ? 'bg-gray-50' : ''}`}>
+              
+              <div className="flex-1">
+                <p className="text-sm text-gray-500">{t('form.name')}</p>
+                {isEditing ? (
+                  <input className="w-full text-kiosk-base font-semibold text-gray-800 bg-white border rounded-lg px-3 py-2 mt-1" value={editData.name} onChange={(e) => handleEditChange('name', e.target.value)} />
+                ) : (
+                  <p className="text-kiosk-base font-semibold text-gray-800">{profileData.name}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Mobile */}
+            <div className={`flex items-center gap-4 p-4 rounded-xl ${isEditing ? 'bg-gray-50' : ''}`}>
+              
+              <div className="flex-1">
+                <p className="text-sm text-gray-500">{t('form.mobile')}</p>
+                {isEditing ? (
+                  <div>
+                    <input className="w-full text-kiosk-base font-semibold text-gray-800 bg-white border rounded-lg px-3 py-2 mt-1" value={editData.mobile} onChange={(e) => handleEditChange('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))} />
+                    {mobileChanged && !otpVerified && (
+                      <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <p className="text-sm text-blue-700 mb-2">OTP verification required for mobile change</p>
+                        {!otpSent ? (
+                          <Button size="small" onClick={handleSendOTP}>Send OTP</Button>
+                        ) : (
+                          <div className="flex gap-2">
+                            <input className="flex-1 border rounded-lg px-3 py-2 text-sm" placeholder="Enter 6-digit OTP (demo: 123456)" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} />
+                            <Button size="small" onClick={handleVerifyOTP}>Verify</Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {otpVerified && (
+                      <p className="mt-2 text-sm text-green-600 flex items-center gap-1">
+                        <CheckCircle className="w-4 h-4" /> OTP Verified
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-kiosk-base font-semibold text-gray-800">{maskValue(profileData.mobile, 'mobile')}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Email */}
+            <div className={`flex items-center gap-4 p-4 rounded-xl ${isEditing ? 'bg-gray-50' : ''}`}>
+              
+              <div className="flex-1">
+                <p className="text-sm text-gray-500">{t('form.email')}</p>
+                {isEditing ? (
+                  <input className="w-full text-kiosk-base font-semibold text-gray-800 bg-white border rounded-lg px-3 py-2 mt-1" value={editData.email} onChange={(e) => handleEditChange('email', e.target.value)} />
+                ) : (
+                  <p className="text-kiosk-base font-semibold text-gray-800">{maskValue(profileData.email, 'email')}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Address */}
+            <div className={`flex items-center gap-4 p-4 rounded-xl ${isEditing ? 'bg-gray-50' : ''}`}>
+              
+              <div className="flex-1">
+                <p className="text-sm text-gray-500">{t('form.address')}</p>
+                {isEditing ? (
+                  <input className="w-full text-kiosk-base font-semibold text-gray-800 bg-white border rounded-lg px-3 py-2 mt-1" value={editData.address} onChange={(e) => handleEditChange('address', e.target.value)} />
+                ) : (
+                  <p className="text-kiosk-base font-semibold text-gray-800">{profileData.address}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Read-only: Aadhaar */}
+            <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50">
+              
+              <div className="flex-1">
+                <p className="text-sm text-gray-500">Aadhaar (Read Only)</p>
+                <p className="text-kiosk-base font-semibold text-gray-800">{maskValue(profileData.aadhaar, 'aadhaar')}</p>
+              </div>
+            </div>
+
+            {/* Read-only: Consumer Number */}
+            <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50">
+              
+              <div className="flex-1">
+                <p className="text-sm text-gray-500">Consumer Number (Read Only)</p>
+                <p className="text-kiosk-base font-semibold text-gray-800">{profileData.consumerNumber}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Save Button */}
+          {isEditing && (
+            <div className="mt-8 pt-6 border-t">
+              <Button onClick={handleSave} size="xlarge" fullWidth icon={Save}>
+                {t('profile.saveAll', 'Save All Changes & Generate Receipt')}
+              </Button>
+            </div>
+          )}
+
+          {/* Ownership Transfer Section */}
+          {!isEditing && (
+            <div className="mt-6 pt-6 border-t">
+              <h3 className="text-kiosk-base font-bold text-gray-700 mb-3">Ownership Transfer</h3>
+              <p className="text-sm text-gray-500 mb-4">
+                Request to transfer this consumer account to a new owner. Requires document verification.
+              </p>
+              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-kiosk">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="text-xs text-gray-500">New Owner Name</label>
+                    <input
+                      className="w-full text-sm bg-white border rounded-lg px-3 py-2 mt-1"
+                      placeholder="Full name of new owner"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">New Owner Aadhaar</label>
+                    <input
+                      className="w-full text-sm bg-white border rounded-lg px-3 py-2 mt-1"
+                      placeholder="12-digit Aadhaar number"
+                      maxLength={12}
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-yellow-700 mb-3">
+                  ⚠️ Ownership transfer requires supporting documents (sale deed / NOC). Upload will be requested after submission.
+                </p>
+                <Button
+                  variant="outline"
+                  size="medium"
+                  onClick={() => {
+                    const receiptData = {
+                      requestId: generateRequestId(),
+                      citizenName: profileData.name,
+                      mobile: profileData.mobile,
+                      serviceType: org,
+                      serviceCategory: 'Ownership Transfer Request',
+                      timestamp: getCurrentTimestamp(),
+                      status: 'submitted',
+                      sla: '30 working days',
+                    };
+                    addReceipt(receiptData);
+                    navigate(`/receipt?org=${encodeURIComponent(receiptData.serviceType)}&id=${encodeURIComponent(receiptData.requestId)}`);
+                  }}
+                >
+                  Submit Transfer Request
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Audit Trail */}
+        <div className="bg-white rounded-kiosk-lg shadow-kiosk p-6 md:p-8 mb-6">
+          <h2 className="text-kiosk-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <Clock className="w-5 h-5 text-gray-500" />
+            {t('profile.auditTrail', 'Update History')}
+          </h2>
+          <div className="space-y-3">
+            {auditTrail.map((entry, idx) => (
+              <div key={idx} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
+                <div className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-gray-800">{entry.action}</p>
+                  <p className="text-xs text-gray-500">{entry.date} • {entry.by}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Back Button */}
+        <div className="text-center">
+          <Button variant="outline" size="large" icon={ArrowLeft} onClick={() => navigate(backPath)}>
+            {t('app.back')}
+          </Button>
+        </div>
+      </div>
+
+      <Modal isOpen={showConfirmModal} onClose={() => setShowConfirmModal(false)} type="confirm" title="Confirm Profile Update" message="Save all changes and generate confirmation receipt?" confirmText={t('app.confirm')} cancelText={t('app.cancel')} onConfirm={handleConfirmSave} onCancel={() => setShowConfirmModal(false)} />
+    </VK>
+  );
+};
+
+export default ConsumerProfile;
