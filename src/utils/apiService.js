@@ -93,9 +93,11 @@ api.interceptors.response.use(
 // â”€â”€â”€ Authentication â”€â”€â”€
 export const authAPI = {
   lookupAadhaar: (uid) => api.post('/auth/aadhaar/lookup', { uid }),
-  verifyQR: (uid) => api.post('/auth/aadhaar/verify-qr', { uid }),
+  // params: { uid } for legacy/biometric, or { qrText, consentToken, sessionId } for QR scan
+  verifyQR: (params) => api.post('/auth/aadhaar/verify-qr', params),
   verifyBiometric: (uid, method) => api.post('/auth/aadhaar/verify-biometric', { uid, method }),
   validateAadhaarMobile: (uid, mobile) => api.post('/auth/aadhaar/validate-mobile', { uid, mobile }),
+  issueConsentToken: (sessionId) => publicApi.post('/auth/consent/issue', { sessionId }),
 };
 
 export const adminAuthAPI = {
