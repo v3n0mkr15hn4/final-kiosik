@@ -12,6 +12,28 @@ const KIOSK_SHELL_ROUTES = new Set([
   '/mode-select',
   '/home',
   '/dashboard',
+  '/electricity',
+  '/electricity-menu',
+  '/electricity/complaint',
+  '/electricity/consumer',
+  '/consumer-profile',
+  '/gas',
+  '/gas-menu',
+  '/gas/complaint',
+  '/gas/bills',
+  '/water',
+  '/sanitation',
+  '/municipal',
+  '/municipal-menu',
+  '/municipal/grievance',
+  '/municipal/property-tax',
+  '/transport',
+  '/healthcare',
+  '/complaints',
+  '/track-status',
+  '/receipt',
+  '/schemes',
+  '/family-profile',
 ]);
 
 /**
@@ -57,19 +79,20 @@ const EmergencyQuickAccess = () => {
       {!onKioskShell && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 left-6 z-[9998] w-16 h-16 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 animate-pulse"
+          className="fixed z-[9998] bg-red-600 hover:bg-red-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 animate-pulse"
+          style={{ bottom: 260, left: 32, width: 160, height: 160 }}
           aria-label="Emergency SOS"
           title="Emergency Numbers"
         >
-          <span className="text-2xl font-black">SOS</span>
+          <span className="text-[40px] font-black">SOS</span>
         </button>
       )}
 
       {/* Emergency Panel */}
       {isOpen && (
-        <div className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center p-4" onClick={() => setIsOpen(false)}>
+        <div className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center p-8" onClick={() => setIsOpen(false)}>
           <div
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto"
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-[1200px] max-h-[3000px] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}

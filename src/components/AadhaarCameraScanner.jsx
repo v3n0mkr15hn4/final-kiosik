@@ -21,20 +21,9 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { callVisionModel } from '../ai/api/nvidiaApi';
 import { authAPI } from '../utils/apiService';
+import { speak } from '../utils/ttsService';
 
 const SCAN_INTERVAL_MS = 200;
-
-function speak(text) {
-  try {
-    const u = new window.SpeechSynthesisUtterance(text);
-    u.lang = 'en-IN';
-    u.rate = 0.9;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(u);
-  } catch {
-    // Browser may block speech without user interaction — ignore
-  }
-}
 
 function generateSessionId() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();

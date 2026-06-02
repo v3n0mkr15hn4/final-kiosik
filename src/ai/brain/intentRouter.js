@@ -4,32 +4,13 @@
  * Takes the parsed AI response JSON and routes it to the correct
  * action handler. The frontend executes these actions safely —
  * the LLM never directly mutates state.
- *
- * Supported action types:
- *   NAVIGATE_PAGE, START_NAVIGATION, SHOW_NEARBY, FILL_FORM,
- *   SUBMIT_FORM, SWITCH_LANGUAGE, READ_PAGE, SCROLL_PAGE,
- *   ZOOM_MAP, SEARCH_OFFICES
  */
 
-// ── Sensitive actions that require extra confirmation ─────────────────────
-
 const REQUIRES_CONFIRMATION = new Set([
-  'NAVIGATE_PAGE',
-  'START_NAVIGATION',
-  'SHOW_NEARBY',
-  'SEARCH_OFFICES',
-  'FILL_FORM',
-  'SUBMIT_FORM',
-  'SWITCH_LANGUAGE',
-  'READ_PAGE',
-  'SCROLL_PAGE',
-  'ZOOM_MAP',
-  'PAY_BILL',
-  'DELETE_DATA',
-  'ADMIN_ACTION',
+  'NAVIGATE_PAGE', 'START_NAVIGATION', 'SHOW_NEARBY', 'SEARCH_OFFICES',
+  'FILL_FORM', 'SUBMIT_FORM', 'SWITCH_LANGUAGE', 'READ_PAGE',
+  'SCROLL_PAGE', 'ZOOM_MAP', 'PAY_BILL', 'DELETE_DATA', 'ADMIN_ACTION',
 ]);
-
-// ── Intent-to-page mapping (for navigation fallback) ─────────────────────
 
 const INTENT_TO_PATH = {
   navigate_electricity:    '/electricity-menu',
@@ -48,36 +29,17 @@ const INTENT_TO_PATH = {
   navigate_dashboard:      '/dashboard',
 };
 
-// ── Route the AI response ─────────────────────────────────────────────────
-
 /**
- * Route an AI response to an executable action object.
- *
- * @param {Object} aiResponse   - parsed JSON from NVIDIA NIM
- * @param {Object} routerContext
- * @param {Function} routerContext.navigate      - react-router navigate
- * @param {Function} routerContext.onFormFill    - fill a form field
- * @param {Function} routerContext.onFormSubmit  - submit a form
- * @param {Function} routerContext.onMapAction   - map control
- * @param {Function} routerContext.onLanguageSwitch - switch UI language
- * @param {Function} routerContext.onReadPage    - read page content aloud
- * @param {Function} routerContext.onNearbySearch - show nearby offices
- * @param {Function} routerContext.onConfirmRequired - request confirmation
- * @returns {{ handled: boolean, actionType: string }}
+ * Route an AI response to an executable action.
  */
 export function routeAction(aiResponse, routerContext) {
-  const { action, intent } = aiResponse;
+  const { action } = aiResponse;
   const ctx = routerContext || {};
 
-  // ── No explicit action — try to infer from intent ────────────────────
-  if (!action) {
-    // Never auto-navigate from intent inference.
-    return { handled: false, actionType: 'NONE' };
-  }
+  if (!action) return { handled: false, actionType: 'NONE' };
 
   const { type } = action;
 
-  // ── Security gate for sensitive actions ──────────────────────────────
   if (REQUIRES_CONFIRMATION.has(type)) {
     if (ctx.onConfirmRequired) {
       const confirmMessage = aiResponse.response || 'Would you like me to proceed?';
@@ -86,23 +48,16 @@ export function routeAction(aiResponse, routerContext) {
     }
   }
 
-  // ── Route by action type ─────────────────────────────────────────────
   switch (type) {
 
     case 'NAVIGATE_PAGE':
-      if (action.path && ctx.navigate) {
-        ctx.navigate(action.path);
-      }
+      if (action.path && ctx.navigate) ctx.navigate(action.path);
       return { handled: true, actionType: type };
 
     case 'START_NAVIGATION':
       if (ctx.onMapAction) {
         ctx.navigate?.('/office-locator');
-        ctx.onMapAction({
-          type: 'START_NAVIGATION',
-          category: action.destinationCategory,
-          destination: action.destination,
-        });
+        ctx.onMapAction({ type: 'START_NAVIGATION', category: action.destinationCategory, destination: action.destination });
       }
       return { handled: true, actionType: type };
 
@@ -116,9 +71,7 @@ export function routeAction(aiResponse, routerContext) {
       return { handled: true, actionType: type };
 
     case 'SEARCH_OFFICES':
-      if (ctx.onNearbySearch) {
-        ctx.onNearbySearch(action.query || action.category);
-      }
+      if (ctx.onNearbySearch) ctx.onNearbySearch(action.query || action.category);
       return { handled: true, actionType: type };
 
     case 'FILL_FORM':
@@ -128,21 +81,15 @@ export function routeAction(aiResponse, routerContext) {
       return { handled: true, actionType: type };
 
     case 'SUBMIT_FORM':
-      if (ctx.onFormSubmit) {
-        ctx.onFormSubmit(action.formId);
-      }
+      if (ctx.onFormSubmit) ctx.onFormSubmit(action.formId);
       return { handled: true, actionType: type };
 
     case 'SWITCH_LANGUAGE':
-      if (ctx.onLanguageSwitch && action.language) {
-        ctx.onLanguageSwitch(action.language);
-      }
+      if (ctx.onLanguageSwitch && action.language) ctx.onLanguageSwitch(action.language);
       return { handled: true, actionType: type };
 
     case 'READ_PAGE':
-      if (ctx.onReadPage) {
-        ctx.onReadPage();
-      }
+      if (ctx.onReadPage) ctx.onReadPage();
       return { handled: true, actionType: type };
 
     case 'SCROLL_PAGE':
@@ -150,9 +97,26 @@ export function routeAction(aiResponse, routerContext) {
       return { handled: true, actionType: type };
 
     case 'ZOOM_MAP':
-      if (ctx.onMapAction) {
-        ctx.onMapAction({ type: 'ZOOM', direction: action.direction });
+      if (ctx.onMapAction) ctx.onMapAction({ type: 'ZOOM', direction: action.direction });
+      return { handled: true, actionType: type };
+
+    case 'TRACK_APPLICATION':
+      if (ctx.navigate) {
+        const q = action.query || action.applicationId || action.ticketId || '';
+        ctx.navigate(`/track-status${q ? `?q=${encodeURIComponent(q)}` : ''}`);
       }
+      return { handled: true, actionType: type };
+
+    case 'EMERGENCY_ALERT':
+      window.dispatchEvent(new CustomEvent('suvidha:open-emergency', {
+        detail: { reason: action.reason || 'voice_trigger' },
+      }));
+      return { handled: true, actionType: type };
+
+    case 'ESCALATE_HUMAN':
+      window.dispatchEvent(new CustomEvent('suvidha:escalate', {
+        detail: { reason: action.reason || 'user_request' },
+      }));
       return { handled: true, actionType: type };
 
     default:
@@ -161,31 +125,21 @@ export function routeAction(aiResponse, routerContext) {
   }
 }
 
-// ── Scroll helper ─────────────────────────────────────────────────────────
-
 function handleScrollPage(direction) {
   const scrollMap = {
-    down: () => window.scrollBy({ top: 300, behavior: 'smooth' }),
-    up:   () => window.scrollBy({ top: -300, behavior: 'smooth' }),
-    top:  () => window.scrollTo({ top: 0, behavior: 'smooth' }),
+    down:   () => window.scrollBy({ top: 300, behavior: 'smooth' }),
+    up:     () => window.scrollBy({ top: -300, behavior: 'smooth' }),
+    top:    () => window.scrollTo({ top: 0, behavior: 'smooth' }),
     bottom: () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }),
   };
   const fn = scrollMap[direction || 'down'];
   if (fn) fn();
 }
 
-// ── Intent classification helpers ─────────────────────────────────────────
-
-/**
- * Check if an intent is related to navigation.
- */
 export function isNavigationIntent(intent) {
   return intent?.startsWith('navigate_') || intent === 'find_location';
 }
 
-/**
- * Check if an intent requires real-time LLM (vs. local handling).
- */
 export function requiresLLM(intent) {
   const localIntents = new Set([
     'navigate_home', 'navigate_electricity', 'navigate_gas',

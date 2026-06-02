@@ -14,6 +14,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { isValidIndianMobile, maskMobile, normalizeIndianMobile } from '../utils/phoneAuth';
 import { speak } from '../utils/ttsService';
+import { useSession } from '../context/SessionContext';
 import { VK, I, ic, Keypad, OTPInput, AadhaarCells } from '../components/kiosk';
 
 // Mock CA/Consumer lookup DB
@@ -33,6 +34,14 @@ export default function Login() {
   const navigate = useNavigate();
   const { sendOtp, verifyOtp, otpLoading, completeCitizenSession } = useAuth();
   const toast = useToast();
+  const { setLoggedIn, setUserType, setAadhaarVerified } = useSession();
+
+  const finishLogin = () => {
+    setLoggedIn(true);
+    setUserType('citizen');
+    setAadhaarVerified(true);
+    navigate('/language-select');
+  };
 
   const tts = (text, options = {}) => {
     speak(text, { language: i18n.language, ...options }).catch(() => {});
@@ -81,7 +90,7 @@ export default function Login() {
     sessionStorage.setItem('userAge', '35');
     toast.success('Login successful.');
     tts('Login successful.', { priority: 'warning', interrupt: true });
-    navigate('/mode-select');
+    finishLogin();
   };
 
   const [step, setStep] = useState('aadhaar');       // 'aadhaar' | 'auth'
@@ -267,7 +276,7 @@ export default function Login() {
 
     toast.success('Login successful.');
     tts('Login successful.', { priority: 'warning', interrupt: true });
-    navigate('/mode-select');
+    finishLogin();
   };
 
   // ── QR + Biometric fallbacks ────────────────────────────────────
@@ -280,7 +289,7 @@ export default function Login() {
     sessionStorage.setItem('citizenData', JSON.stringify({ ...(aadhaarRecord || {}), ...data }));
     toast.success('Login successful.');
     tts('Login successful.', { priority: 'warning', interrupt: true });
-    navigate('/mode-select');
+    finishLogin();
   };
 
   const handleQrDemoLogin = async () => {

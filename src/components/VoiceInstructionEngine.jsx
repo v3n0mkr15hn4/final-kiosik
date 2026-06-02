@@ -5,7 +5,6 @@ import { useAccessibility } from './AccessibilityProvider';
 import { speak, stopTTS, setVoiceCommandActive } from '../utils/ttsService';
 
 const VOICE_TOGGLE_KEY = 'voiceInstructionsEnabled';
-const IDLE_TIMEOUT_MS = 10000;
 
 const ROUTE_INSTRUCTIONS = {
   '/': {
@@ -194,7 +193,6 @@ const VoiceInstructionEngine = () => {
     return stored === 'true';
   });
 
-  const idleTimerRef = useRef(null);
   const previousModeRef = useRef(userMode);
   const onlineStatusRef = useRef(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
@@ -349,43 +347,6 @@ const VoiceInstructionEngine = () => {
       window.removeEventListener('voice:form-error', handleFormError);
     };
   }, [shouldSpeak, i18n.language]);
-
-  useEffect(() => {
-    if (!shouldSpeak) {
-      if (idleTimerRef.current) {
-        clearTimeout(idleTimerRef.current);
-      }
-      return;
-    }
-
-    const startIdleTimer = () => {
-      if (idleTimerRef.current) {
-        clearTimeout(idleTimerRef.current);
-      }
-
-      idleTimerRef.current = setTimeout(() => {
-        if (document.visibilityState !== 'visible') {
-          return;
-        }
-
-        const message = getMessageByLanguage(IDLE_MESSAGES, i18n.language);
-        speakIfEnabled(message, { priority: 'warning' });
-      }, IDLE_TIMEOUT_MS);
-    };
-
-    const activityEvents = ['mousedown', 'touchstart', 'keydown', 'scroll', 'pointerdown'];
-    activityEvents.forEach((eventName) => window.addEventListener(eventName, startIdleTimer, { passive: true }));
-
-    startIdleTimer();
-
-    return () => {
-      if (idleTimerRef.current) {
-        clearTimeout(idleTimerRef.current);
-      }
-
-      activityEvents.forEach((eventName) => window.removeEventListener(eventName, startIdleTimer));
-    };
-  }, [i18n.language, shouldSpeak]);
 
   // Visible overlay removed — the kiosk now exposes voice control via the
   // VK bottom-bar Voice button (see src/components/kiosk/VK.jsx), which

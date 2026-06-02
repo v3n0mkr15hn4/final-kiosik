@@ -1,8 +1,12 @@
-﻿/**
- * speechRecognition.js - Unified STT Manager
+/**
+ * speechRecognition.js — Unified STT Manager
  *
- * Primary: Sarvam STT (chunked continuous loop)
- * Fallback: Web Speech API
+ * Two-tier strategy:
+ *   Tier 1: Browser SpeechRecognition — fast interim results, no upload latency
+ *   Tier 2: Sarvam (MediaRecorder) — higher accuracy, handles more Indian languages
+ *
+ * Sarvam chunking uses silence-energy-based flush instead of fixed 4500ms gap,
+ * eliminating the 500ms restart window that dropped words.
  */
 
 import { sarvamSTT, getSarvamCode } from '../api/sarvamApi.js';
@@ -19,16 +23,35 @@ let _onError = null;
 let _shouldRestart = false;
 let _sessionId = 0;
 let _language = 'en';
+let _defaultLanguage = 'en-IN'; // session language (set by configureSTT)
 let _mode = 'idle'; // idle | sarvam | browser
 
-const SARVAM_CHUNK_MS = 4500;
-const RESTART_MS = 500;
+// Session language source — SessionContext is the only caller.
+// Call sites must not hardcode language strings.
+export function configureSTT(language) {
+  if (typeof language === 'string' && language) _defaultLanguage = language;
+}
+
+// Silence detection for Sarvam chunking
+let _silenceCtx = null;
+let _silenceAnalyser = null;
+let _silenceFrame = null;
+
+const SILENCE_THRESHOLD = 8;      // RMS below this = silence
+const SILENCE_HOLD_MS = 1200;      // flush chunk after this many ms of silence
+const MAX_CHUNK_MS = 6000;         // flush anyway after 6s regardless of silence
+const MIN_CHUNK_MS = 300;          // don't flush if chunk is too short (click noise)
+const RESTART_MS = 100;            // gap between Sarvam chunks (reduced from 500ms)
 
 export function isWebSpeechSupported() {
   return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
 }
 
 function cleanupStream() {
+  if (_silenceFrame) { cancelAnimationFrame(_silenceFrame); _silenceFrame = null; }
+  if (_silenceCtx) { try { _silenceCtx.close(); } catch { /* ok */ } _silenceCtx = null; }
+  _silenceAnalyser = null;
+
   if (_stream) {
     _stream.getTracks().forEach((t) => t.stop());
     _stream = null;
@@ -40,6 +63,8 @@ async function ensureStream() {
   _stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   return _stream;
 }
+
+// ── Tier 1: Browser SpeechRecognition ────────────────────────────────────────
 
 export function startBrowserSTT(opts = {}) {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -70,15 +95,8 @@ export function startBrowserSTT(opts = {}) {
       if (res.isFinal) final += text;
       else interim += text;
     }
-
-    if (interim) {
-      console.log('Transcript:', interim);
-      _onInterim(interim);
-    }
-    if (final) {
-      console.log('Transcript:', final);
-      _onResult(final);
-    }
+    if (interim) _onInterim(interim);
+    if (final) _onResult(final);
   };
 
   recognition.onerror = (e) => {
@@ -91,15 +109,8 @@ export function startBrowserSTT(opts = {}) {
     _isListening = false;
     if (_shouldRestart && localSessionId === _sessionId) {
       setTimeout(() => {
-        try {
-          if (_shouldRestart && !_isListening && localSessionId === _sessionId) {
-            console.log('Restarting listener');
-            recognition.start();
-            _isListening = true;
-            console.log('Listening...');
-          }
-        } catch {
-          // noop
+        if (_shouldRestart && !_isListening && localSessionId === _sessionId) {
+          try { recognition.start(); _isListening = true; } catch { /* ok */ }
         }
       }, RESTART_MS);
     }
@@ -109,12 +120,55 @@ export function startBrowserSTT(opts = {}) {
     recognition.start();
     _isListening = true;
     _mode = 'browser';
-    console.log('Microphone active');
-    console.log('Listening...');
     return true;
   } catch {
     return false;
   }
+}
+
+// ── Tier 2: Sarvam STT with silence-energy-based flushing ────────────────────
+
+function attachSilenceDetector(stream, onSilence) {
+  try {
+    _silenceCtx = new (window.AudioContext || window.webkitAudioContext)();
+    _silenceAnalyser = _silenceCtx.createAnalyser();
+    _silenceAnalyser.fftSize = 256;
+    _silenceCtx.createMediaStreamSource(stream).connect(_silenceAnalyser);
+    const data = new Uint8Array(_silenceAnalyser.frequencyBinCount);
+
+    let silenceStart = 0;
+    let chunkStart = Date.now();
+
+    const tick = () => {
+      if (!_silenceAnalyser) return;
+      _silenceAnalyser.getByteFrequencyData(data);
+      let sum = 0;
+      for (let i = 0; i < data.length; i++) sum += data[i] * data[i];
+      const rms = Math.sqrt(sum / data.length);
+      const now = Date.now();
+      const chunkAge = now - chunkStart;
+
+      if (rms < SILENCE_THRESHOLD) {
+        if (!silenceStart) silenceStart = now;
+        const silenceAge = now - silenceStart;
+        if (silenceAge >= SILENCE_HOLD_MS && chunkAge >= MIN_CHUNK_MS) {
+          silenceStart = 0;
+          chunkStart = now;
+          onSilence();
+          return; // detector reattaches after flush
+        }
+      } else {
+        silenceStart = 0;
+        if (chunkAge >= MAX_CHUNK_MS) {
+          chunkStart = now;
+          onSilence();
+          return;
+        }
+      }
+      _silenceFrame = requestAnimationFrame(tick);
+    };
+    _silenceFrame = requestAnimationFrame(tick);
+  } catch { /* AudioContext unavailable */ }
 }
 
 async function runSarvamChunk(localSessionId) {
@@ -139,40 +193,50 @@ async function runSarvamChunk(localSessionId) {
       const blob = new Blob(_audioChunks, { type: mimeType });
       _audioChunks = [];
 
+      if (blob.size < 1000) {
+        // Too small — likely silence or noise; restart without sending
+        if (_shouldRestart && localSessionId === _sessionId && _mode === 'sarvam') {
+          setTimeout(() => runSarvamChunk(localSessionId), RESTART_MS);
+        }
+        return;
+      }
+
       try {
         _onInterim?.('...');
         const langCode = getSarvamCode(_language);
         const result = await sarvamSTT(blob, langCode);
         const transcript = result?.transcript?.trim() || '';
-        if (transcript) {
-          console.log('Transcript:', transcript);
-          _onResult?.(transcript);
-        }
+        if (transcript) _onResult?.(transcript);
       } catch (err) {
         _onError?.(err.message || 'stt_failed');
       } finally {
         if (_shouldRestart && localSessionId === _sessionId && _mode === 'sarvam') {
-          setTimeout(() => {
-            console.log('Restarting listener');
-            runSarvamChunk(localSessionId);
-          }, RESTART_MS);
+          setTimeout(() => runSarvamChunk(localSessionId), RESTART_MS);
         }
       }
     };
 
-    _mediaRecorder.start(250);
+    _mediaRecorder.start(250); // 250ms timeslice for ondataavailable chunks
     _isListening = true;
     _mode = 'sarvam';
-    console.log('Microphone active');
-    console.log('Listening...');
 
+    // Attach silence detector to decide when to flush
+    attachSilenceDetector(stream, () => {
+      if (_mediaRecorder?.state === 'recording' && localSessionId === _sessionId) {
+        _mediaRecorder.stop();
+      }
+    });
+
+    // Hard cap: flush after MAX_CHUNK_MS regardless
     setTimeout(() => {
       if (_mediaRecorder?.state === 'recording' && localSessionId === _sessionId) {
         _mediaRecorder.stop();
       }
-    }, SARVAM_CHUNK_MS);
+    }, MAX_CHUNK_MS);
+
   } catch (err) {
     _onError?.(err.message || 'mic_denied');
+    // Fallback to browser STT if mic setup fails
     if (_shouldRestart && localSessionId === _sessionId && isWebSpeechSupported()) {
       startBrowserSTT({
         language: _language,
@@ -186,9 +250,56 @@ async function runSarvamChunk(localSessionId) {
   }
 }
 
-export async function startMediaRecorderSTT(opts = {}) {
+// ── Primary entry point ───────────────────────────────────────────────────────
+
+/**
+ * Start STT. Tries browser SpeechRecognition first for fast interim results.
+ * Falls back to Sarvam MediaRecorder when browser STT unavailable or forced.
+ */
+export function startSTT(opts = {}) {
   stopSTT();
 
+  _onResult = opts.onResult || (() => {});
+  _onInterim = opts.onInterim || (() => {});
+  _onError = opts.onError || (() => {});
+  _language = opts.language || _defaultLanguage || 'en';
+  _shouldRestart = opts.continuous !== false;
+
+  // Try browser STT first (fast, interim results)
+  if (isWebSpeechSupported() && opts.preferSarvam !== true) {
+    const started = startBrowserSTT({
+      language: _language,
+      onResult: _onResult,
+      onInterim: _onInterim,
+      onError: (err) => {
+        // If browser STT errors, fall back to Sarvam
+        const criticalErrors = new Set(['not-allowed', 'service-not-allowed']);
+        if (criticalErrors.has(err)) {
+          _onError(err);
+          return;
+        }
+        // Non-critical error: switch to Sarvam
+        if (_shouldRestart && _mode === 'browser') {
+          _mode = 'idle';
+          const localSessionId = ++_sessionId;
+          _shouldRestart = true;
+          runSarvamChunk(localSessionId);
+        }
+      },
+      continuous: true,
+      autoRestart: opts.autoRestart !== false,
+    });
+    if (started) return true;
+  }
+
+  // Sarvam path
+  const localSessionId = ++_sessionId;
+  runSarvamChunk(localSessionId);
+  return true;
+}
+
+export async function startMediaRecorderSTT(opts = {}) {
+  stopSTT();
   _onResult = opts.onResult || (() => {});
   _onInterim = opts.onInterim || (() => {});
   _onError = opts.onError || (() => {});
@@ -200,21 +311,17 @@ export async function startMediaRecorderSTT(opts = {}) {
   return true;
 }
 
-export function startSTT(opts = {}) {
-  return startMediaRecorderSTT(opts);
-}
-
 export function stopSTT() {
   _shouldRestart = false;
   _sessionId += 1;
 
   if (_recognition) {
-    try { _recognition.abort(); } catch {}
+    try { _recognition.abort(); } catch { /* ok */ }
     _recognition = null;
   }
 
   if (_mediaRecorder?.state === 'recording') {
-    try { _mediaRecorder.stop(); } catch {}
+    try { _mediaRecorder.stop(); } catch { /* ok */ }
   }
   _mediaRecorder = null;
 
@@ -234,4 +341,5 @@ export default {
   stopSTT,
   isSTTActive,
   isWebSpeechSupported,
+  configureSTT,
 };

@@ -25,6 +25,7 @@ import { processUtterance, resetSession } from '../brain/aiEngine.js';
 // Voice
 import { startSTT, stopSTT, isWebSpeechSupported } from '../voice/speechRecognition.js';
 import { speak, stopSpeaking } from '../voice/speechSynthesis.js';
+import { startBargeInListener, stopBargeInListener } from '../../utils/naturalVoice.js';
 import { startWakeWordDetection, stopWakeWordDetection, pauseWakeWord, resumeWakeWord } from '../voice/wakeWord.js';
 import { setInterimTranscript, setFinalTranscript, addAITranscript, clearTranscript } from '../voice/transcriptManager.js';
 import { unlockAudio, requestMicPermission } from '../voice/audioManager.js';
@@ -72,6 +73,8 @@ export function VoiceAssistantProvider({ children }) {
   const languageRef = useRef(getCurrentLanguage());
   const sttRunningRef = useRef(false);
   const canCaptureTranscriptRef = useRef(true);
+  const retryCountRef = useRef(0);
+  const processMessageRef = useRef(null);
 
   // ── Helpers ─────────────────────────────────────────────────────────────
 
@@ -91,18 +94,19 @@ export function VoiceAssistantProvider({ children }) {
 
   // ── TTS ──────────────────────────────────────────────────────────────────
 
+  const RECOVERABLE_STT_ERRORS = ['no-speech', 'network', 'audio-capture', 'aborted'];
+
   const startListening = useCallback(() => {
     if (!activeRef.current || sttRunningRef.current) return;
     const lang = currentLanguage();
-    console.log('Microphone active');
-    console.log('Listening...');
     setAIState('listening');
     startSTT({
       language: lang,
       continuous: true,
       autoRestart: true,
       onResult: (text) => {
-        if (canCaptureTranscriptRef.current && text?.trim()) processMessage(text);
+        retryCountRef.current = 0;
+        if (canCaptureTranscriptRef.current && text?.trim()) processMessageRef.current?.(text);
       },
       onInterim: (text) => {
         if (!canCaptureTranscriptRef.current) return;
@@ -110,9 +114,16 @@ export function VoiceAssistantProvider({ children }) {
         setInterimTranscript(text);
       },
       onError: (err) => {
-        console.warn('[VoiceAssistant] STT error:', err);
+        const errType = typeof err === 'object' ? (err.error || err.type || '') : String(err);
         sttRunningRef.current = false;
-        if (activeRef.current) setAIState('idle');
+        if (activeRef.current && RECOVERABLE_STT_ERRORS.includes(errType) && retryCountRef.current < 3) {
+          retryCountRef.current++;
+          const delay = Math.pow(2, retryCountRef.current) * 400;
+          setTimeout(() => { if (activeRef.current) startListening(); }, delay);
+        } else {
+          retryCountRef.current = 0;
+          if (activeRef.current) setAIState('idle');
+        }
       },
     });
     sttRunningRef.current = true;
@@ -128,9 +139,10 @@ export function VoiceAssistantProvider({ children }) {
   const speakResponse = useCallback(async (text, lang) => {
     if (!text) return;
     announceToScreenReader(text);
+    const effectiveLang = lang || currentLanguage();
     try {
       await speak(text, {
-        language: lang || currentLanguage(),
+        language: effectiveLang,
         interrupt: true,
         onStart: () => {
           stopListening();
@@ -138,13 +150,16 @@ export function VoiceAssistantProvider({ children }) {
           setInterim('');
           setInterimTranscript('');
           setAIState('speaking');
-          console.log('TTS started');
+          startBargeInListener((bargeText) => {
+            stopBargeInListener();
+            stopSpeaking();
+            if (bargeText?.trim()) processMessageRef.current?.(bargeText);
+          }, effectiveLang);
         },
         onEnd: () => {
-          console.log('TTS finished');
+          stopBargeInListener();
           canCaptureTranscriptRef.current = true;
           if (activeRef.current) {
-            console.log('Restarting listener');
             startListening();
           } else {
             setAIState('idle');
@@ -152,6 +167,7 @@ export function VoiceAssistantProvider({ children }) {
         },
       });
     } finally {
+      stopBargeInListener();
       if (!activeRef.current) setAIState('idle');
     }
   }, [startListening, stopListening]);
@@ -289,6 +305,10 @@ export function VoiceAssistantProvider({ children }) {
       setAIState('idle');
     }
   }, [location.pathname, addMessage, dispatchAction, speakResponse, isConfirmation, pendingConfirm]);
+
+  // Keep ref current so barge-in callbacks inside speakResponse can call processMessage
+  // without creating a circular useCallback dependency
+  processMessageRef.current = processMessage;
 
   useEffect(() => {
     let mounted = true;

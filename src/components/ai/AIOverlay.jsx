@@ -80,7 +80,7 @@ export default function AIOverlay() {
     return (
       <>
         {micPermission === 'denied' && !micBannerDismissed && (
-          <div className="fixed bottom-20 left-4 right-4 z-[11000] max-w-sm mx-auto">
+          <div className="fixed bottom-[260px] left-8 right-8 z-[11000] max-w-[900px] mx-auto">
             <div className="bg-red-900 border border-red-500 rounded-xl px-4 py-3 flex items-center gap-3 shadow-xl">
               <span className="text-red-200 text-sm flex-1">🎤 Microphone blocked — voice disabled. Touch input works.</span>
               <button
@@ -95,8 +95,8 @@ export default function AIOverlay() {
         <button
           onClick={handleActivate}
           className="
-            fixed bottom-24 right-4 z-50
-            w-16 h-16 rounded-full
+            fixed bottom-[260px] right-8 z-50
+            w-[160px] h-[160px] rounded-full
             bg-gradient-to-br from-indigo-500 to-purple-600
             shadow-2xl shadow-indigo-500/40
             flex items-center justify-center
@@ -108,15 +108,15 @@ export default function AIOverlay() {
           title="Click or say 'Hey Suvidha'"
         >
           {/* Star icon */}
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="white" stroke="none">
+          <svg width="76" height="76" viewBox="0 0 24 24" fill="white" stroke="none">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
           </svg>
           {/* AI badge */}
           <span className="
-            absolute -top-1 -right-1 w-6 h-6
-            bg-emerald-500 text-white text-xs font-bold
+            absolute -top-2 -right-2 w-16 h-16
+            bg-emerald-500 text-white text-2xl font-bold
             rounded-full flex items-center justify-center
-            border-2 border-white text-[10px]
+            border-4 border-white
           ">AI</span>
         </button>
       </>
@@ -129,7 +129,7 @@ export default function AIOverlay() {
     <>
       <ListeningIndicator />
       {micPermission === 'denied' && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[11000] bg-red-900 border border-red-500 rounded-xl px-4 py-2 text-sm text-red-100 flex items-center gap-2 shadow-xl">
+        <div className="fixed bottom-[220px] left-1/2 -translate-x-1/2 z-[11000] bg-red-900 border border-red-500 rounded-xl px-8 py-5 text-4xl text-red-100 flex items-center gap-4 shadow-xl">
           🎤 Microphone blocked — type your question instead.
         </div>
       )}
@@ -144,16 +144,16 @@ export default function AIOverlay() {
       {/* Main panel */}
       <div
         className="
-          fixed bottom-0 right-0 z-50
-          w-full sm:w-[420px]
-          sm:bottom-4 sm:right-4 sm:rounded-3xl
+          fixed bottom-[220px] right-8 z-50
+          w-[900px]
+          sm:bottom-[220px] sm:right-8 sm:rounded-3xl
           rounded-t-3xl
           bg-gradient-to-br from-gray-900/95 via-indigo-950/95 to-gray-900/95
           backdrop-blur-xl border border-white/10
           shadow-2xl shadow-indigo-900/50
           flex flex-col overflow-hidden
           transition-all duration-300 ease-out
-          max-h-[90vh] sm:max-h-[680px]
+          max-h-[2600px] h-[1600px]
         "
         role="dialog"
         aria-label="SUVIDHA AI Assistant"

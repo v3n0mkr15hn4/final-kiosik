@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { MessageCircle, X, Minus, Send, Mic, MicOff, Volume2, VolumeX, Zap } from 'lucide-react';
 import { naturalSpeak, startBargeInListener, stopBargeInListener } from '../utils/naturalVoice';
 import { stopTTS } from '../utils/ttsService';
+import { startSTT, stopSTT } from '../ai/voice/speechRecognition';
 import { callNvidiaAI, MODELS } from '../ai/api/nvidiaApi';
 import SYSTEM_PROMPT from '../ai/prompts/systemPrompt';
 
@@ -89,9 +90,6 @@ const AIChatbot = () => {
 
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
-  const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
-  const recognitionRef = useRef(null);
 
   const context = extractContext(location.pathname);
   const userLang = (i18n.language || 'en').split('-')[0];
@@ -254,14 +252,13 @@ const AIChatbot = () => {
     // Execute navigation/language actions from AI
     if (action) executeAction(action);
 
-    // Speak reply + enable barge-in
+    // Speak reply — start barge-in BEFORE speaking so user can interrupt immediately
+    startBargeInListener((spokenText) => {
+      stopBargeInListener();
+      if (spokenText?.trim()) sendMessage(spokenText);
+    }, userLang);
     naturalSpeak(replyText, { language: finalResponse?.language || userLang, priority: 'normal' })
-      .then(() => {
-        startBargeInListener((spokenText) => {
-          stopBargeInListener();
-          sendMessage(spokenText);
-        }, userLang);
-      }).catch(() => {});
+      .finally(() => stopBargeInListener());
   }, [isTyping, i18n.language, userLang, callNvidiaChat, executeAction, lastProvider, t]);
 
   const handleSend = () => sendMessage(input);
@@ -270,101 +267,38 @@ const AIChatbot = () => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
-  // ── Sarvam STT Voice Input ───────────────────────────────────────────────
+  // ── STT Voice Input (unified — browser first, Sarvam fallback) ────────────
   const stopListening = useCallback(() => {
     setIsListening(false);
-    if (recognitionRef.current) { try { recognitionRef.current.stop(); } catch { /* ok */ } recognitionRef.current = null; }
-    if (mediaRecorderRef.current?.state === 'recording') mediaRecorderRef.current.stop();
+    stopSTT();
   }, []);
-
-  const processAudioBlob = useCallback(async (blob) => {
-    try {
-      setVoiceError('');
-      const formData = new FormData();
-      formData.append('file', blob, 'recording.webm');
-      formData.append('language_code', sttLangCode);
-
-      const resp = await fetch('/api/sarvam/speech-to-text', {
-        method: 'POST', body: formData,
-        signal: AbortSignal.timeout(15000),
-      });
-
-      if (!resp.ok) throw new Error(`STT HTTP ${resp.status}`);
-      const data = await resp.json();
-      const transcriptText = data.transcript || data.text || '';
-
-      if (transcriptText.trim()) {
-        setInput(transcriptText);
-        setTimeout(() => sendMessage(transcriptText), 500);
-      } else {
-        setVoiceError(t('chatbot.noSpeech', 'No speech detected. Please try again.'));
-      }
-    } catch (err) {
-      setVoiceError(t('chatbot.voiceError', 'Voice recognition failed. Please type your question.'));
-      console.error('[Chatbot STT]', err.message);
-    }
-  }, [sttLangCode, t, sendMessage]);
 
   const startListening = useCallback(async () => {
     setVoiceError('');
     setIsListening(true);
-    stopTTS(); // Stop any TTS immediately when user presses mic (barge-in)
+    stopTTS();
     stopBargeInListener();
 
-    // Try browser Web Speech API first
-    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRec) {
-      const recognition = new SpeechRec();
-      recognitionRef.current = recognition;
-      recognition.lang = sttLangCode;
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 3;
-
-      recognition.onresult = (e) => {
-        const text = e.results?.[0]?.[0]?.transcript || '';
+    await startSTT({
+      language: sttLangCode,
+      continuous: false,
+      autoRestart: false,
+      onResult: (text) => {
         setIsListening(false);
         if (text.trim()) {
           setInput(text);
-          setTimeout(() => sendMessage(text), 400);
+          setTimeout(() => sendMessage(text), 300);
         } else {
           setVoiceError(t('chatbot.noSpeech', 'No speech detected.'));
         }
-      };
-
-      recognition.onerror = () => {
+      },
+      onInterim: () => {},
+      onError: () => {
         setIsListening(false);
-        setVoiceError(t('chatbot.voiceError', 'Voice recognition failed.'));
-      };
-
-      recognition.onend = () => setIsListening(false);
-      recognition.start();
-      setTimeout(() => { if (recognitionRef.current) { try { recognition.stop(); } catch { /* ok */ } } }, 9000);
-      return;
-    }
-
-    // Fallback: MediaRecorder → Sarvam STT
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-      mediaRecorderRef.current = recorder;
-      audioChunksRef.current = [];
-
-      recorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
-      recorder.onstop = () => {
-        stream.getTracks().forEach(t => t.stop());
-        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        setIsListening(false);
-        processAudioBlob(blob);
-      };
-
-      recorder.start();
-      setTimeout(() => { if (recorder.state === 'recording') recorder.stop(); }, 9000);
-    } catch {
-      setIsListening(false);
-      setVoiceError(t('chatbot.micError', 'Microphone access denied.'));
-    }
-  }, [sttLangCode, t, processAudioBlob, sendMessage]);
+        setVoiceError(t('chatbot.voiceError', 'Voice recognition failed. Please type.'));
+      },
+    });
+  }, [sttLangCode, t, sendMessage]);
 
   const toggleVoice = () => {
     if (isListening) stopListening();
@@ -396,7 +330,8 @@ const AIChatbot = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-24 right-4 z-50 w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-100 transition-transform touch-manipulation"
+          className="fixed z-50 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-100 transition-transform touch-manipulation"
+          style={{ bottom: 96, right: 24, width: 64, height: 64 }}
           aria-label="Open AI Assistant"
           title="Ask SUVIDHA AI"
         >

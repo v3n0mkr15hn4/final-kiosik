@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Map, { Layer, Marker, Source } from 'react-map-gl/maplibre';
 import maplibregl from 'maplibre-gl';
+import { speak, stopTTS } from '../utils/ttsService';
 
 const FALLBACK_LOCATION = { latitude: 26.1445, longitude: 91.7362 };
 
@@ -99,14 +100,6 @@ function getBoundsFromCoordinates(coordinates) {
   return [[minLng, minLat], [maxLng, maxLat]];
 }
 
-function speak(text) {
-  if (!('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.rate = 0.98;
-  utterance.pitch = 1;
-  window.speechSynthesis.speak(utterance);
-}
 
 export default function RealtimeNavigationMap({ externalCommandRef } = {}) {
   const [userLocation, setUserLocation] = useState(FALLBACK_LOCATION);
@@ -307,9 +300,7 @@ export default function RealtimeNavigationMap({ externalCommandRef } = {}) {
       if (fetchDebounceRef.current) {
         clearTimeout(fetchDebounceRef.current);
       }
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
+      stopTTS();
     };
   }, []);
 

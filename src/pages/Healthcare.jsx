@@ -1,35 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Heart, ArrowRight, ArrowLeft, Search, FileText, UserCog } from 'lucide-react';
-import {
-  Header,
-  Button,
-  Input,
-  Select,
-  TextArea,
-  Modal,
-  LoadingSpinner,
-  PageContainer,
-  DepartmentHeader,
-  SectionTitle,
-  ServiceCard,
-  UtilityCard,
-  ResponsiveGrid,
-  ActionButton
-} from '../components';
-import { VK } from '../components/kiosk';
+import { Stethoscope, Truck, ShieldCheck, UserCog, Search, FileText } from 'lucide-react';
+import { Button, Input, Select, TextArea, Modal, LoadingSpinner } from '../components';
+import { VK, I, ic } from '../components/kiosk';
 import { HealthIcon } from '../assets/icons';
 import QRUpload from '../components/QRUpload';
-import { states, cities, wards, serviceCategories } from '../utils/constants';
+import { states, cities, wards } from '../utils/constants';
 import { generateRequestId, getCurrentTimestamp } from '../utils/helpers';
 import { addReceipt } from '../utils/receipts';
 import { serviceAPI } from '../utils/apiService';
 
-/**
- * Healthcare Services page
- * Covers hospital appointments, ambulance, vaccination, health camps, etc.
- */
 const Healthcare = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -53,35 +34,57 @@ const Healthcare = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  const categories = serviceCategories.healthcare;
-
-  const theme = {
-    gradient: 'from-pink-500 via-rose-500 to-fuchsia-600',
-    softGradient: 'from-pink-50 via-pink-100 to-rose-100',
-    accentClass: 'text-pink-600',
-  };
-
-  const utilityServices = [
+  const mainServices = [
     {
-      id: 'profile',
-      title: 'Edit Credentials / Profile',
-      description: 'Update your healthcare profile and details',
+      id: 'hospitalAppointment',
+      LucideIcon: Stethoscope,
+      title: t('healthcare.hospitalAppointment', 'Hospital Appointment'),
+      description: t('home.healthAppointmentDesc', 'Book outpatient appointment at government hospitals'),
+      color: '#db2777',
+      bg: 'color-mix(in oklab, #db2777 12%, white)',
+    },
+    {
+      id: 'ambulance',
+      LucideIcon: Truck,
+      title: t('healthcare.ambulance', 'Emergency Ambulance'),
+      description: t('home.healthAmbulanceDesc', 'Request ambulance for medical emergency'),
+      color: '#dc2626',
+      bg: 'color-mix(in oklab, #dc2626 12%, white)',
+    },
+    {
+      id: 'vaccination',
+      LucideIcon: ShieldCheck,
+      title: t('healthcare.vaccination', 'Vaccination Services'),
+      description: t('home.healthVaccinationDesc', 'Register for immunization and vaccination camps'),
+      color: '#7c3aed',
+      bg: 'color-mix(in oklab, #7c3aed 12%, white)',
+    },
+    {
+      id: '_profile',
+      LucideIcon: UserCog,
+      title: t('home.healthProfile', 'Update Health Profile'),
+      description: t('home.healthProfileDesc', 'Update credentials and health card details'),
       path: '/consumer-profile?org=healthcare',
-      Icon: UserCog,
+      color: '#0369a1',
+      bg: 'color-mix(in oklab, #0369a1 12%, white)',
     },
     {
-      id: 'track',
-      title: 'Track Request / Complaint',
-      description: 'Check real-time status of your requests',
+      id: '_track',
+      LucideIcon: Search,
+      title: t('home.healthTrack', 'Track Request'),
+      description: t('home.healthTrackDesc', 'Check real-time status of your requests'),
       path: '/track-status',
-      Icon: Search,
+      color: '#475569',
+      bg: 'color-mix(in oklab, #475569 12%, white)',
     },
     {
-      id: 'receipt',
-      title: 'View Receipts',
-      description: 'View and print transaction receipts',
+      id: '_receipt',
+      LucideIcon: FileText,
+      title: t('home.healthReceipt', 'View Receipts'),
+      description: t('home.healthReceiptDesc', 'View and print transaction receipts'),
       path: '/receipt?org=healthcare',
-      Icon: FileText,
+      color: '#059669',
+      bg: 'color-mix(in oklab, #059669 12%, white)',
     },
   ];
 
@@ -96,15 +99,9 @@ const Healthcare = () => {
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-    if (field === 'state') {
-      setFormData(prev => ({ ...prev, city: '', ward: '' }));
-    }
-    if (field === 'city') {
-      setFormData(prev => ({ ...prev, ward: '' }));
-    }
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
+    if (field === 'state') setFormData(prev => ({ ...prev, city: '', ward: '' }));
+    if (field === 'city') setFormData(prev => ({ ...prev, ward: '' }));
   };
 
   const validateForm = () => {
@@ -116,21 +113,17 @@ const Healthcare = () => {
     if (!formData.ward) newErrors.ward = t('errors.required');
     if (!formData.address.trim()) newErrors.address = t('errors.required');
     if (!formData.description.trim()) newErrors.description = t('errors.required');
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = () => {
-    if (validateForm()) {
-      setShowConfirmModal(true);
-    }
+    if (validateForm()) setShowConfirmModal(true);
   };
 
   const handleConfirmSubmit = async () => {
     setShowConfirmModal(false);
     setLoading(true);
-
     try {
       let requestId;
       try {
@@ -161,7 +154,6 @@ const Healthcare = () => {
         timestamp: getCurrentTimestamp(),
         status: 'submitted',
       };
-
       addReceipt(receiptData);
       navigate(`/receipt?org=${encodeURIComponent(receiptData.serviceType)}&id=${encodeURIComponent(receiptData.requestId)}`);
     } catch (error) {
@@ -173,84 +165,108 @@ const Healthcare = () => {
 
   if (loading) {
     return (
-      <PageContainer tone="healthcare">
-        
+      <VK bg="color-mix(in oklab, #ec4899 4%, white)">
         <div className="flex items-center justify-center min-h-[60vh]">
           <LoadingSpinner size="large" message={t('app.loading')} />
         </div>
-      </PageContainer>
+      </VK>
     );
   }
 
   return (
-    <PageContainer tone="healthcare">
-      
-
-      <div>
-        <DepartmentHeader
-          title={t('healthcare.title')}
-          subtitle={t('healthcare.subtitle')}
-          icon={HealthIcon}
-          iconProps={{ size: 40, color: '#ffffff' }}
-          gradient="from-pink-500 to-rose-600"
-        />
-
-        {step === 1 ? (
-          <>
-            <SectionTitle title={t('form.selectCategory')} className="mb-4" />
-            <ResponsiveGrid variant="services" className="mb-8">
-              {categories.map((category) => (
-                <ServiceCard
-                  key={category.id}
-                  title={t(category.key)}
-                  icon={HealthIcon}
-                  iconProps={{ size: 28, color: '#ffffff' }}
-                  gradient={theme.gradient}
-                  onClick={() => {
-                    setSelectedCategory(category.id);
-                    setStep(2);
-                  }}
-                  accessibilityLabel={t(category.key)}
-                />
-              ))}
-            </ResponsiveGrid>
-
-            <SectionTitle
-              title={t('home.utilitiesHistory', 'Utilities & History')}
-              icon={UserCog}
-              accentClass={theme.accentClass}
-              className="mb-4"
-            />
-            <ResponsiveGrid variant="utilities" className="mb-8">
-              {utilityServices.map((service) => (
-                <UtilityCard
-                  key={service.id}
-                  title={service.title}
-                  description={service.description}
-                  icon={service.Icon}
-                  iconProps={{ className: 'w-6 h-6 text-pink-700' }}
-                  gradient={theme.softGradient}
-                  onClick={() => navigate(service.path)}
-                  accessibilityLabel={service.title}
-                />
-              ))}
-            </ResponsiveGrid>
-
-            <div className="mt-8 text-center">
-              <ActionButton
-                variant="outline"
-                size="large"
-                icon={ArrowLeft}
-                onClick={() => navigate('/home')}
-              >
-                {t('home.backToOrgs', 'Back to Home')}
-              </ActionButton>
+    <VK bg="color-mix(in oklab, #ec4899 4%, white)">
+      {step === 1 ? (
+        <>
+          {/* Dept header */}
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <div style={{
+              width: 120, height: 120, borderRadius: '50%',
+              background: 'linear-gradient(135deg, #ec4899, #be185d)',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              marginBottom: 20, boxShadow: '0 8px 32px rgba(236,72,153,0.3)',
+            }}>
+              <HealthIcon size={60} color="#fff" />
             </div>
-          </>
-        ) : (
+            <h1 className="h2" style={{ marginBottom: 10 }}>
+              {t('healthcare.title', 'Healthcare Department')}
+            </h1>
+            <p className="body-l" style={{ color: 'var(--ink-500)' }}>
+              {t('healthcare.subtitle', 'Appointments · Ambulance · Vaccination · Health Camps')}
+            </p>
+          </div>
+
+          {/* Service grid — 3 cols for kiosk */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, marginBottom: 32 }}>
+            {mainServices.map((s) => {
+              const Icon = s.LucideIcon;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => {
+                    if (s.path) {
+                      navigate(s.path);
+                    } else {
+                      setSelectedCategory(s.id);
+                      setStep(2);
+                    }
+                  }}
+                  className="tile"
+                  style={{
+                    minHeight: 260,
+                    padding: 32,
+                    alignItems: 'flex-start',
+                    textAlign: 'left',
+                    gap: 20,
+                    borderTop: `6px solid ${s.color}`,
+                    touchAction: 'manipulation',
+                  }}
+                  aria-label={s.title}
+                >
+                  <div style={{
+                    width: 72, height: 72, borderRadius: 20,
+                    background: s.bg, display: 'grid', placeItems: 'center', flexShrink: 0,
+                  }}>
+                    <Icon size={36} style={{ color: s.color }} strokeWidth={2} />
+                  </div>
+                  <div className="nm" style={{ fontSize: 26, lineHeight: 1.3 }}>{s.title}</div>
+                  <div className="sub" style={{ fontSize: 20, marginTop: 'auto' }}>{s.description}</div>
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            type="button"
+            className="btn btn-quiet"
+            style={{ alignSelf: 'center', fontSize: 22, padding: '18px 48px' }}
+            onClick={() => navigate('/home')}
+          >
+            <I d={ic.back} size={24} /> {t('home.backToOrgs', 'Back to Organizations')}
+          </button>
+        </>
+      ) : (
+        /* Service Request Form */
+        <div>
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <div style={{
+              width: 80, height: 80, borderRadius: '50%',
+              background: 'linear-gradient(135deg, #ec4899, #be185d)',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              marginBottom: 12, boxShadow: '0 4px 16px rgba(236,72,153,0.25)',
+            }}>
+              <HealthIcon size={40} color="#fff" />
+            </div>
+            <h1 className="h2" style={{ marginBottom: 6 }}>
+              {t('healthcare.title', 'Healthcare Department')}
+            </h1>
+          </div>
+
           <div className="bg-white rounded-kiosk-lg shadow-kiosk p-6 md:p-8">
             <div className="mb-6 p-4 bg-pink-50 rounded-kiosk border border-pink-200">
-              <p className="text-kiosk-base font-semibold text-pink-800">Selected: {t(`healthcare.${selectedCategory}`)}</p>
+              <p className="text-kiosk-base font-semibold text-pink-800">
+                Selected: {t(`healthcare.${selectedCategory}`)}
+              </p>
             </div>
 
             <div className="space-y-6">
@@ -271,9 +287,7 @@ const Healthcare = () => {
               </div>
 
               <Input label={t('form.address')} value={formData.address} onChange={(e) => handleInputChange('address', e.target.value)} placeholder={t('form.enterAddress')} error={errors.address} required />
-
               <TextArea label={t('form.description')} value={formData.description} onChange={(e) => handleInputChange('description', e.target.value)} placeholder={t('form.enterDescription')} error={errors.description} required rows={4} maxLength={500} />
-
               <QRUpload label={t('form.uploadDocuments')} onUploadComplete={(uploadedFiles) => setFiles(uploadedFiles)} maxFiles={5} />
 
               <div className="flex flex-col sm:flex-row gap-4 justify-between pt-6 border-t">
@@ -282,11 +296,11 @@ const Healthcare = () => {
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <Modal isOpen={showConfirmModal} onClose={() => setShowConfirmModal(false)} type="confirm" title={t('modal.confirmTitle')} message={t('modal.confirmMessage')} confirmText={t('app.confirm')} cancelText={t('app.cancel')} onConfirm={handleConfirmSubmit} onCancel={() => setShowConfirmModal(false)} />
-    </PageContainer>
+    </VK>
   );
 };
 

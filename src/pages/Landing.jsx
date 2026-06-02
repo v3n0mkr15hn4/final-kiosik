@@ -11,6 +11,7 @@ import { INDIAN_LANGUAGES, POPULAR_LANGS, RTL_LANGS } from '../i18n/languageCode
 import { changeLanguageSafe } from '../i18n';
 import { useAuth } from '../hooks/useAuth';
 import { useAccessibility } from '../components/AccessibilityProvider';
+import { useSession } from '../context/SessionContext';
 import useKioskScale from '../hooks/useKioskScale';
 
 import { I, ic, Logo } from '../components/kiosk';
@@ -22,16 +23,17 @@ export default function Landing() {
   const navigate = useNavigate();
   const { logout, activateGuestSession } = useAuth();
   const { fontSize, setFontSize, userMode, setUserMode } = useAccessibility();
+  const { setUserType } = useSession();
   const [showCamera, setShowCamera] = useState(false);
 
-  // NOTE: welcome announcement is owned by VoiceInstructionEngine for route '/'.
-  // The previous in-page useEffect-speak caused a loop because it ignored the
-  // voice toggle and re-fired on every language change.
+  // NOTE: voice is opt-in and is enabled only during onboarding (after login,
+  // on the Voice Mode step). The landing screen never auto-starts TTS or STT.
 
   const handleGuest = async () => {
     await logout();
     activateGuestSession();
-    navigate('/mode-select');
+    setUserType('guest');
+    navigate('/language-select');
   };
 
   const handleCitizen = () => {
@@ -224,7 +226,8 @@ export default function Landing() {
               sessionStorage.setItem('autoDetectedMode', 'blind');
               sessionStorage.setItem('userMode', 'blind');
               sessionStorage.setItem('voiceNavAlwaysOn', 'true');
-              navigate('/mode-select');
+              setUserType('citizen');
+              navigate('/language-select');
             }}
             onClose={() => setShowCamera(false)}
           />

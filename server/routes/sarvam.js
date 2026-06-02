@@ -481,7 +481,7 @@ router.post('/tts-stream-bridge', async (req, res) => {
             body: JSON.stringify({
                 text: textToSpeak.slice(0, 500),
                 target_language_code: 'hi-IN',
-                speaker: 'meera',
+                speaker: SARVAM_SPEAKERS['hi-IN'],
                 model: 'bulbul:v3',
                 pace: Number(pace),
                 speech_sample_rate: 22050,

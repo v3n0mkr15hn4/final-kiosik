@@ -518,7 +518,7 @@ const VoiceNavigation = () => {
 
   if (!isSupported) {
     return (
-      <div className="fixed bottom-6 left-28 z-50 no-print bg-amber-50 border border-amber-300 text-amber-800 px-4 py-3 rounded-xl shadow-lg flex items-center space-x-2 max-w-xs animate-fade-in">
+      <div className="fixed bottom-[260px] left-8 z-50 no-print bg-amber-50 border border-amber-300 text-amber-800 px-8 py-6 rounded-xl shadow-lg flex items-center space-x-4 max-w-[760px] animate-fade-in">
         <AlertCircle className="w-5 h-5 flex-shrink-0" />
         <p className="text-sm font-medium">Microphone access required for voice navigation</p>
       </div>
@@ -528,7 +528,7 @@ const VoiceNavigation = () => {
   const isBlindMode = sessionStorage.getItem('voiceNavAlwaysOn') === 'true';
 
   return (
-    <div className="fixed bottom-6 left-28 z-50 no-print" role="region" aria-label="Voice navigation">
+    <div className="fixed bottom-[260px] left-8 z-50 no-print" role="region" aria-label="Voice navigation">
       {isBlindMode && (
         <div className="absolute bottom-24 left-0 bg-purple-700 text-white px-3 py-2 rounded-xl shadow-xl text-xs font-bold animate-pulse">
           🔊 {t('voice.modeActive', 'Voice Mode Active')}
@@ -551,7 +551,7 @@ const VoiceNavigation = () => {
       <button
         onClick={toggleListening}
         className={`
-          ${isBlindMode ? 'w-24 h-24' : 'w-14 h-14'} rounded-full shadow-xl flex items-center justify-center
+          ${isBlindMode ? 'w-[180px] h-[180px]' : 'w-[160px] h-[160px]'} rounded-full shadow-xl flex items-center justify-center
           transition-all duration-200 touch-manipulation
           ${isListening
             ? 'bg-red-500 text-white animate-pulse-slow scale-110'
@@ -562,8 +562,8 @@ const VoiceNavigation = () => {
         title={isListening ? 'Stop listening' : 'Voice command (tap to speak)'}
       >
         {isListening
-          ? <MicOff className={`${isBlindMode ? 'w-12 h-12' : 'w-6 h-6'}`} />
-          : <Mic className={`${isBlindMode ? 'w-12 h-12' : 'w-6 h-6'}`} />
+          ? <MicOff className={`${isBlindMode ? 'w-20 h-20' : 'w-16 h-16'}`} />
+          : <Mic className={`${isBlindMode ? 'w-20 h-20' : 'w-16 h-16'}`} />
         }
       </button>
     </div>

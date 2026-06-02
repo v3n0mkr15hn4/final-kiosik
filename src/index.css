@@ -74,13 +74,13 @@ body {
 
 /* ── Kiosk-scale typography helpers ───────────────────── */
 @layer utilities {
-  .text-kiosk-sm   { font-size: 18px; line-height: 1.4; }
-  .text-kiosk-base { font-size: 20px; line-height: 1.45; }
-  .text-kiosk-lg   { font-size: 24px; line-height: 1.4; }
-  .text-kiosk-xl   { font-size: 28px; line-height: 1.35; }
-  .text-kiosk-2xl  { font-size: 32px; line-height: 1.3; }
-  .text-kiosk-3xl  { font-size: 40px; line-height: 1.2; }
-  .text-kiosk-4xl  { font-size: 48px; line-height: 1.15; }
+  .text-kiosk-sm   { font-size: 32px; line-height: 1.4; }
+  .text-kiosk-base { font-size: 36px; line-height: 1.45; }
+  .text-kiosk-lg   { font-size: 40px; line-height: 1.4; }
+  .text-kiosk-xl   { font-size: 48px; line-height: 1.35; }
+  .text-kiosk-2xl  { font-size: 72px; line-height: 1.15; }
+  .text-kiosk-3xl  { font-size: 96px; line-height: 1.1; }
+  .text-kiosk-4xl  { font-size: 112px; line-height: 1.05; }
 }
 
 /* ── Kiosk card component ──────────────────────────────── */
@@ -195,7 +195,104 @@ body {
   align-items: center;
   justify-content: space-around;
   padding: 0.5rem 0;
-  height: 64px;
+  height: 140px;
+  min-height: 120px;
+}
+
+/* 2160×3840 portrait kiosk enforcement.
+   These rules scale legacy Tailwind screens inside the VK shell without
+   changing their content or component hierarchy. */
+.kiosk-stage {
+  isolation: isolate;
+}
+
+.vk h1,
+.vk .text-kiosk-2xl,
+.vk .md\:text-kiosk-3xl {
+  font-size: 96px !important;
+  line-height: 1.1 !important;
+}
+
+.vk h2,
+.vk .text-kiosk-xl {
+  font-size: 72px !important;
+  line-height: 1.12 !important;
+}
+
+.vk h3 {
+  font-size: 56px !important;
+  line-height: 1.18 !important;
+}
+
+.vk p,
+.vk label,
+.vk input,
+.vk textarea,
+.vk select,
+.vk option,
+.vk .text-kiosk-base {
+  font-size: 36px !important;
+  line-height: 1.4 !important;
+}
+
+.vk .text-kiosk-lg {
+  font-size: 40px !important;
+}
+
+.vk button,
+.vk a[role="button"],
+.vk [role="button"] {
+  min-width: 160px;
+  min-height: 160px;
+  font-size: 40px;
+}
+
+.vk select {
+  min-height: 120px;
+}
+
+.vk .grid {
+  gap: max(32px, 2rem) !important;
+}
+
+.vk .rounded-kiosk,
+.vk .rounded-kiosk-lg,
+.vk .rounded-xl,
+.vk .rounded-2xl {
+  border-radius: 32px;
+}
+
+.vk .shadow-kiosk,
+.vk .shadow-kiosk-hover {
+  box-shadow: 0 16px 48px rgba(0, 51, 102, 0.16);
+}
+
+.vk .bg-white.rounded-kiosk-lg,
+.vk .kiosk-card {
+  padding: 64px !important;
+}
+
+.vk .tile .nm {
+  font-size: 48px !important;
+}
+
+.vk [role="button"] h3,
+.vk .card h3 {
+  font-size: 48px !important;
+}
+
+.vk .tile .sub {
+  font-size: 36px !important;
+}
+
+.vk .btn,
+.vk .chip {
+  min-height: 120px;
+}
+
+.vk .vk-bottom .btn {
+  min-height: 120px;
+  font-size: 32px;
 }
 
 /* ── Animated state helpers ─────────────────────────────── */

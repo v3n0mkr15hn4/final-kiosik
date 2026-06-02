@@ -5,13 +5,14 @@
 // voiceNavAlwaysOn flag, TTS announcements, language change.
 // ──────────────────────────────────────────────────────────────────
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAccessibility } from '../components/AccessibilityProvider';
 import { ALL_LANGUAGES } from '../utils/languageConfig';
 import { changeLanguageSafe } from '../i18n';
 import { speak } from '../utils/ttsService';
+import { startSTT, stopSTT } from '../ai/voice/speechRecognition';
 import { VK, I, ic, DD } from '../components/kiosk';
 
 const MODE_LIST = [
@@ -86,6 +87,27 @@ export default function ModeSelection() {
     setSelectedMode(id);
     screenReaderAnnounce?.(`Selected ${id} mode`);
   };
+
+  // Voice commands — always active on this page (user may arrive in blind mode)
+  useEffect(() => {
+    const mode = sessionStorage.getItem('userMode') || autoDetected || 'normal';
+    if (mode !== 'blind') return;
+    startSTT({
+      language: i18n.language || 'en',
+      continuous: false,
+      autoRestart: true,
+      onResult: (text) => {
+        const t = text.toLowerCase();
+        if (t.includes('normal') || t.includes('standard')) handleSelect('normal');
+        else if (t.includes('elderly') || t.includes('senior')) handleSelect('elderly');
+        else if (t.includes('blind') || t.includes('voice') || t.includes('visually')) handleSelect('blind');
+        else if (t.includes('confirm') || t.includes('continue') || t.includes('next')) handleConfirmMode();
+      },
+      onInterim: () => {},
+      onError: () => {},
+    });
+    return () => stopSTT();
+  }, [i18n.language, step]);
 
   const handleConfirmMode = () => {
     sessionStorage.setItem('userMode', selectedMode);

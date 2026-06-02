@@ -91,7 +91,7 @@ export async function sarvamTTS(text, languageCode = 'hi-IN', gender = 'female')
       inputs: [text.slice(0, 500)], // Sarvam limit
       target_language_code: languageCode,
       expected_gender: gender,
-      model: 'bulbul:v1',
+      model: 'bulbul:v3',
       enable_preprocessing: true,
     }),
     signal: AbortSignal.timeout(15000),

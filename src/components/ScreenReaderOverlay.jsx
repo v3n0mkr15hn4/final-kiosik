@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { useAccessibility } from './AccessibilityProvider';
+import { speak as ttsSpeak } from '../utils/ttsService';
 
 /**
  * ScreenReaderOverlay
@@ -15,17 +16,8 @@ const ScreenReaderOverlay = () => {
   const speak = useCallback((text) => {
     if (!text || text === lastReadRef.current) return;
     lastReadRef.current = text;
-
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      const lang = localStorage.getItem('i18nextLng') || 'en';
-      const langMap = { en: 'en-IN', hi: 'hi-IN', ta: 'ta-IN' };
-      utterance.lang = langMap[lang] || 'en-IN';
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      window.speechSynthesis.speak(utterance);
-    }
+    const lang = (localStorage.getItem('i18nextLng') || 'en').split('-')[0];
+    ttsSpeak(text, { language: lang }).catch(() => {});
   }, []);
 
   // Read focused element

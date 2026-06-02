@@ -125,6 +125,20 @@ export default function VK({
     navigate('/', { replace: true });
   };
 
+  useEffect(() => {
+    const handleVoiceBack = () => (onBack ? onBack() : navigate(-1));
+    const handleVoiceHelp = () => onHelp?.();
+    const handleVoiceLogout = () => { if (auth?.isAuthenticated) handleLogout(); };
+    window.addEventListener('suvidha:voice-back', handleVoiceBack);
+    window.addEventListener('suvidha:voice-help', handleVoiceHelp);
+    window.addEventListener('suvidha:voice-logout', handleVoiceLogout);
+    return () => {
+      window.removeEventListener('suvidha:voice-back', handleVoiceBack);
+      window.removeEventListener('suvidha:voice-help', handleVoiceHelp);
+      window.removeEventListener('suvidha:voice-logout', handleVoiceLogout);
+    };
+  }, [onBack, onHelp, navigate]);
+
   const showLogout = Boolean(auth?.isAuthenticated);
 
   return (

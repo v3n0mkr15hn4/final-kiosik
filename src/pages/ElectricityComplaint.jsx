@@ -1,6 +1,8 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { startSTT, stopSTT } from '../ai/voice/speechRecognition';
+import { useVoiceFormSubmit } from '../hooks/useVoiceFormSubmit';
 import {
   Zap,
   FileWarning,
@@ -58,7 +60,11 @@ const ElectricityComplaint = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const recognitionRef = useRef(null);
+
+  const STT_LANG_MAP = { en: 'en-IN', hi: 'hi-IN', ta: 'ta-IN', te: 'te-IN', kn: 'kn-IN', ml: 'ml-IN', mr: 'mr-IN', gu: 'gu-IN', bn: 'bn-IN', or: 'or-IN', pa: 'pa-IN', as: 'as-IN' };
+  const sttLangCode = STT_LANG_MAP[(i18n.language || 'en').split('-')[0]] || 'hi-IN';
+
+  useVoiceFormSubmit('electricity_complaint', () => { if (step === 2) handleSubmit(); });
 
   const complaintCategories = [
     {
@@ -291,6 +297,7 @@ const ElectricityComplaint = () => {
                   placeholder={t('form.enterName')}
                   error={errors.name}
                   required
+                  voiceField="name"
                 />
                 <Input
                   label={t('form.mobile')}
@@ -300,6 +307,7 @@ const ElectricityComplaint = () => {
                   placeholder={t('form.enterMobile')}
                   error={errors.mobile}
                   required
+                  voiceField="mobile"
                 />
               </div>
 
@@ -363,6 +371,7 @@ const ElectricityComplaint = () => {
                   options={states.map(s => ({ value: s.id, label: getLocalizedName(s) }))}
                   error={errors.state}
                   required
+                  voiceField="state"
                 />
                 <Select
                   label={t('form.city')}
@@ -373,6 +382,7 @@ const ElectricityComplaint = () => {
                   error={errors.city}
                   required
                   disabled={!formData.state}
+                  voiceField="city"
                 />
                 <Select
                   label={t('form.ward')}
@@ -382,6 +392,7 @@ const ElectricityComplaint = () => {
                   options={availableWards.map(w => ({ value: w.id, label: w.name }))}
                   error={errors.ward}
                   disabled={!formData.city}
+                  voiceField="ward"
                 />
               </div>
 
@@ -400,27 +411,19 @@ const ElectricityComplaint = () => {
                   </label>
                   <button
                     onClick={() => {
-                      if (isRecording) {
-                        if (recognitionRef.current) recognitionRef.current.stop();
-                        setIsRecording(false);
-                        return;
-                      }
-                      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-                      if (!SR) { alert('Voice input not supported. Use Chrome or Edge.'); return; }
-                      const recognition = new SR();
-                      recognitionRef.current = recognition;
-                      const langMap = { en: 'en-IN', hi: 'hi-IN', as: 'as-IN', ta: 'ta-IN', bn: 'bn-IN' };
-                      recognition.lang = langMap[i18n.language] || 'en-IN';
-                      recognition.continuous = true;
-                      recognition.interimResults = false;
-                      recognition.onresult = (event) => {
-                        const transcript = Array.from(event.results).map(r => r[0].transcript).join(' ');
-                        setFormData(prev => ({ ...prev, description: prev.description ? `${prev.description} ${transcript}` : transcript }));
-                      };
-                      recognition.onerror = () => setIsRecording(false);
-                      recognition.onend = () => setIsRecording(false);
-                      recognition.start();
+                      if (isRecording) { stopSTT(); setIsRecording(false); return; }
                       setIsRecording(true);
+                      startSTT({
+                        language: sttLangCode,
+                        continuous: false,
+                        autoRestart: false,
+                        onResult: (text) => {
+                          setFormData(prev => ({ ...prev, description: prev.description ? `${prev.description} ${text}` : text }));
+                          setIsRecording(false);
+                        },
+                        onInterim: () => {},
+                        onError: () => setIsRecording(false),
+                      });
                     }}
                     className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all touch-manipulation ${
                       isRecording
@@ -445,6 +448,7 @@ const ElectricityComplaint = () => {
                   error={errors.description}
                   rows={5}
                   maxLength={1000}
+                  voiceField="description"
                 />
               </div>
 

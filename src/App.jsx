@@ -1,15 +1,19 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { VoiceAssistantProvider } from './ai/provider/VoiceAssistantProvider';
+import { SessionProvider } from './context/SessionContext';
 import AIOverlay from './components/ai/AIOverlay';
-import AccessibilityProvider from './components/AccessibilityProvider';
+import AccessibilityProvider, { useAccessibility } from './components/AccessibilityProvider';
 import VoiceInstructionEngine from './components/VoiceInstructionEngine';
 import EmergencyAlertBanner from './components/EmergencyAlertBanner';
 import EmergencyQuickAccess from './components/EmergencyQuickAccess';
-import AIChatbot from './components/AIChatbot';
+import ScreenReaderOverlay from './components/ScreenReaderOverlay';
+import VoiceNavigation from './components/VoiceNavigation';
 
 // Eagerly loaded pages
 import { Landing, Login, Home, ModeSelection, OfficeLocator } from './pages';
+import LanguageSelection from './pages/LanguageSelection';
+import VoiceModeSelection from './pages/VoiceModeSelection';
 
 // Lazily loaded kiosk pages
 const Electricity       = lazy(() => import('./pages/Electricity'));
@@ -57,21 +61,22 @@ const MunicipalPortalDashboard    = lazy(() => import('./pages/organization/muni
 const TransportPortalDashboard    = lazy(() => import('./pages/organization/transport/TransportPortalDashboard'));
 const RevenuePortalDashboard      = lazy(() => import('./pages/organization/revenue/RevenuePortalDashboard'));
 
-// Pages where AI overlay should NOT appear (admin, auth)
+// Pages where AI overlay should NOT appear (admin, auth, onboarding)
 const AI_EXCLUDED_PATHS = new Set([
   '/', '/login', '/admin-login', '/admin', '/admin/login',
+  '/language-select', '/voice-select',
 ]);
 
 function LoadingScreen() {
   return (
     <div style={{
-      width: '100vw', height: '100vh',
+      width: '100%', height: '100%',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: '#0f172a', color: '#94a3b8', fontSize: 16,
+      background: '#0f172a', color: '#94a3b8', fontSize: 40,
     }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{
-          width: 48, height: 48, border: '3px solid #6366f1',
+          width: 96, height: 96, border: '6px solid #6366f1',
           borderTopColor: 'transparent', borderRadius: '50%',
           animation: 'spin 0.8s linear infinite', margin: '0 auto 12px',
         }} />
@@ -87,40 +92,43 @@ function LoadingScreen() {
  */
 function AIShell({ children }) {
   const { pathname: path } = useLocation();
-  const showAI = !AI_EXCLUDED_PATHS.has(path) && !path.startsWith('/admin') &&
+  const { userMode } = useAccessibility();
+  const isBlind = userMode === 'blind';
+  const showAI = !isBlind && !AI_EXCLUDED_PATHS.has(path) && !path.startsWith('/admin') &&
     !path.startsWith('/super-admin') && !path.startsWith('/security') &&
     !path.startsWith('/kiosk-ops') && !path.startsWith('/org/');
 
   return (
-    <>
-      {/* Original kiosk global systems (restored) */}
+    <div className="kiosk-stage">
       <EmergencyAlertBanner />
       <EmergencyQuickAccess />
       <VoiceInstructionEngine />
-      <AIChatbot />
+      <ScreenReaderOverlay />
+      <VoiceNavigation />
 
-      {/* Existing kiosk app */}
       {children}
 
-      {/* AI assistant layer (additive only) */}
       {showAI && <AIOverlay />}
-    </>
+    </div>
   );
 }
 
 export default function App() {
   return (
     <BrowserRouter>
+      <SessionProvider>
       <AccessibilityProvider>
         <VoiceAssistantProvider>
           <AIShell>
             <Suspense fallback={<LoadingScreen />}>
               <Routes>
               {/* Public / kiosk entry */}
-              <Route path="/"               element={<Landing />} />
-              <Route path="/login"          element={<Login />} />
-              <Route path="/mode-select"    element={<ModeSelection />} />
-              <Route path="/home"           element={<Home />} />
+              <Route path="/"                 element={<Landing />} />
+              <Route path="/login"            element={<Login />} />
+              <Route path="/language-select"  element={<LanguageSelection />} />
+              <Route path="/voice-select"     element={<VoiceModeSelection />} />
+              <Route path="/mode-select"      element={<ModeSelection />} />
+              <Route path="/home"             element={<Home />} />
 
               {/* Office Locator */}
               <Route path="/office-locator" element={<OfficeLocator />} />
@@ -181,6 +189,7 @@ export default function App() {
           </AIShell>
         </VoiceAssistantProvider>
       </AccessibilityProvider>
+      </SessionProvider>
     </BrowserRouter>
   );
 }

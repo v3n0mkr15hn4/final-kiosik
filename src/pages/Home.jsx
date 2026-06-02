@@ -4,11 +4,14 @@
 // Keeps existing routing to dept menus + auth/access guards.
 // ──────────────────────────────────────────────────────────────────
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { useAccessibility } from '../components/AccessibilityProvider';
+import { useSession } from '../context/SessionContext';
+import { speak } from '../utils/ttsService';
+import { startSTT, stopSTT } from '../ai/voice/speechRecognition';
 import { VK, I, ic, DD } from '../components/kiosk';
 
 export default function Home() {
@@ -16,6 +19,8 @@ export default function Home() {
   const navigate = useNavigate();
   const { userMode } = useAccessibility();
   const { isAuthenticated, isAdminSession } = useAuth();
+  const { voiceEnabled } = useSession();
+  const hasSpokenRef = useRef(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -23,10 +28,50 @@ export default function Home() {
     } else if (isAdminSession) {
       const dashboardPath = sessionStorage.getItem('adminDashboardPath') || '/admin/super';
       navigate(dashboardPath, { replace: true });
-    } else if (!sessionStorage.getItem('userMode')) {
-      navigate('/mode-select', { replace: true });
     }
   }, [isAdminSession, isAuthenticated, navigate]);
+
+  // Dashboard voice: speak ONE welcome prompt (guarded against StrictMode
+  // double-invoke), then start the STT command loop. Only when voice is enabled.
+  useEffect(() => {
+    if (!voiceEnabled || hasSpokenRef.current) return;
+    if (!isAuthenticated || isAdminSession) return;
+    hasSpokenRef.current = true;
+
+    speak(t('home.voiceWelcome',
+      'Welcome. You can select a service, or say help. Available services: electricity, gas, water, municipal, healthcare, transport.'),
+    ).catch(() => {});
+
+    const NAV_COMMANDS = {
+      electricity: '/electricity-menu', power: '/electricity-menu',
+      gas: '/gas-menu', cylinder: '/gas-menu',
+      municipal: '/municipal-menu', water: '/municipal-menu',
+      health: '/healthcare', healthcare: '/healthcare',
+      transport: '/transport', bus: '/transport',
+      sanitation: '/sanitation', scheme: '/schemes',
+      track: '/track-status', status: '/track-status',
+      family: '/family-profile',
+    };
+
+    startSTT({
+      continuous: true,
+      autoRestart: true,
+      onResult: (text) => {
+        const said = (text || '').toLowerCase();
+        if (said.includes('help')) {
+          speak(t('home.voiceHelp',
+            'Say a service name like electricity, gas, water, healthcare, transport, or track status.')).catch(() => {});
+          return;
+        }
+        const hit = Object.keys(NAV_COMMANDS).find((k) => said.includes(k));
+        if (hit) navigate(NAV_COMMANDS[hit]);
+      },
+      onInterim: () => {},
+      onError: () => {},
+    });
+
+    return () => stopSTT();
+  }, [voiceEnabled, isAuthenticated, isAdminSession, navigate, t]);
 
   const orgs = [
     {

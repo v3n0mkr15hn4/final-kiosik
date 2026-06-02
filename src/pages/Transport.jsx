@@ -1,35 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Bus, ArrowRight, Train, CreditCard, Ticket, MapPin, Clock, Users, Calendar, UserCog, Search, FileText, ArrowLeft } from 'lucide-react';
 import {
-  Header,
-  Button,
-  Input,
-  Select,
-  TextArea,
-  Modal,
-  LoadingSpinner,
-  PageContainer,
-  DepartmentHeader,
-  SectionTitle,
-  ServiceCard,
-  UtilityCard,
-  ResponsiveGrid,
-  ActionButton
-} from '../components';
-import { VK } from '../components/kiosk';
+  Train, Bus, CreditCard, Ticket, MapPin, MessageSquare,
+  Search, FileText, UserCog, ArrowLeft,
+} from 'lucide-react';
+import { Button, Input, Select, TextArea, Modal, LoadingSpinner } from '../components';
+import { VK, I, ic } from '../components/kiosk';
 import { TransportIcon } from '../assets/icons';
 import QRUpload from '../components/QRUpload';
-import { states, cities, wards, serviceCategories } from '../utils/constants';
+import { states, cities, wards } from '../utils/constants';
 import { generateRequestId, getCurrentTimestamp } from '../utils/helpers';
 import { serviceAPI, transportAPI } from '../utils/apiService';
 import { addReceipt } from '../utils/receipts';
-
-/**
- * Transport Services page
- * Includes ticket booking (Metro, Bus, Train) + complaint/request forms
- */
 
 // Mock station/route data
 const metroStations = [
@@ -63,12 +46,10 @@ const Transport = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
 
-  // Main view state
   const [view, setView] = useState('categories'); // 'categories' | 'booking' | 'complaint'
   const [step, setStep] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState('');
 
-  // Booking state
   const [bookingData, setBookingData] = useState({
     fromStation: '',
     toStation: '',
@@ -82,7 +63,6 @@ const Transport = () => {
     passengerMobile: sessionStorage.getItem('userMobile') || '',
   });
 
-  // Complaint form state
   const [formData, setFormData] = useState({
     name: sessionStorage.getItem('userName') || '',
     mobile: sessionStorage.getItem('userMobile') || '',
@@ -101,35 +81,60 @@ const Transport = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [bookingResult, setBookingResult] = useState(null);
 
-  const categories = serviceCategories.transport;
-
-  const theme = {
-    gradient: 'from-cyan-500 via-teal-500 to-blue-500',
-    softGradient: 'from-cyan-50 via-cyan-100 to-teal-100',
-    accentClass: 'text-cyan-600',
-  };
-
-  const utilityServices = [
+  const mainServices = [
     {
-      id: 'profile',
-      title: 'Edit Credentials / Profile',
-      description: 'Update your transport profile and details',
-      path: '/consumer-profile?org=transport',
-      Icon: UserCog,
+      id: 'metroTicket',
+      LucideIcon: Train,
+      title: t('transport.metroTicket', 'Metro Ticket'),
+      description: t('home.transportMetroDesc', 'Book metro rail tickets instantly'),
+      color: '#0e7490',
+      bg: 'color-mix(in oklab, #0e7490 12%, white)',
+      booking: true,
     },
     {
-      id: 'track',
-      title: 'Track Request / Complaint',
-      description: 'Check real-time status of your requests',
+      id: 'busTicket',
+      LucideIcon: Bus,
+      title: t('transport.busTicket', 'Bus Ticket'),
+      description: t('home.transportBusDesc', 'Reserve city bus tickets for your route'),
+      color: '#0891b2',
+      bg: 'color-mix(in oklab, #0891b2 12%, white)',
+      booking: true,
+    },
+    {
+      id: 'busPass',
+      LucideIcon: CreditCard,
+      title: t('transport.busPass', 'Bus Pass'),
+      description: t('home.transportPassDesc', 'Purchase monthly or quarterly bus passes'),
+      color: '#1d4ed8',
+      bg: 'color-mix(in oklab, #1d4ed8 12%, white)',
+      booking: true,
+    },
+    {
+      id: 'vehicleComplaint',
+      LucideIcon: MessageSquare,
+      title: t('home.transportComplaint', 'Report an Issue'),
+      description: t('home.transportComplaintDesc', 'Report road, vehicle or transport complaints'),
+      color: '#ea580c',
+      bg: 'color-mix(in oklab, #ea580c 12%, white)',
+      booking: false,
+    },
+    {
+      id: '_track',
+      LucideIcon: Search,
+      title: t('home.transportTrack', 'Track Request'),
+      description: t('home.transportTrackDesc', 'Check real-time status of your requests'),
       path: '/track-status',
-      Icon: Search,
+      color: '#475569',
+      bg: 'color-mix(in oklab, #475569 12%, white)',
     },
     {
-      id: 'receipt',
-      title: 'View Receipts',
-      description: 'View and print transaction receipts',
+      id: '_receipt',
+      LucideIcon: FileText,
+      title: t('home.transportReceipt', 'View Receipts'),
+      description: t('home.transportReceiptDesc', 'View and print transaction receipts'),
       path: '/receipt?org=transport',
-      Icon: FileText,
+      color: '#059669',
+      bg: 'color-mix(in oklab, #059669 12%, white)',
     },
   ];
 
@@ -141,25 +146,6 @@ const Transport = () => {
 
   const availableCities = formData.state ? cities[formData.state] || [] : [];
   const availableWards = formData.city ? wards[formData.city] || wards.default : [];
-
-  const isBookingCategory = (catId) => {
-    const cat = categories.find(c => c.id === catId);
-    return cat?.booking === true;
-  };
-
-  const handleCategorySelect = (catId) => {
-    setSelectedCategory(catId);
-  };
-
-  const handleCategoryNext = () => {
-    if (isBookingCategory(selectedCategory)) {
-      setView('booking');
-      setStep(1);
-    } else {
-      setView('complaint');
-      setStep(2);
-    }
-  };
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -173,13 +159,9 @@ const Transport = () => {
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
   };
 
-  // Calculate fare
   const calculateFare = () => {
     const passengers = parseInt(bookingData.passengers) || 1;
-    if (selectedCategory === 'metroTicket') {
-      const basePrice = 30;
-      return basePrice * passengers;
-    }
+    if (selectedCategory === 'metroTicket') return 30 * passengers;
     if (selectedCategory === 'busTicket') {
       const route = busRoutes.find(r => r.id === bookingData.busRoute);
       return (route?.fare || 30) * passengers;
@@ -199,7 +181,6 @@ const Transport = () => {
     const newErrors = {};
     if (!bookingData.passengerName.trim()) newErrors.passengerName = 'Required';
     if (!bookingData.passengerMobile.trim()) newErrors.passengerMobile = 'Required';
-
     if (selectedCategory === 'metroTicket' || selectedCategory === 'suburbanTrain') {
       if (!bookingData.fromStation) newErrors.fromStation = 'Select station';
       if (!bookingData.toStation) newErrors.toStation = 'Select station';
@@ -214,7 +195,6 @@ const Transport = () => {
       if (!bookingData.passType) newErrors.passType = 'Select pass type';
     }
     if (!bookingData.travelDate) newErrors.travelDate = 'Select date';
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -265,15 +245,13 @@ const Transport = () => {
         passType: bookingData.passType ? busPassTypes.find(p => p.id === bookingData.passType)?.name : '-',
         passengers: bookingData.passengers,
         date: bookingData.travelDate,
-        fare: fare,
+        fare,
         passengerName: bookingData.passengerName,
         status: 'confirmed',
         timestamp: getCurrentTimestamp(),
       };
       setBookingResult(result);
-
-      // Also save to receipt
-      const receiptData = {
+      addReceipt({
         requestId: ticketId,
         citizenName: bookingData.passengerName,
         mobile: bookingData.passengerMobile,
@@ -282,8 +260,7 @@ const Transport = () => {
         timestamp: getCurrentTimestamp(),
         status: 'confirmed',
         fare: `₹${fare}`,
-      };
-      addReceipt(receiptData);
+      });
     } catch (error) {
       console.error('Booking error:', error);
     } finally {
@@ -340,29 +317,32 @@ const Transport = () => {
 
   if (loading) {
     return (
-      <PageContainer tone="transport">
-        
+      <VK bg="color-mix(in oklab, #0891b2 4%, white)">
         <div className="flex items-center justify-center min-h-[60vh]">
-          <LoadingSpinner size="large" message={selectedCategory && isBookingCategory(selectedCategory) ? 'Booking your ticket...' : t('app.loading')} />
+          <LoadingSpinner size="large" message={selectedCategory && mainServices.find(s => s.id === selectedCategory)?.booking ? 'Booking your ticket...' : t('app.loading')} />
         </div>
-      </PageContainer>
+      </VK>
     );
   }
 
-  // Booking confirmation result
   if (bookingResult) {
     return (
-      <PageContainer tone="transport">
-        
+      <VK bg="color-mix(in oklab, #0891b2 4%, white)">
         <div>
-          <DepartmentHeader
-            title={t('transport.title')}
-            subtitle={t('transport.subtitle')}
-            icon={TransportIcon}
-            iconProps={{ size: 40, color: '#ffffff' }}
-            gradient="from-cyan-500 to-blue-600"
-            className="mb-6"
-          />
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <div style={{
+              width: 80, height: 80, borderRadius: '50%',
+              background: 'linear-gradient(135deg, #0891b2, #1d4ed8)',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              marginBottom: 12, boxShadow: '0 4px 16px rgba(8,145,178,0.25)',
+            }}>
+              <TransportIcon size={40} color="#fff" />
+            </div>
+            <h1 className="h2" style={{ marginBottom: 6 }}>
+              {t('transport.title', 'Transport Department')}
+            </h1>
+          </div>
+
           <div className="bg-white rounded-kiosk-lg shadow-kiosk p-8 text-center">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Ticket className="w-10 h-10 text-green-600" />
@@ -409,139 +389,117 @@ const Transport = () => {
                 <span className="font-bold text-gray-800 text-kiosk-lg">Total Fare:</span>
                 <span className="font-bold text-green-700 text-kiosk-lg">₹{bookingResult.fare}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="font-semibold text-gray-600">Status:</span>
-                <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full font-bold text-sm uppercase">{bookingResult.status}</span>
-              </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                onClick={() => navigate(`/receipt?org=transport&id=${encodeURIComponent(bookingResult.ticketId)}`)}
-                size="large"
-              >
+              <Button onClick={() => navigate(`/receipt?org=transport&id=${encodeURIComponent(bookingResult.ticketId)}`)} size="large">
                 View Receipt
               </Button>
               <Button variant="secondary" onClick={() => navigate('/home')} size="large">Go Home</Button>
             </div>
           </div>
         </div>
-      </PageContainer>
+      </VK>
     );
   }
 
   return (
-    <PageContainer tone="transport">
-      
+    <VK bg="color-mix(in oklab, #0891b2 4%, white)">
+      {/* CATEGORY SELECTION */}
+      {view === 'categories' && (
+        <>
+          {/* Dept header */}
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <div style={{
+              width: 120, height: 120, borderRadius: '50%',
+              background: 'linear-gradient(135deg, #0891b2, #1d4ed8)',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              marginBottom: 20, boxShadow: '0 8px 32px rgba(8,145,178,0.3)',
+            }}>
+              <TransportIcon size={60} color="#fff" />
+            </div>
+            <h1 className="h2" style={{ marginBottom: 10 }}>
+              {t('transport.title', 'Transport Department')}
+            </h1>
+            <p className="body-l" style={{ color: 'var(--ink-500)' }}>
+              {t('transport.subtitle', 'Metro · Bus · Passes · Complaints · Tracking')}
+            </p>
+          </div>
 
-      <div>
-        <DepartmentHeader
-          title={t('transport.title')}
-          subtitle={t('transport.subtitle')}
-          icon={TransportIcon}
-          iconProps={{ size: 40, color: '#ffffff' }}
-          gradient="from-cyan-500 to-blue-600"
-        />
-
-        {/* CATEGORY SELECTION */}
-        {view === 'categories' && (
-          <>
-            {/* Booking Section */}
-            <div className="mb-8">
-              <SectionTitle
-                title="Book Tickets & Passes"
-                icon={Ticket}
-                accentClass={theme.accentClass}
-                className="mb-4"
-              />
-              <ResponsiveGrid variant="services">
-                {categories.filter(c => c.booking).map((category) => (
-                  <ServiceCard
-                    key={category.id}
-                    title={t(category.key)}
-                    icon={TransportIcon}
-                    iconProps={{ size: 28, color: '#ffffff' }}
-                    gradient={theme.gradient}
-                    onClick={() => {
-                      setSelectedCategory(category.id);
+          {/* Service grid — 3 cols for kiosk */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, marginBottom: 32 }}>
+            {mainServices.map((s) => {
+              const Icon = s.LucideIcon;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => {
+                    if (s.path) {
+                      navigate(s.path);
+                    } else if (s.booking) {
+                      setSelectedCategory(s.id);
                       setView('booking');
                       setStep(1);
-                    }}
-                    accessibilityLabel={t(category.key)}
-                  />
-                ))}
-              </ResponsiveGrid>
-            </div>
-
-            {/* Complaints/Requests Section */}
-            <div className="mb-8">
-              <SectionTitle
-                title="Report Issues & Requests"
-                icon={MapPin}
-                accentClass="text-orange-600"
-                className="mb-4"
-              />
-              <ResponsiveGrid variant="services">
-                {categories.filter(c => !c.booking).map((category) => (
-                  <ServiceCard
-                    key={category.id}
-                    title={t(category.key)}
-                    icon={TransportIcon}
-                    iconProps={{ size: 28, color: '#ffffff' }}
-                    gradient={theme.gradient}
-                    onClick={() => {
-                      setSelectedCategory(category.id);
+                    } else {
+                      setSelectedCategory(s.id);
                       setView('complaint');
                       setStep(2);
-                    }}
-                    accessibilityLabel={t(category.key)}
-                  />
-                ))}
-              </ResponsiveGrid>
-            </div>
-
-            {/* Profile & History */}
-            <div className="mb-8">
-              <SectionTitle
-                title={t('home.utilitiesHistory', 'Utilities & History')}
-                icon={UserCog}
-                accentClass={theme.accentClass}
-                className="mb-4"
-              />
-              <ResponsiveGrid variant="utilities">
-                {utilityServices.map((service) => (
-                  <UtilityCard
-                    key={service.id}
-                    title={service.title}
-                    description={service.description}
-                    icon={service.Icon}
-                    iconProps={{ className: 'w-6 h-6 text-cyan-700' }}
-                    gradient={theme.softGradient}
-                    onClick={() => navigate(service.path)}
-                    accessibilityLabel={service.title}
-                  />
-                ))}
-              </ResponsiveGrid>
-            </div>
-          </>
-        )}
-
-        {/* Back to Home Button (Only in Categories View) */}
-        {view === 'categories' && (
-          <div className="flex justify-center py-6">
-            <ActionButton
-              variant="outline"
-              size="large"
-              icon={ArrowLeft}
-              onClick={() => navigate('/home')}
-            >
-              {t('home.backToOrgs', 'Back to Home')}
-            </ActionButton>
+                    }
+                  }}
+                  className="tile"
+                  style={{
+                    minHeight: 260,
+                    padding: 32,
+                    alignItems: 'flex-start',
+                    textAlign: 'left',
+                    gap: 20,
+                    borderTop: `6px solid ${s.color}`,
+                    touchAction: 'manipulation',
+                  }}
+                  aria-label={s.title}
+                >
+                  <div style={{
+                    width: 72, height: 72, borderRadius: 20,
+                    background: s.bg, display: 'grid', placeItems: 'center', flexShrink: 0,
+                  }}>
+                    <Icon size={36} style={{ color: s.color }} strokeWidth={2} />
+                  </div>
+                  <div className="nm" style={{ fontSize: 26, lineHeight: 1.3 }}>{s.title}</div>
+                  <div className="sub" style={{ fontSize: 20, marginTop: 'auto' }}>{s.description}</div>
+                </button>
+              );
+            })}
           </div>
-        )}
 
-        {/* BOOKING FORM */}
-        {view === 'booking' && (
+          <button
+            type="button"
+            className="btn btn-quiet"
+            style={{ alignSelf: 'center', fontSize: 22, padding: '18px 48px' }}
+            onClick={() => navigate('/home')}
+          >
+            <I d={ic.back} size={24} /> {t('home.backToOrgs', 'Back to Organizations')}
+          </button>
+        </>
+      )}
+
+      {/* BOOKING FORM */}
+      {view === 'booking' && (
+        <div>
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <div style={{
+              width: 80, height: 80, borderRadius: '50%',
+              background: 'linear-gradient(135deg, #0891b2, #1d4ed8)',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              marginBottom: 12, boxShadow: '0 4px 16px rgba(8,145,178,0.25)',
+            }}>
+              <TransportIcon size={40} color="#fff" />
+            </div>
+            <h1 className="h2" style={{ marginBottom: 6 }}>
+              {t('transport.title', 'Transport Department')}
+            </h1>
+          </div>
+
           <div className="bg-white rounded-kiosk-lg shadow-kiosk p-6 md:p-8">
             <div className="mb-6 p-4 bg-teal-50 rounded-kiosk border border-teal-200 flex items-center gap-3">
               <Ticket className="w-6 h-6 text-teal-700" />
@@ -551,63 +509,26 @@ const Transport = () => {
             </div>
 
             <div className="space-y-6">
-              {/* Common fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                  label="Passenger Name"
-                  value={bookingData.passengerName}
-                  onChange={(e) => handleBookingChange('passengerName', e.target.value)}
-                  error={errors.passengerName}
-                  required
-                />
-                <Input
-                  label="Mobile Number"
-                  value={bookingData.passengerMobile}
-                  onChange={(e) => handleBookingChange('passengerMobile', e.target.value)}
-                  error={errors.passengerMobile}
-                  required
-                />
+                <Input label="Passenger Name" value={bookingData.passengerName} onChange={(e) => handleBookingChange('passengerName', e.target.value)} error={errors.passengerName} required />
+                <Input label="Mobile Number" value={bookingData.passengerMobile} onChange={(e) => handleBookingChange('passengerMobile', e.target.value)} error={errors.passengerMobile} required />
               </div>
 
-              {/* Metro Ticket Fields */}
               {selectedCategory === 'metroTicket' && (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Select
-                      label="From Station"
-                      value={bookingData.fromStation}
-                      onChange={(e) => handleBookingChange('fromStation', e.target.value)}
-                      error={errors.fromStation}
-                      required
-                    >
+                    <Select label="From Station" value={bookingData.fromStation} onChange={(e) => handleBookingChange('fromStation', e.target.value)} error={errors.fromStation} required>
                       <option value="">Select departure station</option>
                       {metroStations.map(s => <option key={s} value={s}>{s}</option>)}
                     </Select>
-                    <Select
-                      label="To Station"
-                      value={bookingData.toStation}
-                      onChange={(e) => handleBookingChange('toStation', e.target.value)}
-                      error={errors.toStation}
-                      required
-                    >
+                    <Select label="To Station" value={bookingData.toStation} onChange={(e) => handleBookingChange('toStation', e.target.value)} error={errors.toStation} required>
                       <option value="">Select arrival station</option>
                       {metroStations.filter(s => s !== bookingData.fromStation).map(s => <option key={s} value={s}>{s}</option>)}
                     </Select>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Input
-                      label="Travel Date"
-                      type="date"
-                      value={bookingData.travelDate}
-                      onChange={(e) => handleBookingChange('travelDate', e.target.value)}
-                      error={errors.travelDate}
-                      required
-                    />
-                    <Select
-                      label="Number of Passengers"
-                      value={bookingData.passengers}
-                      onChange={(e) => handleBookingChange('passengers', e.target.value)}
-                    >
+                    <Input label="Travel Date" type="date" value={bookingData.travelDate} onChange={(e) => handleBookingChange('travelDate', e.target.value)} error={errors.travelDate} required />
+                    <Select label="Number of Passengers" value={bookingData.passengers} onChange={(e) => handleBookingChange('passengers', e.target.value)}>
                       {[1, 2, 3, 4, 5, 6].map(n => <option key={n} value={n}>{n} Passenger{n > 1 ? 's' : ''}</option>)}
                     </Select>
                     <div className="flex items-end">
@@ -620,33 +541,15 @@ const Transport = () => {
                 </>
               )}
 
-              {/* Bus Ticket Fields */}
               {selectedCategory === 'busTicket' && (
                 <>
-                  <Select
-                    label="Select Bus Route"
-                    value={bookingData.busRoute}
-                    onChange={(e) => handleBookingChange('busRoute', e.target.value)}
-                    error={errors.busRoute}
-                    required
-                  >
+                  <Select label="Select Bus Route" value={bookingData.busRoute} onChange={(e) => handleBookingChange('busRoute', e.target.value)} error={errors.busRoute} required>
                     <option value="">Choose a route</option>
                     {busRoutes.map(r => <option key={r.id} value={r.id}>{r.name} — ₹{r.fare}</option>)}
                   </Select>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Input
-                      label="Travel Date"
-                      type="date"
-                      value={bookingData.travelDate}
-                      onChange={(e) => handleBookingChange('travelDate', e.target.value)}
-                      error={errors.travelDate}
-                      required
-                    />
-                    <Select
-                      label="Passengers"
-                      value={bookingData.passengers}
-                      onChange={(e) => handleBookingChange('passengers', e.target.value)}
-                    >
+                    <Input label="Travel Date" type="date" value={bookingData.travelDate} onChange={(e) => handleBookingChange('travelDate', e.target.value)} error={errors.travelDate} required />
+                    <Select label="Passengers" value={bookingData.passengers} onChange={(e) => handleBookingChange('passengers', e.target.value)}>
                       {[1, 2, 3, 4, 5, 6].map(n => <option key={n} value={n}>{n} Passenger{n > 1 ? 's' : ''}</option>)}
                     </Select>
                     <div className="flex items-end">
@@ -659,7 +562,6 @@ const Transport = () => {
                 </>
               )}
 
-              {/* Bus Pass Fields */}
               {selectedCategory === 'busPass' && (
                 <>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -667,10 +569,7 @@ const Transport = () => {
                       <div
                         key={pass.id}
                         onClick={() => handleBookingChange('passType', pass.id)}
-                        className={`cursor-pointer rounded-kiosk p-4 border-2 text-center transition-all ${bookingData.passType === pass.id
-                            ? 'border-teal-600 bg-teal-50'
-                            : 'border-gray-200 bg-white hover:border-teal-300'
-                          }`}
+                        className={`cursor-pointer rounded-kiosk p-4 border-2 text-center transition-all ${bookingData.passType === pass.id ? 'border-teal-600 bg-teal-50' : 'border-gray-200 bg-white hover:border-teal-300'}`}
                       >
                         <CreditCard className={`w-8 h-8 mx-auto mb-2 ${bookingData.passType === pass.id ? 'text-teal-600' : 'text-gray-400'}`} />
                         <p className="font-semibold text-sm">{pass.name}</p>
@@ -679,14 +578,7 @@ const Transport = () => {
                     ))}
                   </div>
                   {errors.passType && <p className="text-red-500 text-sm">{errors.passType}</p>}
-                  <Input
-                    label="Start Date"
-                    type="date"
-                    value={bookingData.travelDate}
-                    onChange={(e) => handleBookingChange('travelDate', e.target.value)}
-                    error={errors.travelDate}
-                    required
-                  />
+                  <Input label="Start Date" type="date" value={bookingData.travelDate} onChange={(e) => handleBookingChange('travelDate', e.target.value)} error={errors.travelDate} required />
                   {bookingData.passType && (
                     <div className="p-4 bg-green-50 rounded-kiosk border border-green-200 text-center">
                       <p className="text-sm text-green-600 font-semibold">Pass Cost</p>
@@ -696,80 +588,34 @@ const Transport = () => {
                 </>
               )}
 
-              {/* Suburban Train Fields */}
-              {selectedCategory === 'suburbanTrain' && (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Select
-                      label="From Station"
-                      value={bookingData.fromStation}
-                      onChange={(e) => handleBookingChange('fromStation', e.target.value)}
-                      error={errors.fromStation}
-                      required
-                    >
-                      <option value="">Select departure station</option>
-                      {trainStations.map(s => <option key={s} value={s}>{s}</option>)}
-                    </Select>
-                    <Select
-                      label="To Station"
-                      value={bookingData.toStation}
-                      onChange={(e) => handleBookingChange('toStation', e.target.value)}
-                      error={errors.toStation}
-                      required
-                    >
-                      <option value="">Select arrival station</option>
-                      {trainStations.filter(s => s !== bookingData.fromStation).map(s => <option key={s} value={s}>{s}</option>)}
-                    </Select>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <Input
-                      label="Travel Date"
-                      type="date"
-                      value={bookingData.travelDate}
-                      onChange={(e) => handleBookingChange('travelDate', e.target.value)}
-                      error={errors.travelDate}
-                      required
-                    />
-                    <Select
-                      label="Class"
-                      value={bookingData.trainClass}
-                      onChange={(e) => handleBookingChange('trainClass', e.target.value)}
-                    >
-                      <option value="second">Second Class — ₹25</option>
-                      <option value="first">First Class — ₹80</option>
-                    </Select>
-                    <Select
-                      label="Passengers"
-                      value={bookingData.passengers}
-                      onChange={(e) => handleBookingChange('passengers', e.target.value)}
-                    >
-                      {[1, 2, 3, 4, 5, 6].map(n => <option key={n} value={n}>{n}</option>)}
-                    </Select>
-                    <div className="flex items-end">
-                      <div className="w-full p-4 bg-green-50 rounded-kiosk border border-green-200 text-center">
-                        <p className="text-sm text-green-600 font-semibold">Fare</p>
-                        <p className="text-kiosk-xl font-bold text-green-700">₹{calculateFare()}</p>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Booking Actions */}
               <div className="flex flex-col sm:flex-row gap-4 justify-between pt-6 border-t">
-                <Button variant="secondary" onClick={() => { setView('categories'); setErrors({}); }} size="large">
-                  {t('app.back')}
-                </Button>
+                <Button variant="secondary" onClick={() => { setView('categories'); setErrors({}); }} size="large">{t('app.back')}</Button>
                 <Button onClick={handleBookTicket} size="xlarge">
                   {selectedCategory === 'busPass' ? 'Purchase Pass' : 'Book Ticket'} — ₹{calculateFare()}
                 </Button>
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* COMPLAINT / REQUEST FORM */}
-        {view === 'complaint' && (
+      {/* COMPLAINT / REQUEST FORM */}
+      {view === 'complaint' && (
+        <div>
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <div style={{
+              width: 80, height: 80, borderRadius: '50%',
+              background: 'linear-gradient(135deg, #0891b2, #1d4ed8)',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              marginBottom: 12, boxShadow: '0 4px 16px rgba(8,145,178,0.25)',
+            }}>
+              <TransportIcon size={40} color="#fff" />
+            </div>
+            <h1 className="h2" style={{ marginBottom: 6 }}>
+              {t('transport.title', 'Transport Department')}
+            </h1>
+          </div>
+
           <div className="bg-white rounded-kiosk-lg shadow-kiosk p-6 md:p-8">
             <div className="mb-6 p-4 bg-orange-50 rounded-kiosk border border-orange-200">
               <p className="text-kiosk-base font-semibold text-orange-800">
@@ -791,52 +637,50 @@ const Transport = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Select label={t('form.state')} value={formData.state} onChange={(e) => handleInputChange('state', e.target.value)} error={errors.state} required>
                   <option value="">{t('form.selectState')}</option>
-                  {states.map(s => <option key={s.code} value={s.code}>{getLocalizedName(s)}</option>)}
+                  {states.map(s => <option key={s.id} value={s.id}>{getLocalizedName(s)}</option>)}
                 </Select>
                 <Select label={t('form.city')} value={formData.city} onChange={(e) => handleInputChange('city', e.target.value)} error={errors.city} required disabled={!formData.state}>
                   <option value="">{t('form.selectCity')}</option>
-                  {availableCities.map(c => <option key={c.code} value={c.code}>{getLocalizedName(c)}</option>)}
+                  {availableCities.map(c => <option key={c.id} value={c.id}>{getLocalizedName(c)}</option>)}
                 </Select>
                 <Select label={t('form.ward')} value={formData.ward} onChange={(e) => handleInputChange('ward', e.target.value)} error={errors.ward} required disabled={!formData.city}>
                   <option value="">{t('form.selectWard')}</option>
-                  {availableWards.map(w => <option key={w.code} value={w.code}>{getLocalizedName(w)}</option>)}
+                  {availableWards.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                 </Select>
               </div>
 
               <Input label={t('form.address')} value={formData.address} onChange={(e) => handleInputChange('address', e.target.value)} placeholder={t('form.enterAddress')} error={errors.address} required />
               <TextArea label={t('form.description')} value={formData.description} onChange={(e) => handleInputChange('description', e.target.value)} placeholder={t('form.enterDescription')} error={errors.description} required rows={4} maxLength={500} />
-
               <QRUpload label={t('form.uploadDocuments')} onUploadComplete={(uploadedFiles) => setFiles(uploadedFiles)} maxFiles={5} />
 
               <div className="flex flex-col sm:flex-row gap-4 justify-between pt-6 border-t">
-                <Button variant="secondary" onClick={() => { setView('categories'); setErrors({}); }} size="large">
-                  {t('app.back')}
-                </Button>
-                <Button onClick={handleComplaintSubmit} size="xlarge">
-                  {t('app.submit')}
-                </Button>
+                <Button variant="secondary" onClick={() => { setView('categories'); setErrors({}); }} size="large">{t('app.back')}</Button>
+                <Button onClick={handleComplaintSubmit} size="xlarge">{t('app.submit')}</Button>
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Confirmation Modal */}
-        <Modal isOpen={showConfirmModal} onClose={() => setShowConfirmModal(false)} title={t('form.confirmSubmission')}>
-          <div className="space-y-4">
-            <p className="text-kiosk-base text-gray-600">{t('form.confirmMessage')}</p>
-            <div className="bg-gray-50 rounded-kiosk p-4 space-y-2">
-              <p><strong>{t('form.name')}:</strong> {formData.name}</p>
-              <p><strong>{t('form.mobile')}:</strong> {formData.mobile}</p>
-              <p><strong>Category:</strong> {t(`transport.${selectedCategory}`)}</p>
-            </div>
-            <div className="flex gap-4 justify-end pt-4">
-              <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>{t('app.cancel')}</Button>
-              <Button onClick={handleConfirmSubmit}>{t('app.confirm')}</Button>
-            </div>
+      <Modal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        title={t('form.confirmSubmission')}
+      >
+        <div className="space-y-4">
+          <p className="text-kiosk-base text-gray-600">{t('form.confirmMessage')}</p>
+          <div className="bg-gray-50 rounded-kiosk p-4 space-y-2">
+            <p><strong>{t('form.name')}:</strong> {formData.name}</p>
+            <p><strong>{t('form.mobile')}:</strong> {formData.mobile}</p>
+            <p><strong>Category:</strong> {t(`transport.${selectedCategory}`)}</p>
           </div>
-        </Modal>
-      </div>
-    </PageContainer>
+          <div className="flex gap-4 justify-end pt-4">
+            <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>{t('app.cancel')}</Button>
+            <Button onClick={handleConfirmSubmit}>{t('app.confirm')}</Button>
+          </div>
+        </div>
+      </Modal>
+    </VK>
   );
 };
 

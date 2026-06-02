@@ -1,6 +1,8 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { startSTT, stopSTT } from '../ai/voice/speechRecognition';
+import { useVoiceFormSubmit } from '../hooks/useVoiceFormSubmit';
 import {
   Building2,
   Droplets,
@@ -55,34 +57,27 @@ const MunicipalGrievance = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const recognitionRef = useRef(null);
+
+  const STT_LANG_MAP = { en: 'en-IN', hi: 'hi-IN', ta: 'ta-IN', te: 'te-IN', kn: 'kn-IN', ml: 'ml-IN', mr: 'mr-IN', gu: 'gu-IN', bn: 'bn-IN', or: 'or-IN', pa: 'pa-IN', as: 'as-IN' };
+  const sttLangCode = STT_LANG_MAP[(i18n.language || 'en').split('-')[0]] || 'hi-IN';
+
+  useVoiceFormSubmit('municipal_grievance', () => { if (step === 2) handleSubmit(); });
 
   const toggleVoiceInput = useCallback(() => {
-    if (isRecording) {
-      if (recognitionRef.current) recognitionRef.current.stop();
-      setIsRecording(false);
-      return;
-    }
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert('Voice input not supported. Use Chrome or Edge.');
-      return;
-    }
-    const recognition = new SpeechRecognition();
-    recognitionRef.current = recognition;
-    const langMap = { en: 'en-IN', hi: 'hi-IN', as: 'as-IN', ta: 'ta-IN', bn: 'bn-IN' };
-    recognition.lang = langMap[i18n.language] || 'en-IN';
-    recognition.continuous = true;
-    recognition.interimResults = false;
-    recognition.onresult = (event) => {
-      const transcript = Array.from(event.results).map(r => r[0].transcript).join(' ');
-      setFormData(prev => ({ ...prev, description: prev.description ? `${prev.description} ${transcript}` : transcript }));
-    };
-    recognition.onerror = () => setIsRecording(false);
-    recognition.onend = () => setIsRecording(false);
-    recognition.start();
+    if (isRecording) { stopSTT(); setIsRecording(false); return; }
     setIsRecording(true);
-  }, [isRecording, i18n.language]);
+    startSTT({
+      language: sttLangCode,
+      continuous: false,
+      autoRestart: false,
+      onResult: (text) => {
+        setFormData(prev => ({ ...prev, description: prev.description ? `${prev.description} ${text}` : text }));
+        setIsRecording(false);
+      },
+      onInterim: () => {},
+      onError: () => setIsRecording(false),
+    });
+  }, [isRecording, sttLangCode]);
 
   const grievanceCategories = [
     { id: 'waterDisruption', label: t('muniGrievance.waterDisruption', 'Water Supply Disruption'), icon: Droplets, color: 'bg-blue-100 text-blue-700 border-blue-300' },
@@ -254,14 +249,14 @@ const MunicipalGrievance = () => {
 
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input label={t('form.name')} value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} placeholder={t('form.enterName')} error={errors.name} required />
-                <Input label={t('form.mobile')} type="tel" value={formData.mobile} onChange={(e) => handleInputChange('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))} placeholder={t('form.enterMobile')} error={errors.mobile} required />
+                <Input label={t('form.name')} value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} placeholder={t('form.enterName')} error={errors.name} required voiceField="name" />
+                <Input label={t('form.mobile')} type="tel" value={formData.mobile} onChange={(e) => handleInputChange('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))} placeholder={t('form.enterMobile')} error={errors.mobile} required voiceField="mobile" />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Select label={t('form.state')} value={formData.state} onChange={(e) => handleInputChange('state', e.target.value)} placeholder={t('form.selectState')} options={states.map(s => ({ value: s.id, label: getLocalizedName(s) }))} error={errors.state} required />
-                <Select label={t('form.city')} value={formData.city} onChange={(e) => handleInputChange('city', e.target.value)} placeholder={t('form.selectCity')} options={availableCities.map(c => ({ value: c.id, label: getLocalizedName(c) }))} error={errors.city} required disabled={!formData.state} />
-                <Select label={t('form.ward')} value={formData.ward} onChange={(e) => handleInputChange('ward', e.target.value)} placeholder={t('form.selectWard')} options={availableWards.map(w => ({ value: w.id, label: w.name }))} disabled={!formData.city} />
+                <Select label={t('form.state')} value={formData.state} onChange={(e) => handleInputChange('state', e.target.value)} placeholder={t('form.selectState')} options={states.map(s => ({ value: s.id, label: getLocalizedName(s) }))} error={errors.state} required voiceField="state" />
+                <Select label={t('form.city')} value={formData.city} onChange={(e) => handleInputChange('city', e.target.value)} placeholder={t('form.selectCity')} options={availableCities.map(c => ({ value: c.id, label: getLocalizedName(c) }))} error={errors.city} required disabled={!formData.state} voiceField="city" />
+                <Select label={t('form.ward')} value={formData.ward} onChange={(e) => handleInputChange('ward', e.target.value)} placeholder={t('form.selectWard')} options={availableWards.map(w => ({ value: w.id, label: w.name }))} disabled={!formData.city} voiceField="ward" />
               </div>
 
               <Input
@@ -290,7 +285,7 @@ const MunicipalGrievance = () => {
                     🎤 {t('gasComplaint.recording', 'Listening… Speak now')}
                   </div>
                 )}
-                <TextArea value={formData.description} onChange={(e) => handleInputChange('description', e.target.value)} placeholder={t('form.enterDescription')} error={errors.description} rows={4} maxLength={1000} />
+                <TextArea value={formData.description} onChange={(e) => handleInputChange('description', e.target.value)} placeholder={t('form.enterDescription')} error={errors.description} rows={4} maxLength={1000} voiceField="description" />
               </div>
 
               <QRUpload label={t('form.uploadDocuments')} onUploadComplete={(uploadedFiles) => setFiles(uploadedFiles)} maxFiles={5} />

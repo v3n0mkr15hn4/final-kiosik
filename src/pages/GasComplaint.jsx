@@ -1,7 +1,9 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Mic, MicOff, ArrowLeft, ArrowRight, FileWarning, Gauge, Ban, HelpCircle, Flame } from 'lucide-react';
+import { startSTT, stopSTT } from '../ai/voice/speechRecognition';
+import { useVoiceFormSubmit } from '../hooks/useVoiceFormSubmit';
 import {
   Button,
   Input,
@@ -53,7 +55,11 @@ const GasComplaint = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const recognitionRef = useRef(null);
+
+  const STT_LANG_MAP = { en: 'en-IN', hi: 'hi-IN', ta: 'ta-IN', te: 'te-IN', kn: 'kn-IN', ml: 'ml-IN', mr: 'mr-IN', gu: 'gu-IN', bn: 'bn-IN', or: 'or-IN', pa: 'pa-IN', as: 'as-IN' };
+  const sttLangCode = STT_LANG_MAP[(i18n.language || 'en').split('-')[0]] || 'hi-IN';
+
+  useVoiceFormSubmit('gas_complaint', () => { if (step === 2) handleSubmit(); });
 
   const getLocalizedName = (item) => {
     if (i18n.language === 'hi' && item.nameHi) return item.nameHi;
@@ -72,52 +78,25 @@ const GasComplaint = () => {
     if (field === 'city') setFormData(prev => ({ ...prev, ward: '' }));
   };
 
-  // Voice input using Web Speech API
   const toggleVoiceInput = useCallback(() => {
     if (isRecording) {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
+      stopSTT();
       setIsRecording(false);
       return;
     }
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert('Voice input is not supported in this browser. Please use Chrome or Edge.');
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognitionRef.current = recognition;
-
-    // Map i18n language to speech recognition language
-    const langMap = { en: 'en-IN', hi: 'hi-IN', as: 'as-IN', ta: 'ta-IN', bn: 'bn-IN' };
-    recognition.lang = langMap[i18n.language] || 'en-IN';
-    recognition.continuous = true;
-    recognition.interimResults = false;
-
-    recognition.onresult = (event) => {
-      const transcript = Array.from(event.results)
-        .map(r => r[0].transcript)
-        .join(' ');
-      setFormData(prev => ({
-        ...prev,
-        description: prev.description ? `${prev.description} ${transcript}` : transcript,
-      }));
-    };
-
-    recognition.onerror = () => {
-      setIsRecording(false);
-    };
-
-    recognition.onend = () => {
-      setIsRecording(false);
-    };
-
-    recognition.start();
     setIsRecording(true);
-  }, [isRecording, i18n.language]);
+    startSTT({
+      language: sttLangCode,
+      continuous: false,
+      autoRestart: false,
+      onResult: (text) => {
+        setFormData(prev => ({ ...prev, description: prev.description ? `${prev.description} ${text}` : text }));
+        setIsRecording(false);
+      },
+      onInterim: () => {},
+      onError: () => setIsRecording(false),
+    });
+  }, [isRecording, sttLangCode]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -267,6 +246,7 @@ const GasComplaint = () => {
                 placeholder={t('form.enterName')}
                 error={errors.name}
                 required
+                voiceField="name"
               />
               <Input
                 label={t('form.mobile')}
@@ -276,6 +256,7 @@ const GasComplaint = () => {
                 placeholder={t('form.enterMobile')}
                 error={errors.mobile}
                 required
+                voiceField="mobile"
               />
             </div>
 
@@ -305,6 +286,7 @@ const GasComplaint = () => {
                 options={states.map(s => ({ value: s.id, label: getLocalizedName(s) }))}
                 error={errors.state}
                 required
+                voiceField="state"
               />
               <Select
                 label={t('form.city')}
@@ -315,6 +297,7 @@ const GasComplaint = () => {
                 error={errors.city}
                 required
                 disabled={!formData.state}
+                voiceField="city"
               />
               <Select
                 label={t('form.ward')}
@@ -323,6 +306,7 @@ const GasComplaint = () => {
                 placeholder={t('form.selectWard')}
                 options={availableWards.map(w => ({ value: w.id, label: w.name }))}
                 disabled={!formData.city}
+                voiceField="ward"
               />
             </div>
 
@@ -367,6 +351,7 @@ const GasComplaint = () => {
                 error={errors.description}
                 rows={5}
                 maxLength={1000}
+                voiceField="description"
               />
             </div>
 

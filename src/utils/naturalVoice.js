@@ -1,41 +1,23 @@
 /**
- * naturalVoice.js — Conversational TTS + Barge-In (Interrupt) Detection
+ * naturalVoice.js — Conversational TTS + Barge-In Detection
  *
- * Makes the kiosk voice feel warm and human, NOT robotic.
+ * Barge-in strategy (two-layer):
+ *   1. AudioContext VAD fires immediately on speech amplitude → stops TTS
+ *   2. Web Speech Recognition runs in parallel → delivers transcript to onInterrupt
  *
- * Features:
- * 1. Conversational text preprocessor — strips markdown, adds natural pauses
- * 2. Randomised warm response phrases (no repeating the same robotic string)
- * 3. Barge-in / interrupt detection — if user speaks while TTS is playing,
- *    the speech stops immediately and the command is processed
- * 4. Context-aware page introductions — brief, friendly welcome when entering a section
- * 5. Pace control — slightly slower for elderly/blind modes
+ * This gives a "smart speaker" feel: TTS stops the instant user speaks,
+ * transcript arrives ~300ms later via Web Speech.
  */
 
-import ttsService, { speak as rawSpeak, stopTTS } from './ttsService';
+import ttsService, { speak as rawSpeak, stopTTS, isVoiceEnabled } from './ttsService';
 
-// ─── Warm, randomised phrase banks ────────────────────────────────────────
+// ─── Warm phrase banks ────────────────────────────────────────────────────────
 
 const PHRASES = {
   navigating: {
-    en: [
-      'Sure! Taking you to',
-      'Alright, opening',
-      'On it! Going to',
-      'Great choice! Loading',
-      'No problem! Heading to',
-    ],
-    hi: [
-      'ठीक है! आपको ले जा रहा हूँ',
-      'बिल्कुल! खोल रहा हूँ',
-      'अच्छा! चलते हैं',
-      'जरूर! जा रहे हैं',
-    ],
-    as: [
-      'ঠিক আছে! আপোনাক লৈ যাইছো',
-      'অৱশ্যে! খুলি আছো',
-      'নিশ্চয়! যাওঁ',
-    ],
+    en: ['Sure! Taking you to', 'Alright, opening', 'On it! Going to', 'Great choice! Loading', 'No problem! Heading to'],
+    hi: ['ठीक है! आपको ले जा रहा हूँ', 'बिल्कुल! खोल रहा हूँ', 'अच्छा! चलते हैं', 'जरूर! जा रहे हैं'],
+    as: ['ঠিক আছে! আপোনাক লৈ যাইছো', 'অৱশ্যে! খুলি আছো', 'নিশ্চয়! যাওঁ'],
   },
   goingBack: {
     en: ['Going back.', 'Taking you back.', 'Stepping back now.'],
@@ -48,19 +30,9 @@ const PHRASES = {
     as: ['লগ আউট হ\'ল। ভাল দিন হওক!'],
   },
   notUnderstood: {
-    en: [
-      "Sorry, I didn't catch that. Could you try again?",
-      "Hmm, I'm not sure what you said. Please try once more.",
-      "I didn't quite get that. Say it again?",
-    ],
-    hi: [
-      'माफ करें, समझ नहीं आया। फिर से कहें?',
-      'क्षमा करें, दोबारा बोलें।',
-    ],
-    as: [
-      'মাফ কৰিব, বুজা নগ\'ল। পুনৰ কওক?',
-      'ক্ষমা কৰিব, আকৌ কওক।',
-    ],
+    en: ["Sorry, I didn't catch that. Could you try again?", "Hmm, I'm not sure what you said. Please try once more.", "I didn't quite get that. Say it again?"],
+    hi: ['माफ करें, समझ नहीं आया। फिर से कहें?', 'क्षमा करें, दोबारा बोलें।'],
+    as: ['মাফ কৰিব, বুজা নগ\'ল। পুনৰ কওক?', 'ক্ষমা কৰিব, আকৌ কওক।'],
   },
   listening: {
     en: ["I'm listening...", 'Go ahead, I\'m all ears.', 'Yes? Listening...'],
@@ -74,7 +46,6 @@ const PHRASES = {
   },
 };
 
-// Page introductions — keep them SHORT so users can interrupt immediately
 const PAGE_INTROS = {
   '/home': {
     en: "Welcome! You can access electricity, gas, water, or municipal services. Just say what you need, or tap a tile.",
@@ -127,7 +98,7 @@ const PAGE_INTROS = {
     as: "স্থিতি ট্ৰেক কৰক। টিকট আইডি, আবেদন আইডি বা মোবাইল নম্বৰ দিয়ক।",
   },
   '/schemes': {
-    en: "Welfare Schemes. Find government schemes you qualify for based on your profile — PM-KISAN, Ayushman Bharat, and more.",
+    en: "Welfare Schemes. Find government schemes you qualify for — PM-KISAN, Ayushman Bharat, and more.",
     hi: "कल्याण योजनाएं। PM-KISAN, आयुष्मान भारत और अन्य योजनाएं देखें।",
     as: "কল্যাণ আঁচনি। PM-KISAN, আয়ুষ্মান ভাৰত আৰু অন্য আঁচনি চাওক।",
   },
@@ -138,8 +109,6 @@ const PAGE_INTROS = {
   },
 };
 
-// ─── Utilities ─────────────────────────────────────────────────────────────
-
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 const getLang = (language) => {
@@ -147,32 +116,24 @@ const getLang = (language) => {
   return ['en', 'hi', 'as'].includes(base) ? base : 'en';
 };
 
-/**
- * Preprocess text for natural-sounding TTS:
- * - Remove markdown symbols
- * - Convert arrows/bullets to spoken equivalents
- * - Add breathing pauses after sentences
- * - Trim to a reasonable length to avoid long monologues
- */
 function preprocessText(text) {
   return text
-    .replace(/<[^>]*>/g, '')                  // strip HTML
-    .replace(/\*\*(.*?)\*\*/g, '$1')          // **bold** → plain
-    .replace(/\*(.*?)\*/g, '$1')              // *italic* → plain
-    .replace(/→/g, ',')                       // → to pause
+    .replace(/<[^>]*>/g, '')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/→/g, ',')
     .replace(/←/g, ',')
-    .replace(/•\s*/g, ', ')                   // bullets → pause
-    .replace(/\n+/g, '. ')                    // newlines → sentence breaks
-    .replace(/\s{2,}/g, ' ')                  // collapse whitespace
-    .replace(/\.{2,}/g, '.')                  // ellipsis → period
-    .replace(/[_`#]/g, '')                    // clean remaining markdown
+    .replace(/•\s*/g, ', ')
+    .replace(/\n+/g, '. ')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\.{2,}/g, '.')
+    .replace(/[_`#]/g, '')
     .trim()
-    .slice(0, 280);                            // max 280 chars — keeps speech under ~15s
+    .slice(0, 280);
 }
 
-// ─── Public API ────────────────────────────────────────────────────────────
+// ─── Public TTS API ──────────────────────────────────────────────────────────
 
-/** Speak text naturally — warm preprocessing + Sarvam TTS */
 export function naturalSpeak(text, options = {}) {
   const processed = preprocessText(text);
   if (!processed) return Promise.resolve();
@@ -181,14 +142,12 @@ export function naturalSpeak(text, options = {}) {
   return rawSpeak(processed, { ...options, language: lang, pace });
 }
 
-/** Announce navigation in a warm, varied phrase */
 export function announceNavigation(pageName, language = 'en') {
   const lang = getLang(language);
   const prefix = pick(PHRASES.navigating[lang] || PHRASES.navigating.en);
   return rawSpeak(`${prefix} ${pageName}.`, { language: lang, interrupt: false });
 }
 
-/** Speak a page introduction when first entering a route */
 export function speakPageIntro(pathname, language = 'en', options = {}) {
   const lang = getLang(language);
   const intros = PAGE_INTROS[pathname];
@@ -197,92 +156,127 @@ export function speakPageIntro(pathname, language = 'en', options = {}) {
   return rawSpeak(text, { language: lang, priority: 'normal', ...options });
 }
 
-/** Get a random "going back" phrase */
 export function announceGoBack(language = 'en') {
   const lang = getLang(language);
-  const phrase = pick(PHRASES.goingBack[lang] || PHRASES.goingBack.en);
-  return rawSpeak(phrase, { language: lang });
+  return rawSpeak(pick(PHRASES.goingBack[lang] || PHRASES.goingBack.en), { language: lang });
 }
 
-/** Logout announcement */
 export function announceLogout(language = 'en') {
   const lang = getLang(language);
-  const phrase = pick(PHRASES.loggedOut[lang] || PHRASES.loggedOut.en);
-  return rawSpeak(phrase, { language: lang });
+  return rawSpeak(pick(PHRASES.loggedOut[lang] || PHRASES.loggedOut.en), { language: lang });
 }
 
-/** "I didn't understand" — varied phrase */
 export function announceNotUnderstood(language = 'en') {
   const lang = getLang(language);
-  const phrase = pick(PHRASES.notUnderstood[lang] || PHRASES.notUnderstood.en);
-  return rawSpeak(phrase, { language: lang });
+  return rawSpeak(pick(PHRASES.notUnderstood[lang] || PHRASES.notUnderstood.en), { language: lang });
 }
 
-/** "I'm listening" — varied phrase */
 export function announceListening(language = 'en') {
   const lang = getLang(language);
-  const phrase = pick(PHRASES.listening[lang] || PHRASES.listening.en);
-  return rawSpeak(phrase, { language: lang });
+  return rawSpeak(pick(PHRASES.listening[lang] || PHRASES.listening.en), { language: lang });
 }
 
-/** Brief acknowledgement before action */
 export function announceConfirm(language = 'en') {
   const lang = getLang(language);
-  const phrase = pick(PHRASES.commandConfirm[lang] || PHRASES.commandConfirm.en);
-  return rawSpeak(phrase, { language: lang, interrupt: true });
+  return rawSpeak(pick(PHRASES.commandConfirm[lang] || PHRASES.commandConfirm.en), { language: lang, interrupt: true });
 }
 
-// ─── Barge-in / Interrupt Detection ───────────────────────────────────────
+// ─── Barge-In Detection ───────────────────────────────────────────────────────
 //
-// How it works:
-//   1. When TTS starts playing, call startBargeInListener(onCommand, language)
-//   2. A Web Speech API recogniser runs in continuous mode at LOW confidence threshold
-//   3. If ANY interim speech is detected, TTS stops immediately (barge-in)
-//   4. onCommand(transcript) is called with what the user said
-//   5. When TTS ends naturally, stopBargeInListener() cleans up
+// Two-layer strategy:
+//   Layer 1 (VAD): AudioContext amplitude → fires ~50ms after speech starts → stops TTS immediately
+//   Layer 2 (STT): Web Speech Recognition → fires ~300ms after → delivers transcript
 //
-// This creates a "smart speaker" feel — users can interrupt at any moment.
+// Both run together. VAD stops TTS, Web Speech delivers what was said.
 
 let bargeInRecognition = null;
 let bargeInActive = false;
+let bargeInVADStream = null;
+let bargeInVADCtx = null;
+let bargeInVADFrame = null;
 
 const BARGE_IN_LANG_MAP = {
   en: 'en-IN', hi: 'hi-IN', as: 'as-IN',
   ta: 'ta-IN', te: 'te-IN', kn: 'kn-IN',
   ml: 'ml-IN', mr: 'mr-IN', gu: 'gu-IN',
-  bn: 'bn-IN', pa: 'pa-IN',
+  bn: 'bn-IN', pa: 'pa-IN', or: 'or-IN',
 };
 
+// VAD amplitude threshold (RMS). Tune: 12=sensitive, 25=robust.
+const VAD_THRESHOLD = 15;
+
+function stopBargeInVAD() {
+  if (bargeInVADFrame) { cancelAnimationFrame(bargeInVADFrame); bargeInVADFrame = null; }
+  if (bargeInVADCtx) { try { bargeInVADCtx.close(); } catch { /* ok */ } bargeInVADCtx = null; }
+  if (bargeInVADStream) { bargeInVADStream.getTracks().forEach(t => t.stop()); bargeInVADStream = null; }
+}
+
 /**
- * Start listening for barge-in while TTS is playing.
+ * Start barge-in detection while TTS plays.
  * @param {Function} onInterrupt - called with (transcript) when user speaks
  * @param {string} language - user's current language
  */
 export function startBargeInListener(onInterrupt, language = 'en') {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition || bargeInActive) return;
+  // Barge-in only runs when the user has opted into voice mode.
+  if (!isVoiceEnabled()) return;
+  if (bargeInActive) return;
+  bargeInActive = true;
 
   const lang = getLang(language);
   const recognitionLang = BARGE_IN_LANG_MAP[lang] || 'en-IN';
+  let vadTriggered = false;
+
+  // Layer 1: VAD — immediately stop TTS on amplitude detection
+  if (navigator.mediaDevices?.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(stream => {
+      if (!bargeInActive) { stream.getTracks().forEach(t => t.stop()); return; }
+
+      bargeInVADStream = stream;
+      bargeInVADCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const analyser = bargeInVADCtx.createAnalyser();
+      analyser.fftSize = 256;
+      bargeInVADCtx.createMediaStreamSource(stream).connect(analyser);
+      const data = new Uint8Array(analyser.frequencyBinCount);
+
+      const tick = () => {
+        if (!bargeInActive || vadTriggered) return;
+        analyser.getByteFrequencyData(data);
+        let sum = 0;
+        for (let i = 0; i < data.length; i++) sum += data[i] * data[i];
+        const rms = Math.sqrt(sum / data.length);
+        if (rms > VAD_THRESHOLD) {
+          vadTriggered = true;
+          stopTTS();
+          stopBargeInVAD();
+          // Web Speech will deliver the transcript via Layer 2
+        } else {
+          bargeInVADFrame = requestAnimationFrame(tick);
+        }
+      };
+      bargeInVADFrame = requestAnimationFrame(tick);
+    }).catch(() => { /* mic denied — only Web Speech path */ });
+  }
+
+  // Layer 2: Web Speech — deliver transcript
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) return;
 
   const recognition = new SpeechRecognition();
   recognition.lang = recognitionLang;
   recognition.continuous = true;
-  recognition.interimResults = true;    // detect speech as it happens, not just final
+  recognition.interimResults = true;
   recognition.maxAlternatives = 1;
 
   recognition.onresult = (event) => {
     const lastResult = event.results[event.results.length - 1];
     const transcript = (lastResult?.[0]?.transcript || '').trim();
-
     if (!transcript) return;
 
-    // On any speech detected (even interim) — stop TTS immediately (barge-in)
-    stopTTS();
+    // Stop TTS if VAD hasn't already (fallback for when VAD unavailable)
+    if (!vadTriggered) stopTTS();
+
     stopBargeInListener();
-    if (typeof onInterrupt === 'function') {
-      onInterrupt(transcript);
-    }
+    if (typeof onInterrupt === 'function') onInterrupt(transcript);
   };
 
   recognition.onerror = () => {
@@ -298,14 +292,14 @@ export function startBargeInListener(onInterrupt, language = 'en') {
   try {
     recognition.start();
     bargeInRecognition = recognition;
-    bargeInActive = true;
   } catch {
     bargeInActive = false;
+    stopBargeInVAD();
   }
 }
 
-/** Stop the barge-in listener */
 export function stopBargeInListener() {
+  stopBargeInVAD();
   if (bargeInRecognition) {
     try { bargeInRecognition.stop(); } catch { /* ok */ }
     bargeInRecognition = null;
@@ -313,7 +307,6 @@ export function stopBargeInListener() {
   bargeInActive = false;
 }
 
-/** Whether barge-in is currently active */
 export function isBargeInActive() {
   return bargeInActive;
 }
