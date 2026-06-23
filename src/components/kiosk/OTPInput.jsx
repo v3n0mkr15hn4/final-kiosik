@@ -1,5 +1,5 @@
 // OTP cell row — renders N cells, fills from a string value.
-// Layout from kiosk design/designs/vertical-pages-v1.jsx:248
+// Layout from docs/kiosk-design/designs/vertical-pages-v1.jsx:248
 
 import React from 'react';
 

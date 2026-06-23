@@ -7,7 +7,7 @@
  *   keyed by a hash of request body so TTS works offline
  */
 
-const CACHE_NAME = 'suvidha-v3';
+const CACHE_NAME = 'suvidha-v4';
 const TTS_CACHE_NAME = 'suvidha-tts-v1';
 const MAX_TTS_CACHE = 300;
 

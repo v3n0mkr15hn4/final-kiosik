@@ -220,13 +220,13 @@ const ConsumerProfile = () => {
                     <input className="w-full text-kiosk-base font-semibold text-gray-800 bg-white border rounded-lg px-3 py-2 mt-1" value={editData.mobile} onChange={(e) => handleEditChange('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))} />
                     {mobileChanged && !otpVerified && (
                       <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-sm text-blue-700 mb-2">OTP verification required for mobile change</p>
+                        <p className="text-sm text-blue-700 mb-2">{t('profile.otpRequiredForMobile')}</p>
                         {!otpSent ? (
-                          <Button size="small" onClick={handleSendOTP}>Send OTP</Button>
+                          <Button size="small" onClick={handleSendOTP}>{t('auth.sendOTP')}</Button>
                         ) : (
                           <div className="flex gap-2">
-                            <input className="flex-1 border rounded-lg px-3 py-2 text-sm" placeholder="Enter 6-digit OTP (demo: 123456)" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} />
-                            <Button size="small" onClick={handleVerifyOTP}>Verify</Button>
+                            <input className="flex-1 border rounded-lg px-3 py-2 text-sm" placeholder={t('profile.enterOtp')} value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} />
+                            <Button size="small" onClick={handleVerifyOTP}>{t('profile.verify')}</Button>
                           </div>
                         )}
                       </div>
@@ -300,30 +300,30 @@ const ConsumerProfile = () => {
           {/* Ownership Transfer Section */}
           {!isEditing && (
             <div className="mt-6 pt-6 border-t">
-              <h3 className="text-kiosk-base font-bold text-gray-700 mb-3">Ownership Transfer</h3>
+              <h3 className="text-kiosk-base font-bold text-gray-700 mb-3">{t('profile.ownershipTransfer')}</h3>
               <p className="text-sm text-gray-500 mb-4">
-                Request to transfer this consumer account to a new owner. Requires document verification.
+                {t('profile.ownershipTransferDesc')}
               </p>
               <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-kiosk">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label className="text-xs text-gray-500">New Owner Name</label>
+                    <label className="text-xs text-gray-500">{t('profile.newOwnerName')}</label>
                     <input
                       className="w-full text-sm bg-white border rounded-lg px-3 py-2 mt-1"
-                      placeholder="Full name of new owner"
+                      placeholder={t('profile.enterNewOwnerName')}
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500">New Owner Aadhaar</label>
+                    <label className="text-xs text-gray-500">{t('profile.newOwnerAadhaar')}</label>
                     <input
                       className="w-full text-sm bg-white border rounded-lg px-3 py-2 mt-1"
-                      placeholder="12-digit Aadhaar number"
+                      placeholder={t('profile.enterAadhaarNumber')}
                       maxLength={12}
                     />
                   </div>
                 </div>
                 <p className="text-xs text-yellow-700 mb-3">
-                  ⚠️ Ownership transfer requires supporting documents (sale deed / NOC). Upload will be requested after submission.
+                  {t('profile.ownershipTransferWarning')}
                 </p>
                 <Button
                   variant="outline"
@@ -377,7 +377,7 @@ const ConsumerProfile = () => {
         </div>
       </div>
 
-      <Modal isOpen={showConfirmModal} onClose={() => setShowConfirmModal(false)} type="confirm" title="Confirm Profile Update" message="Save all changes and generate confirmation receipt?" confirmText={t('app.confirm')} cancelText={t('app.cancel')} onConfirm={handleConfirmSave} onCancel={() => setShowConfirmModal(false)} />
+      <Modal isOpen={showConfirmModal} onClose={() => setShowConfirmModal(false)} type="confirm" title={t('profile.confirmUpdateTitle')} message={t('profile.confirmUpdateMsg')} confirmText={t('app.confirm')} cancelText={t('app.cancel')} onConfirm={handleConfirmSave} onCancel={() => setShowConfirmModal(false)} />
     </VK>
   );
 };

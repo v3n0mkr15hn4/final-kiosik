@@ -260,9 +260,9 @@ const PropertyTaxPayment = () => {
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
         type="confirm"
-        title="Confirm Payment"
-        message={`Pay ₹${propertyData?.totalPayable?.toLocaleString('en-IN')} for Property Tax (${propertyData?.propertyId})?`}
-        confirmText="Confirm Payment"
+        title={t('municipal.confirmPaymentTitle')}
+        message={t('municipal.payForPropertyTax', { amount: propertyData?.totalPayable?.toLocaleString('en-IN'), propertyId: propertyData?.propertyId })}
+        confirmText={t('municipal.confirmPaymentTitle')}
         cancelText={t('app.cancel')}
         onConfirm={handleConfirmPayment}
         onCancel={() => setShowConfirmModal(false)}

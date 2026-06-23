@@ -1,8 +1,10 @@
 ﻿import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 
 const AdminLayout = ({ title, subtitle, children }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { logout } = useAuth();
   const role = sessionStorage.getItem('adminRole') || 'UNKNOWN';
@@ -23,7 +25,7 @@ const AdminLayout = ({ title, subtitle, children }) => {
         <div className="text-right">
           <p className="text-sm font-semibold">{userName}</p>
           <p className="text-xs text-slate-300">{role}</p>
-          <button onClick={handleLogout} className="mt-1 text-xs underline">Logout</button>
+          <button onClick={handleLogout} className="mt-1 text-xs underline">{t('app.logout')}</button>
         </div>
       </header>
       <main className="max-w-7xl mx-auto p-6">{children}</main>

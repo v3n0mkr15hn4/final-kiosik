@@ -1,5 +1,5 @@
 /* @import MUST be first — PostCSS requirement */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Noto+Sans+Arabic:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Noto+Sans+Gujarati:wght@400;500;600;700;800&family=Noto+Sans+Gurmukhi:wght@400;500;600;700;800&family=Noto+Sans+Kannada:wght@400;500;600;700;800&family=Noto+Sans+Malayalam:wght@400;500;600;700;800&family=Noto+Sans+Meetei+Mayek:wght@400;500;600;700;800&family=Noto+Sans+Ol+Chiki:wght@400;500;600;700;800&family=Noto+Sans+Oriya:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Noto+Sans+Telugu:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 /* New design system (Phase 1+) */
 @import './design/tokens.css';
@@ -294,6 +294,77 @@ body {
   min-height: 120px;
   font-size: 32px;
 }
+
+/* ── A+ Larger text — the design system below is hardcoded px (no rem),
+   so bumping the root font-size does nothing on its own. These overrides
+   beat the .vk px rules above on specificity (extra class), not source order. */
+.vk.a11y-large h1,
+.vk.a11y-large .text-kiosk-2xl,
+.vk.a11y-large .md\:text-kiosk-3xl { font-size: 115px !important; line-height: 1.1 !important; }
+.vk.a11y-xlarge h1,
+.vk.a11y-xlarge .text-kiosk-2xl,
+.vk.a11y-xlarge .md\:text-kiosk-3xl { font-size: 134px !important; line-height: 1.1 !important; }
+
+.vk.a11y-large h2,
+.vk.a11y-large .text-kiosk-xl { font-size: 86px !important; }
+.vk.a11y-xlarge h2,
+.vk.a11y-xlarge .text-kiosk-xl { font-size: 101px !important; }
+
+.vk.a11y-large h3 { font-size: 67px !important; }
+.vk.a11y-xlarge h3 { font-size: 78px !important; }
+
+.vk.a11y-large p,
+.vk.a11y-large label,
+.vk.a11y-large input,
+.vk.a11y-large textarea,
+.vk.a11y-large select,
+.vk.a11y-large option,
+.vk.a11y-large .text-kiosk-base { font-size: 43px !important; }
+.vk.a11y-xlarge p,
+.vk.a11y-xlarge label,
+.vk.a11y-xlarge input,
+.vk.a11y-xlarge textarea,
+.vk.a11y-xlarge select,
+.vk.a11y-xlarge option,
+.vk.a11y-xlarge .text-kiosk-base { font-size: 50px !important; }
+
+.vk.a11y-large .text-kiosk-lg { font-size: 48px !important; }
+.vk.a11y-xlarge .text-kiosk-lg { font-size: 56px !important; }
+
+.vk.a11y-large button,
+.vk.a11y-large a[role="button"],
+.vk.a11y-large [role="button"] { font-size: 48px; min-height: 180px; }
+.vk.a11y-xlarge button,
+.vk.a11y-xlarge a[role="button"],
+.vk.a11y-xlarge [role="button"] { font-size: 56px; min-height: 200px; }
+
+.vk.a11y-large .tile .nm { font-size: 58px !important; }
+.vk.a11y-xlarge .tile .nm { font-size: 67px !important; }
+
+.vk.a11y-large [role="button"] h3,
+.vk.a11y-large .card h3 { font-size: 58px !important; }
+.vk.a11y-xlarge [role="button"] h3,
+.vk.a11y-xlarge .card h3 { font-size: 67px !important; }
+
+.vk.a11y-large .tile .sub { font-size: 43px !important; }
+.vk.a11y-xlarge .tile .sub { font-size: 50px !important; }
+
+.vk.a11y-large .label-tag { font-size: 38px !important; }
+.vk.a11y-xlarge .label-tag { font-size: 45px !important; }
+
+.vk.a11y-large .body-l,
+.vk.a11y-large .body { font-size: 48px !important; }
+.vk.a11y-xlarge .body-l,
+.vk.a11y-xlarge .body { font-size: 56px !important; }
+
+.vk.a11y-large .meta { font-size: 38px !important; }
+.vk.a11y-xlarge .meta { font-size: 45px !important; }
+
+.vk.a11y-large .chip { font-size: 43px !important; }
+.vk.a11y-xlarge .chip { font-size: 50px !important; }
+
+.vk.a11y-large .vk-bottom .btn { font-size: 38px !important; }
+.vk.a11y-xlarge .vk-bottom .btn { font-size: 44px !important; }
 
 /* ── Animated state helpers ─────────────────────────────── */
 @keyframes fadeIn {

@@ -1,6 +1,6 @@
 // ──────────────────────────────────────────────────────────────────
 // Dashboard — Vertical Kiosk personal hub (1080×1920)
-// Design source: kiosk design/designs/kiosk-pages-personal.jsx:11-101 (VDashboard)
+// Design source: docs/kiosk-design/designs/kiosk-pages-personal.jsx:11-101 (VDashboard)
 //
 // Phase 1: active requests + bills are stubbed with design mock data.
 // TODO Phase 2: fetch from /api/me/dashboard, /api/me/requests, /api/me/bills.

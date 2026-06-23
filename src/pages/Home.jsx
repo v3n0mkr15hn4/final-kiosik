@@ -1,6 +1,6 @@
 // ──────────────────────────────────────────────────────────────────
 // Home — Vertical Kiosk service hub (1080×1920)
-// Design source: kiosk design/designs/vertical-pages-v1.jsx:316-365 (VHome)
+// Design source: docs/kiosk-design/designs/vertical-pages-v1.jsx:316-365 (VHome)
 // Keeps existing routing to dept menus + auth/access guards.
 // ──────────────────────────────────────────────────────────────────
 

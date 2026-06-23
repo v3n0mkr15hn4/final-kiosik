@@ -59,6 +59,6 @@
 - Replace or augment the AIChatbot with a hosted conversational model for richer dialogs.
 
 **Where this document is saved**
-- `KIOSK_FEATURES.md` (this file) — root of the frontend project.
+- `docs/reports/KIOSK_FEATURES.md` (this file) — frontend feature inventory.
 
 If you'd like, I can: generate a short user-facing one-page quickstart, produce an admin checklist for deploying kiosks, or open any of the referenced files and extract exact code snippets for documentation.

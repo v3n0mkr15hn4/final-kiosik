@@ -36,7 +36,7 @@ export default {
           greenDark: '#0A5C04',
           gold: '#C9A84C',
         },
-        // SUVIDHA Vertical Kiosk design tokens (source: kiosk design/tokens.md)
+        // SUVIDHA Vertical Kiosk design tokens (source: docs/kiosk-design/tokens.md)
         indigo: {
           100: 'oklch(0.93 0.025 270)',
           300: 'oklch(0.78 0.06 270)',

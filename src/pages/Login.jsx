@@ -1,6 +1,6 @@
 // ──────────────────────────────────────────────────────────────────
 // Login — Aadhaar entry (VAadhaar) → Mobile OTP (VAuth)
-// Design source: kiosk design/designs/vertical-pages-v1.jsx:179-265
+// Design source: docs/kiosk-design/designs/vertical-pages-v1.jsx:179-265
 // Keeps all existing wiring: lookupAadhaar, validateAadhaarMobile, sendOtp,
 // verifyOtp, QR/biometric fallbacks, toast, TTS.
 // ──────────────────────────────────────────────────────────────────

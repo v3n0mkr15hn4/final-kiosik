@@ -45,32 +45,32 @@ const FamilyProfile = () => {
     {
       id: 'addChild',
       LucideIcon: Baby,
-      title: lang === 'hi' ? 'बच्चा जोड़ें' : lang === 'ta' ? 'குழந்தை சேர்க்கவும்' : 'Add Child',
-      description: lang === 'hi' ? 'अपने परिवार में बच्चे को जोड़ें' : lang === 'ta' ? 'குழந்தையை குடும்பத்தில் சேர்க்கவும்' : 'Register a child dependent (under 18)',
+      title: t('familyProfile.addChildTitle'),
+      description: t('familyProfile.addChildDesc'),
       color: '#ec4899',
       bg: 'color-mix(in oklab, #ec4899 12%, white)',
     },
     {
       id: 'addParent',
       LucideIcon: Heart,
-      title: lang === 'hi' ? 'वृद्ध माता-पिता जोड़ें' : lang === 'ta' ? 'முதியோர் பெற்றோர் சேர்க்கவும்' : 'Add Elderly Parent',
-      description: lang === 'hi' ? 'वृद्ध माता-पिता को परिवार में जोड़ें' : lang === 'ta' ? 'முதியோர் பெற்றோரை குடும்பத்தில் சேர்க்கவும்' : 'Register an elderly parent (55+ years)',
+      title: t('familyProfile.addParentTitle'),
+      description: t('familyProfile.addParentDesc'),
       color: '#f59e0b',
       bg: 'color-mix(in oklab, #f59e0b 12%, white)',
     },
     {
       id: 'viewFamily',
       LucideIcon: Users,
-      title: lang === 'hi' ? 'परिवार देखें' : lang === 'ta' ? 'குடும்பத்தை பாருங்கள்' : 'View Family Members',
-      description: lang === 'hi' ? 'जोड़े गए सभी आश्रितों को देखें' : lang === 'ta' ? 'சேர்க்கப்பட்ட அனைத்து சார்புடையவர்களையும் பாருங்கள்' : 'View all registered dependents',
+      title: t('familyProfile.viewFamilyTitle'),
+      description: t('familyProfile.viewFamilyDesc'),
       color: '#0369a1',
       bg: 'color-mix(in oklab, #0369a1 12%, white)',
     },
     {
       id: 'schemes',
       LucideIcon: Sparkles,
-      title: lang === 'hi' ? 'योजना लाभ' : lang === 'ta' ? 'திட்ட நன்மைகள்' : 'Discover Benefits',
-      description: lang === 'hi' ? 'परिवार के लिए सरकारी योजनाएं खोजें' : lang === 'ta' ? 'குடும்பத்திற்கான அரசு திட்டங்களை கண்டறியுங்கள்' : 'Find government schemes for your family',
+      title: t('familyProfile.schemesTitle'),
+      description: t('familyProfile.schemesDesc'),
       path: '/schemes',
       color: '#7c3aed',
       bg: 'color-mix(in oklab, #7c3aed 12%, white)',
@@ -78,8 +78,8 @@ const FamilyProfile = () => {
     {
       id: 'track',
       LucideIcon: Search,
-      title: lang === 'hi' ? 'अनुरोध ट्रैक करें' : lang === 'ta' ? 'கோரிக்கை கண்காணிக்கவும்' : 'Track Requests',
-      description: lang === 'hi' ? 'अपने अनुरोधों की स्थिति जांचें' : lang === 'ta' ? 'உங்கள் கோரிக்கைகளின் நிலையை சரிபார்க்கவும்' : 'Check real-time status of your requests',
+      title: t('familyProfile.trackTitle'),
+      description: t('familyProfile.trackDesc'),
       path: '/track-status',
       color: '#475569',
       bg: 'color-mix(in oklab, #475569 12%, white)',
@@ -87,8 +87,8 @@ const FamilyProfile = () => {
     {
       id: 'receipt',
       LucideIcon: FileText,
-      title: lang === 'hi' ? 'रसीद देखें' : lang === 'ta' ? 'ரசீதுகளை பாருங்கள்' : 'View Receipts',
-      description: lang === 'hi' ? 'लेनदेन रसीद देखें और प्रिंट करें' : lang === 'ta' ? 'பரிவர்த்தனை ரசீதுகளை பார்க்கவும் மற்றும் அச்சிடவும்' : 'View and print transaction receipts',
+      title: t('familyProfile.receiptTitle'),
+      description: t('familyProfile.receiptDesc'),
       path: '/receipt',
       color: '#059669',
       bg: 'color-mix(in oklab, #059669 12%, white)',
@@ -108,15 +108,15 @@ const FamilyProfile = () => {
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) return lang === 'hi' ? 'नाम आवश्यक है' : lang === 'ta' ? 'பெயர் தேவை' : 'Name is required';
+    if (!formData.name.trim()) return t('familyProfile.nameRequired');
     if (!formData.age || isNaN(formData.age) || formData.age < 0 || formData.age > 120)
-      return lang === 'hi' ? 'मान्य आयु दर्ज करें' : lang === 'ta' ? 'சரியான வயதை உள்ளிடவும்' : 'Enter a valid age';
+      return t('familyProfile.enterValidAge');
     if (formData.relationship === 'child' && parseInt(formData.age) > 18)
-      return lang === 'hi' ? 'बच्चे की आयु 18 या उससे कम होनी चाहिए' : lang === 'ta' ? 'குழந்தையின் வயது 18 அல்லது அதற்கும் குறைவாக இருக்க வேண்டும்' : 'Child must be 18 or younger';
+      return t('familyProfile.childAgeLimit');
     if (formData.relationship === 'elderly_parent' && parseInt(formData.age) < 55)
-      return lang === 'hi' ? 'वृद्ध माता-पिता की आयु 55+ होनी चाहिए' : lang === 'ta' ? 'முதியோர் பெற்றோர் வயது 55+ இருக்க வேண்டும்' : 'Elderly parent must be 55+';
+      return t('familyProfile.elderlyAgeLimit');
     if (formData.aadhaar && !/^\d{12}$/.test(formData.aadhaar))
-      return lang === 'hi' ? 'मान्य 12 अंक का आधार दर्ज करें' : lang === 'ta' ? 'சரியான 12 இலக்க ஆதார் உள்ளிடவும்' : 'Enter valid 12-digit Aadhaar';
+      return t('familyProfile.enterValidAadhaar');
     return null;
   };
 
@@ -256,7 +256,7 @@ const FamilyProfile = () => {
             <div>
               <p className="font-bold text-government-blue">{userName}</p>
               <p className="text-xs text-blue-600">
-                {lang === 'hi' ? 'प्राथमिक नागरिक (आधार सत्यापित)' : lang === 'ta' ? 'முதன்மை குடிமகன் (ஆதார் சரிபார்க்கப்பட்டது)' : 'Primary Citizen (Aadhaar Verified)'}
+                {t('familyProfile.primaryCitizen')}
               </p>
             </div>
           </div>
@@ -286,7 +286,7 @@ const FamilyProfile = () => {
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">{t('form.name')} *</label>
                   <input type="text" value={formData.name} onChange={(e) => handleFormChange('name', e.target.value)}
-                    placeholder={lang === 'hi' ? 'नाम दर्ज करें' : lang === 'ta' ? 'பெயரை உள்ளிடுங்கள்' : 'Enter full name'}
+                    placeholder={t('familyProfile.enterFullName')}
                     className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-government-blue focus:ring-2 focus:ring-blue-200 text-base" />
                 </div>
 
@@ -294,17 +294,17 @@ const FamilyProfile = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">{t('familyProfile.relationship')} *</label>
                   <select value={formData.relationship} onChange={(e) => handleFormChange('relationship', e.target.value)}
                     className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-government-blue focus:ring-2 focus:ring-blue-200 text-base">
-                    <option value="child">{lang === 'hi' ? 'बच्चा' : lang === 'ta' ? 'குழந்தை' : 'Child'}</option>
-                    <option value="elderly_parent">{lang === 'hi' ? 'वृद्ध माता-पिता' : lang === 'ta' ? 'முதியோர் பெற்றோர்' : 'Elderly Parent'}</option>
+                    <option value="child">{t('familyProfile.child')}</option>
+                    <option value="elderly_parent">{t('familyProfile.elderlyParent')}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    {lang === 'hi' ? 'आयु' : lang === 'ta' ? 'வயது' : 'Age'} *
+                    {t('familyProfile.age')} *
                   </label>
                   <input type="number" min="0" max="120" value={formData.age} onChange={(e) => handleFormChange('age', e.target.value)}
-                    placeholder={lang === 'hi' ? 'आयु' : lang === 'ta' ? 'வயது' : 'Age'}
+                    placeholder={t('familyProfile.age')}
                     className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-government-blue focus:ring-2 focus:ring-blue-200 text-base" />
                 </div>
 
@@ -312,33 +312,33 @@ const FamilyProfile = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">{t('schemes.gender')}</label>
                   <select value={formData.gender} onChange={(e) => handleFormChange('gender', e.target.value)}
                     className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-government-blue focus:ring-2 focus:ring-blue-200 text-base">
-                    <option value="Male">{lang === 'hi' ? 'पुरुष' : lang === 'ta' ? 'ஆண்' : 'Male'}</option>
-                    <option value="Female">{lang === 'hi' ? 'महिला' : lang === 'ta' ? 'பெண்' : 'Female'}</option>
-                    <option value="Other">{lang === 'hi' ? 'अन्य' : lang === 'ta' ? 'மற்றவை' : 'Other'}</option>
+                    <option value="Male">{t('familyProfile.male')}</option>
+                    <option value="Female">{t('familyProfile.female')}</option>
+                    <option value="Other">{t('familyProfile.other')}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    {lang === 'hi' ? 'आधार नंबर (वैकल्पिक)' : lang === 'ta' ? 'ஆதார் எண் (விருப்பம்)' : 'Aadhaar Number (Optional)'}
+                    {t('familyProfile.aadhaarOptional')}
                   </label>
                   <input type="text" value={formData.aadhaar}
                     onChange={(e) => handleFormChange('aadhaar', e.target.value.replace(/\D/g, '').slice(0, 12))}
-                    placeholder="XXXX XXXX XXXX" maxLength={12}
+                    placeholder={t('familyProfile.aadhaarPlaceholder')} maxLength={12}
                     className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-government-blue focus:ring-2 focus:ring-blue-200 text-base" />
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    {lang === 'hi' ? 'विकलांगता (वैकल्पिक)' : lang === 'ta' ? 'ஊனம் (விருப்பம்)' : 'Disability (Optional)'}
+                    {t('familyProfile.disabilityOptional')}
                   </label>
                   <select value={formData.disability} onChange={(e) => handleFormChange('disability', e.target.value)}
                     className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-government-blue focus:ring-2 focus:ring-blue-200 text-base">
-                    <option value="">{lang === 'hi' ? 'कोई नहीं' : lang === 'ta' ? 'எதுவுமில்லை' : 'None'}</option>
-                    <option value="visual">{lang === 'hi' ? 'दृष्टि' : lang === 'ta' ? 'பார்வை' : 'Visual'}</option>
-                    <option value="physical">{lang === 'hi' ? 'शारीरिक' : lang === 'ta' ? 'உடல்' : 'Physical'}</option>
-                    <option value="hearing">{lang === 'hi' ? 'श्रवण' : lang === 'ta' ? 'செவிப்புலன்' : 'Hearing'}</option>
-                    <option value="intellectual">{lang === 'hi' ? 'बौद्धिक' : lang === 'ta' ? 'அறிவுசார்' : 'Intellectual'}</option>
+                    <option value="">{t('familyProfile.none')}</option>
+                    <option value="visual">{t('familyProfile.visual')}</option>
+                    <option value="physical">{t('familyProfile.physical')}</option>
+                    <option value="hearing">{t('familyProfile.hearing')}</option>
+                    <option value="intellectual">{t('familyProfile.intellectual')}</option>
                   </select>
                 </div>
               </div>
@@ -352,9 +352,7 @@ const FamilyProfile = () => {
 
               <div className="flex space-x-4">
                 <Button onClick={handleSave} icon={Save} size="large" fullWidth>
-                  {editingId
-                    ? (lang === 'hi' ? 'अपडेट करें' : lang === 'ta' ? 'புதுப்பிக்கவும்' : 'Update Dependent')
-                    : (lang === 'hi' ? 'जोड़ें' : lang === 'ta' ? 'சேர்க்கவும்' : 'Save Dependent')}
+                  {editingId ? t('familyProfile.updateDependent') : t('familyProfile.saveDependent')}
                 </Button>
                 <Button onClick={resetForm} variant="outline" size="large">{t('app.cancel')}</Button>
               </div>
@@ -375,12 +373,12 @@ const FamilyProfile = () => {
                   <div className="flex items-center mb-3">
                     <Baby className="w-5 h-5 text-pink-500 mr-2" />
                     <h2 className="text-kiosk-base font-bold text-gray-800">
-                      {lang === 'hi' ? 'बच्चे' : lang === 'ta' ? 'குழந்தைகள்' : 'Children'} ({children.length})
+                      {t('familyProfile.children')} ({children.length})
                     </h2>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {children.map((dep) => (
-                      <DependentCard key={dep.id} dependent={dep} lang={lang} onEdit={handleEdit} onRemove={handleRemove} />
+                      <DependentCard key={dep.id} dependent={dep} onEdit={handleEdit} onRemove={handleRemove} />
                     ))}
                   </div>
                 </div>
@@ -391,12 +389,12 @@ const FamilyProfile = () => {
                   <div className="flex items-center mb-3">
                     <Heart className="w-5 h-5 text-amber-500 mr-2" />
                     <h2 className="text-kiosk-base font-bold text-gray-800">
-                      {lang === 'hi' ? 'वृद्ध माता-पिता' : lang === 'ta' ? 'முதியோர் பெற்றோர்' : 'Elderly Parents'} ({parents.length})
+                      {t('familyProfile.elderlyParents')} ({parents.length})
                     </h2>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {parents.map((dep) => (
-                      <DependentCard key={dep.id} dependent={dep} lang={lang} onEdit={handleEdit} onRemove={handleRemove} />
+                      <DependentCard key={dep.id} dependent={dep} onEdit={handleEdit} onRemove={handleRemove} />
                     ))}
                   </div>
                 </div>
@@ -417,7 +415,7 @@ const FamilyProfile = () => {
               style={{ fontSize: 22, padding: '18px 48px' }}
               onClick={() => setView('menu')}
             >
-              <I d={ic.back} size={24} /> {lang === 'hi' ? 'मेनू पर वापस' : lang === 'ta' ? 'மெனுவிற்கு திரும்பு' : 'Back to Menu'}
+              <I d={ic.back} size={24} /> {t('familyProfile.backToMenu')}
             </button>
           </div>
         </div>
@@ -427,9 +425,9 @@ const FamilyProfile = () => {
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         type="warning"
-        title={lang === 'hi' ? 'हटाने की पुष्टि करें' : lang === 'ta' ? 'நீக்குவதை உறுதிப்படுத்தவும்' : 'Confirm Removal'}
-        message={lang === 'hi' ? 'क्या आप इस आश्रित को हटाना चाहते हैं?' : lang === 'ta' ? 'இந்த சார்புடையவரை நீக்க விரும்புகிறீர்களா?' : 'Are you sure you want to remove this dependent?'}
-        confirmText={lang === 'hi' ? 'हटाएं' : lang === 'ta' ? 'நீக்கு' : 'Remove'}
+        title={t('familyProfile.confirmRemovalTitle')}
+        message={t('familyProfile.confirmRemovalMsg')}
+        confirmText={t('familyProfile.remove')}
         cancelText={t('app.cancel')}
         onConfirm={confirmRemove}
         onCancel={() => setShowDeleteModal(false)}

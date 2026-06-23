@@ -319,7 +319,7 @@ const Transport = () => {
     return (
       <VK bg="color-mix(in oklab, #0891b2 4%, white)">
         <div className="flex items-center justify-center min-h-[60vh]">
-          <LoadingSpinner size="large" message={selectedCategory && mainServices.find(s => s.id === selectedCategory)?.booking ? 'Booking your ticket...' : t('app.loading')} />
+          <LoadingSpinner size="large" message={selectedCategory && mainServices.find(s => s.id === selectedCategory)?.booking ? t('transport.bookingInProgress') : t('app.loading')} />
         </div>
       </VK>
     );
@@ -347,55 +347,55 @@ const Transport = () => {
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Ticket className="w-10 h-10 text-green-600" />
             </div>
-            <h2 className="text-kiosk-2xl font-bold text-green-700 mb-2">Booking Confirmed!</h2>
-            <p className="text-kiosk-lg text-gray-600 mb-6">Your ticket has been booked successfully</p>
+            <h2 className="text-kiosk-2xl font-bold text-green-700 mb-2">{t('transport.bookingConfirmed')}</h2>
+            <p className="text-kiosk-lg text-gray-600 mb-6">{t('transport.bookingSuccessMsg')}</p>
 
             <div className="bg-gray-50 rounded-kiosk p-6 text-left space-y-3 mb-6">
               <div className="flex justify-between">
-                <span className="font-semibold text-gray-600">Ticket ID:</span>
+                <span className="font-semibold text-gray-600">{t('transport.ticketId')}:</span>
                 <span className="font-bold text-government-blue">{bookingResult.ticketId}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-semibold text-gray-600">Passenger:</span>
+                <span className="font-semibold text-gray-600">{t('transport.passenger')}:</span>
                 <span>{bookingResult.passengerName}</span>
               </div>
               {bookingResult.from !== '-' && (
                 <div className="flex justify-between">
-                  <span className="font-semibold text-gray-600">From → To:</span>
+                  <span className="font-semibold text-gray-600">{t('transport.fromTo')}:</span>
                   <span>{bookingResult.from} → {bookingResult.to}</span>
                 </div>
               )}
               {bookingResult.route !== '-' && (
                 <div className="flex justify-between">
-                  <span className="font-semibold text-gray-600">Route:</span>
+                  <span className="font-semibold text-gray-600">{t('transport.route')}:</span>
                   <span className="text-right">{bookingResult.route}</span>
                 </div>
               )}
               {bookingResult.passType !== '-' && (
                 <div className="flex justify-between">
-                  <span className="font-semibold text-gray-600">Pass Type:</span>
+                  <span className="font-semibold text-gray-600">{t('transport.passType')}:</span>
                   <span>{bookingResult.passType}</span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="font-semibold text-gray-600">Date:</span>
+                <span className="font-semibold text-gray-600">{t('transport.date')}:</span>
                 <span>{bookingResult.date}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-semibold text-gray-600">Passengers:</span>
+                <span className="font-semibold text-gray-600">{t('transport.passengers')}:</span>
                 <span>{bookingResult.passengers}</span>
               </div>
               <div className="flex justify-between border-t pt-3">
-                <span className="font-bold text-gray-800 text-kiosk-lg">Total Fare:</span>
+                <span className="font-bold text-gray-800 text-kiosk-lg">{t('transport.totalFare')}:</span>
                 <span className="font-bold text-green-700 text-kiosk-lg">₹{bookingResult.fare}</span>
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button onClick={() => navigate(`/receipt?org=transport&id=${encodeURIComponent(bookingResult.ticketId)}`)} size="large">
-                View Receipt
+                {t('transport.viewReceipt')}
               </Button>
-              <Button variant="secondary" onClick={() => navigate('/home')} size="large">Go Home</Button>
+              <Button variant="secondary" onClick={() => navigate('/home')} size="large">{t('transport.goHome')}</Button>
             </div>
           </div>
         </div>
@@ -504,36 +504,36 @@ const Transport = () => {
             <div className="mb-6 p-4 bg-teal-50 rounded-kiosk border border-teal-200 flex items-center gap-3">
               <Ticket className="w-6 h-6 text-teal-700" />
               <p className="text-kiosk-base font-semibold text-teal-800">
-                Booking: {t(`transport.${selectedCategory}`)}
+                {t('transport.bookingLabel')}: {t(`transport.${selectedCategory}`)}
               </p>
             </div>
 
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input label="Passenger Name" value={bookingData.passengerName} onChange={(e) => handleBookingChange('passengerName', e.target.value)} error={errors.passengerName} required />
-                <Input label="Mobile Number" value={bookingData.passengerMobile} onChange={(e) => handleBookingChange('passengerMobile', e.target.value)} error={errors.passengerMobile} required />
+                <Input label={t('transport.passengerName')} value={bookingData.passengerName} onChange={(e) => handleBookingChange('passengerName', e.target.value)} error={errors.passengerName} required />
+                <Input label={t('form.mobile')} value={bookingData.passengerMobile} onChange={(e) => handleBookingChange('passengerMobile', e.target.value)} error={errors.passengerMobile} required />
               </div>
 
               {selectedCategory === 'metroTicket' && (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Select label="From Station" value={bookingData.fromStation} onChange={(e) => handleBookingChange('fromStation', e.target.value)} error={errors.fromStation} required>
-                      <option value="">Select departure station</option>
+                    <Select label={t('transport.fromStation')} value={bookingData.fromStation} onChange={(e) => handleBookingChange('fromStation', e.target.value)} error={errors.fromStation} required>
+                      <option value="">{t('transport.selectDeparture')}</option>
                       {metroStations.map(s => <option key={s} value={s}>{s}</option>)}
                     </Select>
-                    <Select label="To Station" value={bookingData.toStation} onChange={(e) => handleBookingChange('toStation', e.target.value)} error={errors.toStation} required>
-                      <option value="">Select arrival station</option>
+                    <Select label={t('transport.toStation')} value={bookingData.toStation} onChange={(e) => handleBookingChange('toStation', e.target.value)} error={errors.toStation} required>
+                      <option value="">{t('transport.selectArrival')}</option>
                       {metroStations.filter(s => s !== bookingData.fromStation).map(s => <option key={s} value={s}>{s}</option>)}
                     </Select>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Input label="Travel Date" type="date" value={bookingData.travelDate} onChange={(e) => handleBookingChange('travelDate', e.target.value)} error={errors.travelDate} required />
-                    <Select label="Number of Passengers" value={bookingData.passengers} onChange={(e) => handleBookingChange('passengers', e.target.value)}>
-                      {[1, 2, 3, 4, 5, 6].map(n => <option key={n} value={n}>{n} Passenger{n > 1 ? 's' : ''}</option>)}
+                    <Input label={t('transport.travelDate')} type="date" value={bookingData.travelDate} onChange={(e) => handleBookingChange('travelDate', e.target.value)} error={errors.travelDate} required />
+                    <Select label={t('transport.numberOfPassengers')} value={bookingData.passengers} onChange={(e) => handleBookingChange('passengers', e.target.value)}>
+                      {[1, 2, 3, 4, 5, 6].map(n => <option key={n} value={n}>{t('transport.passengerCount', { count: n })}</option>)}
                     </Select>
                     <div className="flex items-end">
                       <div className="w-full p-4 bg-green-50 rounded-kiosk border border-green-200 text-center">
-                        <p className="text-sm text-green-600 font-semibold">Estimated Fare</p>
+                        <p className="text-sm text-green-600 font-semibold">{t('transport.estimatedFare')}</p>
                         <p className="text-kiosk-xl font-bold text-green-700">₹{calculateFare()}</p>
                       </div>
                     </div>
@@ -543,18 +543,18 @@ const Transport = () => {
 
               {selectedCategory === 'busTicket' && (
                 <>
-                  <Select label="Select Bus Route" value={bookingData.busRoute} onChange={(e) => handleBookingChange('busRoute', e.target.value)} error={errors.busRoute} required>
-                    <option value="">Choose a route</option>
+                  <Select label={t('transport.selectBusRoute')} value={bookingData.busRoute} onChange={(e) => handleBookingChange('busRoute', e.target.value)} error={errors.busRoute} required>
+                    <option value="">{t('transport.chooseRoute')}</option>
                     {busRoutes.map(r => <option key={r.id} value={r.id}>{r.name} — ₹{r.fare}</option>)}
                   </Select>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Input label="Travel Date" type="date" value={bookingData.travelDate} onChange={(e) => handleBookingChange('travelDate', e.target.value)} error={errors.travelDate} required />
-                    <Select label="Passengers" value={bookingData.passengers} onChange={(e) => handleBookingChange('passengers', e.target.value)}>
-                      {[1, 2, 3, 4, 5, 6].map(n => <option key={n} value={n}>{n} Passenger{n > 1 ? 's' : ''}</option>)}
+                    <Input label={t('transport.travelDate')} type="date" value={bookingData.travelDate} onChange={(e) => handleBookingChange('travelDate', e.target.value)} error={errors.travelDate} required />
+                    <Select label={t('transport.passengers')} value={bookingData.passengers} onChange={(e) => handleBookingChange('passengers', e.target.value)}>
+                      {[1, 2, 3, 4, 5, 6].map(n => <option key={n} value={n}>{t('transport.passengerCount', { count: n })}</option>)}
                     </Select>
                     <div className="flex items-end">
                       <div className="w-full p-4 bg-green-50 rounded-kiosk border border-green-200 text-center">
-                        <p className="text-sm text-green-600 font-semibold">Estimated Fare</p>
+                        <p className="text-sm text-green-600 font-semibold">{t('transport.estimatedFare')}</p>
                         <p className="text-kiosk-xl font-bold text-green-700">₹{calculateFare()}</p>
                       </div>
                     </div>
@@ -578,10 +578,10 @@ const Transport = () => {
                     ))}
                   </div>
                   {errors.passType && <p className="text-red-500 text-sm">{errors.passType}</p>}
-                  <Input label="Start Date" type="date" value={bookingData.travelDate} onChange={(e) => handleBookingChange('travelDate', e.target.value)} error={errors.travelDate} required />
+                  <Input label={t('transport.startDate')} type="date" value={bookingData.travelDate} onChange={(e) => handleBookingChange('travelDate', e.target.value)} error={errors.travelDate} required />
                   {bookingData.passType && (
                     <div className="p-4 bg-green-50 rounded-kiosk border border-green-200 text-center">
-                      <p className="text-sm text-green-600 font-semibold">Pass Cost</p>
+                      <p className="text-sm text-green-600 font-semibold">{t('transport.passCost')}</p>
                       <p className="text-kiosk-xl font-bold text-green-700">₹{calculateFare()}</p>
                     </div>
                   )}
@@ -591,7 +591,7 @@ const Transport = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-between pt-6 border-t">
                 <Button variant="secondary" onClick={() => { setView('categories'); setErrors({}); }} size="large">{t('app.back')}</Button>
                 <Button onClick={handleBookTicket} size="xlarge">
-                  {selectedCategory === 'busPass' ? 'Purchase Pass' : 'Book Ticket'} — ₹{calculateFare()}
+                  {selectedCategory === 'busPass' ? t('transport.purchasePass') : t('transport.bookTicket')} — ₹{calculateFare()}
                 </Button>
               </div>
             </div>
@@ -619,7 +619,7 @@ const Transport = () => {
           <div className="bg-white rounded-kiosk-lg shadow-kiosk p-6 md:p-8">
             <div className="mb-6 p-4 bg-orange-50 rounded-kiosk border border-orange-200">
               <p className="text-kiosk-base font-semibold text-orange-800">
-                Reporting: {t(`transport.${selectedCategory}`)}
+                {t('transport.reportingLabel')}: {t(`transport.${selectedCategory}`)}
               </p>
             </div>
 
@@ -672,7 +672,7 @@ const Transport = () => {
           <div className="bg-gray-50 rounded-kiosk p-4 space-y-2">
             <p><strong>{t('form.name')}:</strong> {formData.name}</p>
             <p><strong>{t('form.mobile')}:</strong> {formData.mobile}</p>
-            <p><strong>Category:</strong> {t(`transport.${selectedCategory}`)}</p>
+            <p><strong>{t('transport.categoryLabel')}:</strong> {t(`transport.${selectedCategory}`)}</p>
           </div>
           <div className="flex gap-4 justify-end pt-4">
             <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>{t('app.cancel')}</Button>

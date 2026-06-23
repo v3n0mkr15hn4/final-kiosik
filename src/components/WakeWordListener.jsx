@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Mic } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAccessibility } from './AccessibilityProvider';
 
 const getBaseLang = (language) => (language || 'en').toLowerCase().split('-')[0];
@@ -11,6 +12,7 @@ const getBaseLang = (language) => (language || 'en').toLowerCase().split('-')[0]
  * Uses continuous Web Speech API recognition.
  */
 const WakeWordListener = () => {
+  const { t } = useTranslation();
   const { userMode, setUserMode } = useAccessibility();
   const [isListening, setIsListening] = useState(false);
   const [detected, setDetected] = useState(false);
@@ -44,19 +46,11 @@ const WakeWordListener = () => {
     sessionStorage.setItem('userMode', 'blind');
     sessionStorage.setItem('voiceNavAlwaysOn', 'true');
 
-    const lang = getBaseLang(localStorage.getItem('i18nextLng') || 'en');
-    const messages = {
-      en: 'Hello! Suvidha voice mode activated. I am now in visually impaired mode. You can use voice commands to navigate. Say help for available commands.',
-      hi: 'नमस्ते! सुविधा वॉइस मोड सक्रिय। अब मैं दृष्टिबाधित मोड में हूं। नेविगेट करने के लिए वॉइस कमांड बोलें। उपलब्ध कमांड के लिए मदद बोलें।',
-      as: 'নমস্কাৰ! সুবিধা ভয়েছ মোড সক্ৰিয় হৈছে। এতিয়া মই দৃষ্টিহীন মোডত আছোঁ। নেভিগেট কৰিবলৈ ভয়েছ কমাণ্ড ব্যৱহাৰ কৰক। উপলব্ধ কমাণ্ডৰ বাবে সহায় বুলিব।',
-      ta: 'வணக்கம்! சுவிதா குரல் பயன்முறை செயல்படுத்தப்பட்டது. நான் பார்வை குறைபாடு பயன்முறையில் உள்ளேன். வழிசெலுத்த குரல் கட்டளைகளைப் பயன்படுத்துங்கள்.',
-    };
-
-    speak(messages[lang] || messages.en);
+    speak(t('wakeword.activationMessage'));
 
     // Reset detection indicator after 3s
     setTimeout(() => setDetected(false), 3000);
-  }, [setUserMode, speak]);
+  }, [setUserMode, speak, t]);
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -146,10 +140,10 @@ const WakeWordListener = () => {
       {isListening && userMode !== 'blind' && (
         <div
           className="fixed bottom-6 right-24 z-[9990] flex items-center space-x-1 bg-gray-800/80 text-white px-2 py-1 rounded-full text-xs"
-          title="Say 'Hey Suvidha' for voice mode"
+          title={t('wakeword.indicatorLabel')}
         >
           <Mic className="w-3 h-3 text-green-400 animate-pulse" />
-          <span className="hidden sm:inline">Hey Suvidha</span>
+          <span className="hidden sm:inline">{t('wakeword.indicatorLabel')}</span>
         </div>
       )}
 
@@ -158,8 +152,8 @@ const WakeWordListener = () => {
         <div className="fixed inset-0 z-[10000] bg-purple-900/90 flex items-center justify-center animate-fade-in pointer-events-none">
           <div className="text-center text-white">
             <Mic className="w-24 h-24 mx-auto mb-4 animate-pulse" />
-            <h2 className="text-4xl font-bold mb-2">Suvidha Activated</h2>
-            <p className="text-xl opacity-80">Switching to Voice Mode...</p>
+            <h2 className="text-4xl font-bold mb-2">{t('wakeword.activatedTitle')}</h2>
+            <p className="text-xl opacity-80">{t('wakeword.switchingToVoice')}</p>
           </div>
         </div>
       )}

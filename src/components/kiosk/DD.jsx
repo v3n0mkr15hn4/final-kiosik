@@ -1,5 +1,5 @@
 // Department dot — a coloured icon-block used to mark service categories.
-// Source: kiosk design/designs/kiosk-shell.jsx:156-162
+// Source: docs/kiosk-design/designs/kiosk-shell.jsx:156-162
 
 import React from 'react';
 import { I } from './icons';

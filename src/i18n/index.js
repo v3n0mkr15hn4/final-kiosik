@@ -6,15 +6,55 @@ import enTranslation from './locales/en.json';
 import hiTranslation from './locales/hi.json';
 import taTranslation from './locales/ta.json';
 import asTranslation from './locales/as.json';
+import bnTranslation from './locales/bn.json';
+import teTranslation from './locales/te.json';
+import mrTranslation from './locales/mr.json';
+import guTranslation from './locales/gu.json';
+import knTranslation from './locales/kn.json';
+import mlTranslation from './locales/ml.json';
+import paTranslation from './locales/pa.json';
+import orTranslation from './locales/or.json';
+import urTranslation from './locales/ur.json';
+import maiTranslation from './locales/mai.json';
+import kokTranslation from './locales/kok.json';
+import doiTranslation from './locales/doi.json';
+import neTranslation from './locales/ne.json';
+import saTranslation from './locales/sa.json';
+import brxTranslation from './locales/brx.json';
+import ksTranslation from './locales/ks.json';
+import mniTranslation from './locales/mni.json';
+import satTranslation from './locales/sat.json';
+import sdTranslation from './locales/sd.json';
 import { ALL_LANGUAGES } from '../utils/languageConfig';
 import { translateAllStrings } from '../utils/translationService';
 
-// Static resources for languages with full JSON locale files
+// Static resources — all 23 languages ship with a translated JSON locale file.
+// Dynamic Sarvam-API translation (loadDynamicTranslations below) only kicks in
+// as a fallback for a language code that isn't in this list.
 const resources = {
   en: enTranslation,
   hi: hiTranslation,
   ta: taTranslation,
-  as: asTranslation
+  as: asTranslation,
+  bn: bnTranslation,
+  te: teTranslation,
+  mr: mrTranslation,
+  gu: guTranslation,
+  kn: knTranslation,
+  ml: mlTranslation,
+  pa: paTranslation,
+  or: orTranslation,
+  ur: urTranslation,
+  mai: maiTranslation,
+  kok: kokTranslation,
+  doi: doiTranslation,
+  ne: neTranslation,
+  sa: saTranslation,
+  brx: brxTranslation,
+  ks: ksTranslation,
+  mni: mniTranslation,
+  sat: satTranslation,
+  sd: sdTranslation
 };
 
 i18n
@@ -41,8 +81,8 @@ i18n
  * @returns {Promise<boolean>} Whether translations were loaded successfully
  */
 export async function loadDynamicTranslations(langCode) {
-  // Already has static translations
-  if (['en', 'hi', 'ta', 'as'].includes(langCode)) {
+  // Already has a static translation bundle — no API call needed
+  if (Object.prototype.hasOwnProperty.call(resources, langCode)) {
     return true;
   }
 
@@ -87,8 +127,9 @@ export function getSupportedLanguages() {
 
 // ← NEW: Dynamically set <html lang=""> and dir for WCAG + screen readers
 i18n.on('languageChanged', (lng) => {
-  document.documentElement.lang = lng;
-  document.documentElement.dir = ['ur', 'ks', 'sd'].includes(lng) ? 'rtl' : 'ltr';
+  const baseLanguage = (lng || 'en').toLowerCase().split('-')[0];
+  document.documentElement.lang = baseLanguage;
+  document.documentElement.dir = ['ur', 'ks', 'sd'].includes(baseLanguage) ? 'rtl' : 'ltr';
 });
 
 export default i18n;

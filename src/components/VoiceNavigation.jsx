@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Mic, MicOff, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { speechToText, textToSpeech } from '../utils/sarvamAPI';
 import { getSarvamLangCode, isSTTSupported, isTTSSupported } from '../utils/languageConfig';
 import {
@@ -510,6 +510,16 @@ const VoiceNavigation = () => {
     }
   }, [location.pathname, i18n.language, processCommand]);
 
+  // Triggered from the kiosk shell's bottom-bar "Voice mode" button (VK.jsx)
+  const toggleListeningRef = useRef(toggleListening);
+  toggleListeningRef.current = toggleListening;
+
+  useEffect(() => {
+    const handleActivateVoice = () => toggleListeningRef.current();
+    window.addEventListener('suvidha:activate-ai', handleActivateVoice);
+    return () => window.removeEventListener('suvidha:activate-ai', handleActivateVoice);
+  }, []);
+
   // Barge-in while TTS plays globally (for blind mode always-on)
   useEffect(() => {
     const isBlindMode = sessionStorage.getItem('voiceNavAlwaysOn') === 'true';
@@ -557,45 +567,31 @@ const VoiceNavigation = () => {
 
   const isBlindMode = sessionStorage.getItem('voiceNavAlwaysOn') === 'true';
 
+  // No floating button — listening is started via VK's bottom-bar "Voice mode"
+  // button (suvidha:activate-ai event, wired above). Only transient feedback
+  // renders here, anchored bottom-left while active.
+  if (!isBlindMode && !feedback && !(transcript && !isListening)) return null;
+
   return (
     <div className="fixed bottom-[260px] left-8 z-50 no-print" role="region" aria-label="Voice navigation">
       {isBlindMode && (
-        <div className="absolute bottom-24 left-0 bg-purple-700 text-white px-3 py-2 rounded-xl shadow-xl text-xs font-bold animate-pulse">
+        <div className="bg-purple-700 text-white px-3 py-2 rounded-xl shadow-xl text-xs font-bold animate-pulse">
           🔊 {t('voice.modeActive', 'Voice Mode Active')}
         </div>
       )}
 
       {feedback && (
-        <div className={`absolute ${isBlindMode ? 'bottom-32' : 'bottom-20'} left-0 bg-government-blue text-white px-4 py-3 rounded-xl shadow-xl animate-fade-in text-sm font-semibold max-w-[220px]`}>
+        <div className="mt-2 bg-government-blue text-white px-4 py-3 rounded-xl shadow-xl animate-fade-in text-sm font-semibold max-w-[220px]">
           {feedback}
         </div>
       )}
 
       {transcript && !isListening && (
-        <div className={`absolute ${isBlindMode ? 'bottom-48' : 'bottom-20'} left-0 bg-white text-gray-800 px-4 py-3 rounded-xl shadow-xl border-2 border-government-blue text-sm max-w-[250px]`}>
+        <div className="mt-2 bg-white text-gray-800 px-4 py-3 rounded-xl shadow-xl border-2 border-government-blue text-sm max-w-[250px]">
           <p className="font-semibold text-government-blue">{t('voice.heard', 'Heard')}:</p>
           <p>"{transcript}"</p>
         </div>
       )}
-
-      <button
-        onClick={toggleListening}
-        className={`
-          ${isBlindMode ? 'w-[180px] h-[180px]' : 'w-[160px] h-[160px]'} rounded-full shadow-xl flex items-center justify-center
-          transition-all duration-200 touch-manipulation
-          ${isListening
-            ? 'bg-red-500 text-white animate-pulse-slow scale-110'
-            : 'bg-green-600 text-white hover:bg-green-700 active:scale-95'}
-        `}
-        aria-label={isListening ? t('voice.stopListening', 'Stop listening') : t('voice.startListening', 'Start voice navigation')}
-        aria-pressed={isListening}
-        title={isListening ? 'Stop listening' : 'Voice command (tap to speak)'}
-      >
-        {isListening
-          ? <MicOff className={`${isBlindMode ? 'w-20 h-20' : 'w-16 h-16'}`} />
-          : <Mic className={`${isBlindMode ? 'w-20 h-20' : 'w-16 h-16'}`} />
-        }
-      </button>
     </div>
   );
 };

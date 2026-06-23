@@ -277,7 +277,7 @@ Security / compliance (high-level)
 Status: PARTIALLY IMPLEMENTED
 Evidence:
 - Inactivity auto-logout: src/App.jsx
-- Compliance docs present: COMPLIANCE_REPORT.txt, THREAT_MODEL.md
+- Compliance docs present: docs/reports/COMPLIANCE_REPORT.txt, docs/reports/THREAT_MODEL.md
 - Client-side input sanitation helpers mentioned in README; backend includes structured routes + SQLite persistence.
 Notes / gaps vs spec:
 - “Government IT and data security norms” are broader than what can be verified from a demo repo; treat as demonstrative rather than certified.

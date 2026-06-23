@@ -6,9 +6,9 @@
 import { test, expect } from '@playwright/test';
 import { mkdirSync } from 'fs';
 
-mkdirSync('test-results/screenshots', { recursive: true });
+mkdirSync('removable/test-results/screenshots', { recursive: true });
 
-const SS = (name) => ({ path: `test-results/screenshots/${name}.png` });
+const SS = (name) => ({ path: `removable/test-results/screenshots/${name}.png` });
 
 // Simulate logged-in citizen session
 async function loginAsGuest(page) {

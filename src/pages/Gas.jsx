@@ -279,7 +279,7 @@ const Gas = () => {
                   <h3 className="text-kiosk-base font-bold text-rose-800 mb-4">Meter Issue Details</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <Select
-                      label="Issue Type"
+                      label={t('gas.issueType')}
                       value={formData.meterIssueType || ''}
                       onChange={e => handleInputChange('meterIssueType', e.target.value)}
                       options={[
@@ -289,11 +289,11 @@ const Gas = () => {
                         { value: 'installation', label: 'New Meter Installation' },
                         { value: 'replacement', label: 'Replacement Required' },
                       ]}
-                      placeholder="Select issue type"
+                      placeholder={t('gas.selectIssueType')}
                       required
                     />
                     <Select
-                      label="Priority"
+                      label={t('gas.priority')}
                       value={formData.priority || ''}
                       onChange={e => handleInputChange('priority', e.target.value)}
                       options={[
@@ -301,7 +301,7 @@ const Gas = () => {
                         { value: 'urgent', label: '🟡 Urgent (3 days)' },
                         { value: 'normal', label: '🟢 Normal (10 days)' },
                       ]}
-                      placeholder="Select priority"
+                      placeholder={t('gas.selectPriority')}
                     />
                   </div>
                 </div>

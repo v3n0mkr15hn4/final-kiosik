@@ -1,5 +1,5 @@
 // Numeric keypad — 1-9, ⌫, 0, ✓
-// Layout from kiosk design/designs/vertical-pages-v1.jsx:198 + primitives.css `.keypad`
+// Layout from docs/kiosk-design/designs/vertical-pages-v1.jsx:198 + primitives.css `.keypad`
 
 import React from 'react';
 

@@ -209,14 +209,14 @@ const TrackStatus = () => {
                   <div className="flex items-center gap-3">
                     {getStatusBadge(result.status)}
                     <button
-                      aria-label="Download status as PDF"
+                      aria-label={t('tracking.downloadPdf')}
                       className="p-2 bg-white/10 rounded-full hover:bg-white/20"
                       onClick={() => window.print()}
                     >
                       <Download className="w-5 h-5" />
                     </button>
                     <button
-                      aria-label="Print status"
+                      aria-label={t('tracking.printStatus')}
                       className="p-2 bg-white/10 rounded-full hover:bg-white/20"
                       onClick={() => window.print()}
                     >
@@ -236,25 +236,25 @@ const TrackStatus = () => {
                   )}
                   <div>
                     {slaCountdown.overdue ? (
-                      <p className="text-sm font-semibold text-red-700">SLA breached — this request is overdue. Escalation may be initiated.</p>
+                      <p className="text-sm font-semibold text-red-700">{t('tracking.slaBreached')}</p>
                     ) : (
                       <p className="text-sm font-semibold text-amber-700">
-                        SLA deadline: {slaCountdown.daysLeft} working day{slaCountdown.daysLeft !== 1 ? 's' : ''} remaining
+                        {t('tracking.slaDeadline', { count: slaCountdown.daysLeft })}
                         &nbsp;({slaCountdown.dueDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })})
                       </p>
                     )}
-                    <p className="text-xs text-gray-500 mt-0.5">Committed SLA: {result.sla}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{t('tracking.committedSla')}: {result.sla}</p>
                   </div>
                   {slaCountdown.overdue && !escalated && (
                     <button
                       onClick={() => {
                         setEscalated(true);
-                        alert(`Escalation raised for ${result.requestId}. Senior Officer notified via SMS.`);
+                        alert(t('tracking.escalationRaised', { requestId: result.requestId }));
                       }}
                       className="ml-auto flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl text-sm font-bold hover:bg-red-700 touch-manipulation"
-                      aria-label="Escalate to senior officer"
+                      aria-label={t('tracking.escalate')}
                     >
-                      <ChevronsUp className="w-4 h-4" /> Escalate
+                      <ChevronsUp className="w-4 h-4" /> {t('tracking.escalate')}
                     </button>
                   )}
                   {escalated && (

@@ -25,7 +25,7 @@ export const INDIAN_LANGUAGES = [
   { code:'ne',  name:'Nepali',    native:'नेपाली',         script:'Devanagari',  provider:'hf',     rtl:false },
   { code:'sa',  name:'Sanskrit',  native:'संस्कृतम्',      script:'Devanagari',  provider:'hf',     rtl:false },
   { code:'mni', name:'Manipuri',  native:'ꯃꯤꯇꯩꯂꯣꯟ',        script:'Meitei Mayek',provider:'hf',     rtl:false },
-  { code:'bo',  name:'Bodo',      native:'बड़ो',            script:'Devanagari',  provider:'hf',     rtl:false },
+  { code:'brx', name:'Bodo',      native:'बड़ो',            script:'Devanagari',  provider:'hf',     rtl:false },
   { code:'sat', name:'Santali',   native:'ᱥᱟᱱᱛᱟᱲᱤ',       script:'Ol Chiki',    provider:'hf',     rtl:false },
 ];
 

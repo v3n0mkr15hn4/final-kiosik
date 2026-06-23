@@ -308,10 +308,10 @@ const Municipal = () => {
                 <div className="p-4 bg-indigo-50 rounded-kiosk border border-indigo-200">
                   <h3 className="text-kiosk-base font-bold text-indigo-800 mb-4">Water Connection Details (SRS Module 17)</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    <Select label="Connection Type" value={formData.waterConnectionType || ''} onChange={e => handleInputChange('waterConnectionType', e.target.value)} options={[{value:'domestic',label:'🏠 Domestic (Household)'},{value:'commercial',label:'🏢 Commercial'},{value:'industrial',label:'🏭 Industrial'},{value:'institutional',label:'🏫 Institutional/Govt'},{value:'upgrade',label:'⬆️ Upgrade Existing'}]} placeholder="Select connection type" required />
-                    <Select label="Pipe Size" value={formData.pipeSize || ''} onChange={e => handleInputChange('pipeSize', e.target.value)} options={[{value:'0.5inch',label:'½ inch (Standard domestic)'},{value:'1inch',label:'1 inch (Small commercial)'},{value:'2inch',label:'2 inch (Large commercial)'},{value:'3inch',label:'3 inch+ (Industrial)'}]} placeholder="Select pipe size" />
-                    <Input label="Plot / Property Area (sq ft)" type="number" value={formData.plotArea || ''} onChange={e => handleInputChange('plotArea', e.target.value)} placeholder="e.g. 1500" />
-                    <Input label="Number of Floors / Units" type="number" value={formData.floorCount || ''} onChange={e => handleInputChange('floorCount', e.target.value)} placeholder="e.g. 3" />
+                    <Select label={t('municipal.connectionType')} value={formData.waterConnectionType || ''} onChange={e => handleInputChange('waterConnectionType', e.target.value)} options={[{value:'domestic',label:'🏠 Domestic (Household)'},{value:'commercial',label:'🏢 Commercial'},{value:'industrial',label:'🏭 Industrial'},{value:'institutional',label:'🏫 Institutional/Govt'},{value:'upgrade',label:'⬆️ Upgrade Existing'}]} placeholder={t('municipal.selectConnectionType')} required />
+                    <Select label={t('municipal.pipeSize')} value={formData.pipeSize || ''} onChange={e => handleInputChange('pipeSize', e.target.value)} options={[{value:'0.5inch',label:'½ inch (Standard domestic)'},{value:'1inch',label:'1 inch (Small commercial)'},{value:'2inch',label:'2 inch (Large commercial)'},{value:'3inch',label:'3 inch+ (Industrial)'}]} placeholder={t('municipal.selectPipeSize')} />
+                    <Input label={t('municipal.plotArea')} type="number" value={formData.plotArea || ''} onChange={e => handleInputChange('plotArea', e.target.value)} placeholder="e.g. 1500" />
+                    <Input label={t('municipal.numberOfFloors')} type="number" value={formData.floorCount || ''} onChange={e => handleInputChange('floorCount', e.target.value)} placeholder="e.g. 3" />
                   </div>
                 </div>
               )}

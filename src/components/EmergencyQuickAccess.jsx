@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Phone, X, AlertTriangle, Shield } from 'lucide-react';
 
 // Pages that have the new VK shell with a built-in EMERGENCY button in the
@@ -9,6 +10,8 @@ import { Phone, X, AlertTriangle, Shield } from 'lucide-react';
 const KIOSK_SHELL_ROUTES = new Set([
   '/',
   '/login',
+  '/language-select',
+  '/voice-select',
   '/mode-select',
   '/home',
   '/dashboard',
@@ -43,20 +46,20 @@ const KIOSK_SHELL_ROUTES = new Set([
  */
 
 const EMERGENCY_NUMBERS = [
-  { name: 'Ambulance', nameHi: 'एम्बुलेंस', nameTa: 'ஆம்புலன்ஸ்', number: '108', color: 'bg-red-600', icon: '🚑' },
-  { name: 'Police', nameHi: 'पुलिस', nameTa: 'காவல்துறை', number: '100', color: 'bg-blue-700', icon: '🚔' },
-  { name: 'Fire Department', nameHi: 'दमकल', nameTa: 'தீயணைப்பு', number: '101', color: 'bg-orange-600', icon: '🚒' },
-  { name: 'Women Helpline', nameHi: 'महिला हेल्पलाइन', nameTa: 'பெண்கள் உதவி', number: '1091', color: 'bg-pink-600', icon: '👩' },
-  { name: 'Child Helpline', nameHi: 'बाल हेल्पलाइन', nameTa: 'குழந்தை உதவி', number: '1098', color: 'bg-green-600', icon: '👶' },
-  { name: 'Disaster Management', nameHi: 'आपदा प्रबंधन', nameTa: 'பேரிடர் மேலாண்மை', number: '1078', color: 'bg-yellow-600', icon: '⚠️' },
-  { name: 'Suicide Prevention (iCall)', nameHi: 'आत्महत्या रोकथाम', nameTa: 'தற்கொலை தடுப்பு', number: '9152987821', color: 'bg-purple-600', icon: '💜' },
-  { name: 'Senior Citizen Helpline', nameHi: 'वरिष्ठ नागरिक', nameTa: 'மூத்த குடிமக்கள்', number: '14567', color: 'bg-teal-600', icon: '👴' },
-  { name: 'Road Accident Emergency', nameHi: 'सड़क दुर्घटना', nameTa: 'சாலை விபத்து', number: '1073', color: 'bg-gray-700', icon: '🚗' },
+  { id: 'ambulance', number: '108', color: 'bg-red-600', icon: '🚑' },
+  { id: 'police', number: '100', color: 'bg-blue-700', icon: '🚔' },
+  { id: 'fire', number: '101', color: 'bg-orange-600', icon: '🚒' },
+  { id: 'womenHelpline', number: '1091', color: 'bg-pink-600', icon: '👩' },
+  { id: 'childHelpline', number: '1098', color: 'bg-green-600', icon: '👶' },
+  { id: 'disasterMgmt', number: '1078', color: 'bg-yellow-600', icon: '⚠️' },
+  { id: 'suicidePrevention', number: '9152987821', color: 'bg-purple-600', icon: '💜' },
+  { id: 'seniorCitizen', number: '14567', color: 'bg-teal-600', icon: '👴' },
+  { id: 'roadAccident', number: '1073', color: 'bg-gray-700', icon: '🚗' },
 ];
 
 const EmergencyQuickAccess = () => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const lang = localStorage.getItem('i18nextLng') || 'en';
   const location = useLocation();
   const onKioskShell = KIOSK_SHELL_ROUTES.has(location.pathname);
 
@@ -67,11 +70,7 @@ const EmergencyQuickAccess = () => {
     return () => window.removeEventListener('suvidha:open-emergency', handler);
   }, []);
 
-  const getName = (item) => {
-    if (lang === 'hi') return item.nameHi || item.name;
-    if (lang === 'ta') return item.nameTa || item.name;
-    return item.name;
-  };
+  const getName = (item) => t(`emergency.contacts.${item.id}`);
 
   return (
     <>
@@ -82,7 +81,7 @@ const EmergencyQuickAccess = () => {
           className="fixed z-[9998] bg-red-600 hover:bg-red-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 animate-pulse"
           style={{ bottom: 260, left: 32, width: 160, height: 160 }}
           aria-label="Emergency SOS"
-          title="Emergency Numbers"
+          title={t('emergency.title')}
         >
           <span className="text-[40px] font-black">SOS</span>
         </button>
@@ -101,10 +100,10 @@ const EmergencyQuickAccess = () => {
                 <Shield className="w-8 h-8" />
                 <div>
                   <h2 className="text-xl font-bold">
-                    {lang === 'hi' ? '🆘 आपातकालीन नंबर' : lang === 'ta' ? '🆘 அவசர எண்கள்' : '🆘 Emergency Numbers'}
+                    🆘 {t('emergency.title')}
                   </h2>
                   <p className="text-sm opacity-90">
-                    {lang === 'hi' ? 'लॉगिन आवश्यक नहीं' : lang === 'ta' ? 'உள்நுழைவு தேவையில்லை' : 'No login required'}
+                    {t('emergency.noLoginRequired')}
                   </p>
                 </div>
               </div>
@@ -130,7 +129,7 @@ const EmergencyQuickAccess = () => {
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-gray-800 text-lg">{getName(item)}</p>
                     <p className="text-sm text-gray-500">
-                      {lang === 'hi' ? 'नंबर डायल करें' : lang === 'ta' ? 'எண்ணை அழைக்கவும்' : 'Tap to call'}
+                      {t('emergency.tapToCall')}
                     </p>
                   </div>
                   <div className="flex items-center space-x-2 flex-shrink-0">
@@ -144,11 +143,7 @@ const EmergencyQuickAccess = () => {
             {/* Footer */}
             <div className="p-4 bg-gray-50 rounded-b-2xl text-center">
               <p className="text-xs text-gray-500">
-                {lang === 'hi'
-                  ? 'सभी नंबर 24/7 उपलब्ध हैं। कॉल सरकारी हेल्पलाइन पर जाती है।'
-                  : lang === 'ta'
-                  ? 'அனைத்து எண்களும் 24/7 கிடைக்கும்.'
-                  : 'All numbers are 24/7. Calls connect to government helplines.'}
+                {t('emergency.footerNote')}
               </p>
             </div>
           </div>

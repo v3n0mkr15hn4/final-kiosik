@@ -296,7 +296,7 @@ const Electricity = () => {
                   <h3 className="text-kiosk-base font-bold text-amber-800 mb-4">Connection & Load Details</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <Select
-                      label="Premises Type"
+                      label={t('electricity.premisesType')}
                       value={formData.premisesType || ''}
                       onChange={e => handleInputChange('premisesType', e.target.value)}
                       options={[
@@ -305,11 +305,11 @@ const Electricity = () => {
                         { value: 'industrial', label: 'Industrial' },
                         { value: 'agricultural', label: 'Agricultural' },
                       ]}
-                      placeholder="Select premises type"
+                      placeholder={t('electricity.selectPremisesType')}
                       required
                     />
                     <Select
-                      label="Connection Type"
+                      label={t('electricity.connectionType')}
                       value={formData.connectionType || ''}
                       onChange={e => handleInputChange('connectionType', e.target.value)}
                       options={[
@@ -317,11 +317,11 @@ const Electricity = () => {
                         { value: 'three_phase', label: 'Three Phase (3φ)' },
                         { value: 'ht', label: 'HT Connection (>100 kVA)' },
                       ]}
-                      placeholder="Select connection type"
+                      placeholder={t('electricity.selectConnectionType')}
                       required
                     />
                     <Input
-                      label="Proposed Sanctioned Load (kW)"
+                      label={t('electricity.proposedLoad')}
                       type="number"
                       value={formData.sanctionedLoad || ''}
                       onChange={e => handleInputChange('sanctionedLoad', e.target.value)}
@@ -329,7 +329,7 @@ const Electricity = () => {
                       required
                     />
                     <Input
-                      label="Plot / Floor Area (sq ft)"
+                      label={t('electricity.plotArea')}
                       type="number"
                       value={formData.plotArea || ''}
                       onChange={e => handleInputChange('plotArea', e.target.value)}
@@ -351,7 +351,7 @@ const Electricity = () => {
                       placeholder={t('electricity.enterMeterNumber')}
                     />
                     <Select
-                      label="Issue Type"
+                      label={t('electricity.issueType')}
                       value={formData.meterIssueType || ''}
                       onChange={e => handleInputChange('meterIssueType', e.target.value)}
                       options={[
@@ -361,11 +361,11 @@ const Electricity = () => {
                         { value: 'burnt', label: 'Burnt / Fire Damage' },
                         { value: 'shifting', label: 'Shifting Request' },
                       ]}
-                      placeholder="Select issue type"
+                      placeholder={t('electricity.selectIssueType')}
                       required
                     />
                     <Select
-                      label="Priority / Severity"
+                      label={t('electricity.priority')}
                       value={formData.priority || ''}
                       onChange={e => handleInputChange('priority', e.target.value)}
                       options={[
@@ -373,12 +373,12 @@ const Electricity = () => {
                         { value: 'urgent', label: '🟡 Urgent (3 days TAT)' },
                         { value: 'normal', label: '🟢 Normal (7–10 days TAT)' },
                       ]}
-                      placeholder="Select priority"
+                      placeholder={t('electricity.selectPriority')}
                       required
                     />
                     {selectedCategory === 'meterShifting' && (
                       <Input
-                        label="New Meter Location"
+                        label={t('electricity.newMeterLocation')}
                         value={formData.newMeterLocation || ''}
                         onChange={e => handleInputChange('newMeterLocation', e.target.value)}
                         placeholder="e.g. Main entrance, ground floor"

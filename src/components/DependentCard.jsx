@@ -1,26 +1,26 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { User, Calendar, Edit2, Trash2, Heart, Baby } from 'lucide-react';
 
 /**
  * DependentCard — Reusable card for displaying a dependent (child or elderly parent).
  * Shows: name, relationship, age/DOB, gender, and action buttons (edit/remove).
- * Supports multilingual (en/hi/ta).
  */
-const DependentCard = ({ dependent, lang = 'en', onEdit, onRemove }) => {
-  const relationLabels = {
-    child: { en: 'Child', hi: 'बच्चा', ta: 'குழந்தை' },
-    elderly_parent: { en: 'Elderly Parent', hi: 'वृद्ध माता-पिता', ta: 'முதியோர் பெற்றோர்' },
-    spouse: { en: 'Spouse', hi: 'जीवनसाथी', ta: 'வாழ்க்கைத் துணை' },
+const DependentCard = ({ dependent, onEdit, onRemove }) => {
+  const { t } = useTranslation();
+
+  const relationKeys = {
+    child: 'familyProfile.child',
+    elderly_parent: 'familyProfile.elderlyParent',
+  };
+  const genderKeys = {
+    Male: 'familyProfile.male',
+    Female: 'familyProfile.female',
+    Other: 'familyProfile.other',
   };
 
-  const genderLabels = {
-    Male: { en: 'Male', hi: 'पुरुष', ta: 'ஆண்' },
-    Female: { en: 'Female', hi: 'महिला', ta: 'பெண்' },
-    Other: { en: 'Other', hi: 'अन्य', ta: 'மற்றவை' },
-  };
-
-  const relation = relationLabels[dependent.relationship]?.[lang] || dependent.relationship;
-  const gender = genderLabels[dependent.gender]?.[lang] || dependent.gender;
+  const relation = relationKeys[dependent.relationship] ? t(relationKeys[dependent.relationship]) : dependent.relationship;
+  const gender = genderKeys[dependent.gender] ? t(genderKeys[dependent.gender]) : dependent.gender;
 
   const isChild = dependent.relationship === 'child';
   const iconBg = isChild ? 'from-pink-400 to-rose-500' : 'from-amber-400 to-orange-500';
@@ -48,17 +48,17 @@ const DependentCard = ({ dependent, lang = 'en', onEdit, onRemove }) => {
             </span>
             <span className="text-xs text-gray-500 flex items-center gap-1">
               <Calendar className="w-3 h-3" />
-              {lang === 'hi' ? 'आयु' : lang === 'ta' ? 'வயது' : 'Age'}: {dependent.age}
+              {t('familyProfile.age')}: {dependent.age}
             </span>
           </div>
           {dependent.aadhaar && (
             <p className="text-xs text-gray-400 mt-1">
-              Aadhaar: XXXX-XXXX-{dependent.aadhaar.slice(-4)}
+              {t('familyProfile.aadhaar')}: XXXX-XXXX-{dependent.aadhaar.slice(-4)}
             </p>
           )}
           {dependent.disability && (
             <p className="text-xs text-purple-600 mt-1">
-              ♿ {lang === 'hi' ? 'विकलांगता' : lang === 'ta' ? 'ஊனம்' : 'Disability'}: {dependent.disability}
+              ♿ {t('familyProfile.disability')}: {dependent.disability}
             </p>
           )}
         </div>
@@ -69,7 +69,7 @@ const DependentCard = ({ dependent, lang = 'en', onEdit, onRemove }) => {
             <button
               onClick={() => onEdit(dependent)}
               className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
-              aria-label={`Edit ${dependent.name}`}
+              aria-label={t('familyProfile.editName', { name: dependent.name })}
             >
               <Edit2 className="w-4 h-4" />
             </button>
@@ -78,7 +78,7 @@ const DependentCard = ({ dependent, lang = 'en', onEdit, onRemove }) => {
             <button
               onClick={() => onRemove(dependent.id)}
               className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
-              aria-label={`Remove ${dependent.name}`}
+              aria-label={t('familyProfile.removeName', { name: dependent.name })}
             >
               <Trash2 className="w-4 h-4" />
             </button>

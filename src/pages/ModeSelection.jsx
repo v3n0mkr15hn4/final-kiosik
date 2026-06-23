@@ -1,6 +1,6 @@
 // ──────────────────────────────────────────────────────────────────
 // ModeSelection — Vertical Kiosk (1080×1920)
-// Design source: kiosk design/designs/vertical-pages-v1.jsx:271-310 (VMode)
+// Design source: docs/kiosk-design/designs/vertical-pages-v1.jsx:271-310 (VMode)
 // Keeps existing wiring: useAccessibility, sessionStorage userMode,
 // voiceNavAlwaysOn flag, TTS announcements, language change.
 // ──────────────────────────────────────────────────────────────────
@@ -14,6 +14,8 @@ import { changeLanguageSafe } from '../i18n';
 import { speak } from '../utils/ttsService';
 import { startSTT, stopSTT } from '../ai/voice/speechRecognition';
 import { VK, I, ic, DD } from '../components/kiosk';
+
+const RTL_LANGS = ['ur', 'ks', 'sd'];
 
 const MODE_LIST = [
   {
@@ -74,7 +76,7 @@ const MODE_TTS = {
 };
 
 export default function ModeSelection() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { setFontSize, setHighContrast, setReducedMotion, setUserMode, screenReaderAnnounce } = useAccessibility();
 
@@ -82,6 +84,8 @@ export default function ModeSelection() {
   const [selectedMode, setSelectedMode] = useState(autoDetected || 'normal');
   const [step, setStep] = useState('mode');           // 'mode' | 'language'
   const [loadingLang, setLoadingLang] = useState(null);
+  const activeLanguage = (i18n.resolvedLanguage || i18n.language || 'en').toLowerCase().split('-')[0];
+  const headingDirection = RTL_LANGS.includes(activeLanguage) ? 'rtl' : 'ltr';
 
   const handleSelect = (id) => {
     setSelectedMode(id);
@@ -166,8 +170,9 @@ export default function ModeSelection() {
     return (
       <VK helpBack onBack={() => setStep('mode')}>
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <h1 className="h2">Choose Language</h1>
-          <p className="body-l" style={{ marginTop: 12 }}>Select your preferred language</p>
+          <h1 className="h2" style={{ direction: headingDirection, fontFamily: 'var(--font-multi)' }}>
+            {t('language.selectionTitle')}
+          </h1>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 24 }}>
@@ -176,7 +181,7 @@ export default function ModeSelection() {
               key={l.code}
               type="button"
               className="tile"
-              style={{ minHeight: 140, alignItems: 'center', justifyContent: 'center', gap: 6, opacity: loadingLang === l.code ? 0.5 : 1 }}
+              style={{ minHeight: 140, alignItems: 'center', justifyContent: 'center', gap: 6, opacity: loadingLang === l.code ? 0.5 : 1, direction: RTL_LANGS.includes(l.code) ? 'rtl' : 'ltr' }}
               disabled={loadingLang !== null}
               onClick={() => handleLanguagePick(l.code)}
             >

@@ -1,5 +1,5 @@
 // SUVIDHA — Radiant Arch logo.
-// Source: kiosk design/designs/kiosk-shell.jsx:7-17
+// Source: docs/kiosk-design/designs/kiosk-shell.jsx:7-17
 
 import React from 'react';
 

@@ -1,6 +1,6 @@
 // ──────────────────────────────────────────────────────────────────
 // SUVIDHA Vertical Kiosk · Status row (Weather + AQI + Clock + Connectivity)
-// Source: kiosk design/designs/kiosk-shell.jsx:75-119
+// Source: docs/kiosk-design/designs/kiosk-shell.jsx:75-119
 // Pulls live data from useEnvironment(); accepts explicit `status` props
 // to override (used by Dashboard for the AQI-Moderate showcase).
 // ──────────────────────────────────────────────────────────────────

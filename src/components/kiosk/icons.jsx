@@ -1,6 +1,6 @@
 // ──────────────────────────────────────────────────────────────────
 // SUVIDHA Vertical Kiosk · Icon set
-// Verbatim port of the `ic` map from `kiosk design/designs/kiosk-shell.jsx:25`.
+// Verbatim port of the `ic` map from `docs/kiosk-design/designs/kiosk-shell.jsx:25`.
 // We use inline SVG (not lucide-react) because the project pins lucide-react
 // at ^1.16.0 — a divergent old line where icon coverage isn't guaranteed.
 // All icons render at 24×24 viewBox; size scales via the `size` prop on <I>.
@@ -76,6 +76,7 @@ export const ic = {
   edit:     <g><path d="M16 4 L20 8 L8 20 H4 V16 Z" /><path d="M13 7 L17 11" /></g>,
   link:     <g><path d="M10 14 L14 10" /><path d="M11 6 L15 2 A4 4 0 0 1 22 9 L18 13" /><path d="M13 18 L9 22 A4 4 0 0 1 2 15 L6 11" /></g>,
   dot:      <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />,
+  chat:     <g><path d="M4 5 H20 V16 H9 L5 20 V16 H4 Z" /><path d="M8 9 H16 M8 12.5 H13" /></g>,
 };
 
 // Pick the right weather icon glyph from an iconKey string ('sun'|'cloud'|'cloudsun')

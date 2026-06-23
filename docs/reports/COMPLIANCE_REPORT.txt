@@ -588,7 +588,7 @@ Req 4.1: Security Best Practices
 
   - CORS: Configured with specific origin whitelist
 
-  - THREAT_MODEL.md (200 lines):
+  - docs/reports/THREAT_MODEL.md (200 lines):
       * STRIDE analysis with 20 enumerated threats
       * 7 asset categories identified
       * 12 security controls documented
@@ -701,7 +701,7 @@ Req 4.4: Design Rationale
       * Architecture diagrams showing component relationships
       * "Why PWA" implied by offline/installability discussion
 
-  - THREAT_MODEL.md covers:
+  - docs/reports/THREAT_MODEL.md covers:
       * Security technology justifications
       * Why specific controls were chosen
 
@@ -852,7 +852,7 @@ Req 4.4: Design Rationale
   [x] Source code in repository
   [x] README.md with setup instructions
   [x] Architecture documented
-  [x] THREAT_MODEL.md present
+  [x] docs/reports/THREAT_MODEL.md present
   [x] All 12 services functional
   [x] 22+ languages supported
   [x] Voice navigation working

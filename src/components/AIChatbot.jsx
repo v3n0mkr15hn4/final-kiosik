@@ -101,32 +101,7 @@ const AIChatbot = () => {
   // Welcome message with natural greeting
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      const greetings = {
-        en: "Hello! I'm SUVIDHA AI — powered by NVIDIA NIM. I can help with Electricity, Gas & Municipal services in all 22 Indian languages. What do you need?",
-        hi: "नमस्ते! मैं SUVIDHA AI हूँ — NVIDIA NIM द्वारा संचालित। बिजली, गैस, पानी, और नगर सेवाओं में मदद करता हूँ। क्या चाहिए?",
-        as: "নমস্কাৰ! মই SUVIDHA AI — NVIDIA NIM চালিত। ভাৰতৰ ২২ টা ভাষাত বিদ্যুৎ, গেছ আৰু পৌৰ সেৱাত সহায় কৰিব পাৰো। কি লাগে?",
-        bn: "নমস্কার! আমি SUVIDHA AI — NVIDIA NIM চালিত। বিদ্যুৎ, গ্যাস ও পৌর সেবায় ২২ ভারতীয় ভাষায় সাহায্য করি। কী দরকার?",
-        ta: "வணக்கம்! நான் SUVIDHA AI — NVIDIA NIM மூலம். மின்சாரம், வாயு, நகர சேவைகளில் உதவுகிறேன். என்ன தேவை?",
-        te: "నమస్కారం! నేను SUVIDHA AI — NVIDIA NIM ద్వారా. విద్యుత్, గ్యాస్, మున్సిపల్ సేవలలో సహాయం చేస్తాను. ఏం కావాలి?",
-        kn: "ನಮಸ್ಕಾರ! ನಾನು SUVIDHA AI — NVIDIA NIM ನಿಂದ. ವಿದ್ಯುತ್, ಗ್ಯಾಸ್, ಮುನ್ಸಿಪಲ್ ಸೇವೆಗಳಲ್ಲಿ ಸಹಾಯ ಮಾಡುತ್ತೇನೆ. ಏನು ಬೇಕು?",
-        ml: "നമസ്കാരം! ഞാൻ SUVIDHA AI — NVIDIA NIM ഉപയോഗിക്കുന്നു. വൈദ്യുതി, ഗ്യാസ്, മുനിസിപ്പൽ സേവനങ്ങളിൽ സഹായിക്കാം. എന്ത് വേണം?",
-        gu: "નમસ્તે! હું SUVIDHA AI — NVIDIA NIM સ્ચાલિત. વીજળી, ગેસ, નગર સેવાઓ 22 ભાષામાં. શું જોઈએ?",
-        mr: "नमस्कार! मी SUVIDHA AI — NVIDIA NIM द्वारे. वीज, गॅस, महापालिका सेवांमध्ये मदत करतो. काय हवंय?",
-        pa: "ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ SUVIDHA AI ਹਾਂ — NVIDIA NIM ਚਾਲਿਤ। ਬਿਜਲੀ, ਗੈਸ, ਸ਼ਹਿਰੀ ਸੇਵਾਵਾਂ ਵਿੱਚ ਮਦਦ। ਕੀ ਚਾਹੀਦਾ?",
-        ur: "آداب! میں SUVIDHA AI ہوں — NVIDIA NIM سے۔ بجلی، گیس، بلدیاتی خدمات میں مدد کرتا ہوں۔ کیا چاہیے؟",
-        or: "ନମସ୍କାର! ମୁଁ SUVIDHA AI — NVIDIA NIM ଦ୍ୱାରା। ବିଦ୍ୟୁତ, ଗ୍ୟାସ, ନଗର ସେବାରେ ସାହାଯ୍ୟ। କ'ଣ ଦରକାର?",
-        brx: "नमस्कार! मां SUVIDHA AI — NVIDIA NIM खालामजों। बिजुली, गेस, नगर सेवायां सिबियाय। मां खामानि लागोन?",
-        mai: "प्रणाम! हम SUVIDHA AI छी — NVIDIA NIM द्वारा संचालित। बिजली, गैस, नगर सेवा में 22 भाषामे सहायता करैत छी। की चाही?",
-        ne:  "नमस्कार! म SUVIDHA AI हुँ — NVIDIA NIM द्वारा संचालित। बिजुली, ग्यास, नगर सेवाहरूमा सहयोग गर्छु। के चाहिन्छ?",
-        kok: "नमस्कार! हांव SUVIDHA AI — NVIDIA NIM वर्वी। विज, गॅस, नगर सेवांनी 22 भाशांनी मजत करता. किते जाय?",
-        doi: "नमस्कार! मैं SUVIDHA AI हां — NVIDIA NIM राहें। बिजली, गैस, शहर सेवाएं च मदद। की चाहिए?",
-        sa:  "नमस्ते! अहं SUVIDHA AI अस्मि — NVIDIA NIM शक्त्या। विद्युत्, गैस, नगर-सेवासु 22 भाषासु साहाय्यं करोमि। किं वाञ्छितम्?",
-        ks:  "السلام علیکم! مے SUVIDHA AI چھُس — NVIDIA NIM سیتی۔ بجلی، گیس، شہری خدمتن مدد کرتھ۔ کیا چھُ ضرورت؟",
-        mni: "ꯑꯣꯏꯅꯥ ꯍꯥꯏ! ꯑꯩ SUVIDHA AI — NVIDIA NIM ꯗꯨꯅꯥ। ꯕꯤꯖꯂꯤ, ꯒꯦꯁ, ꯅꯧꯄꯥꯂꯒꯤ ꯁꯦꯚꯥ ꯑꯁꯤꯗꯥ ꯃꯇꯦꯡ ꯄꯥꯡꯂꯒꯩ। ꯃꯁꯤ ꯇꯧꯗꯨꯅꯥ?",
-        sat: "ᱡᱚᱦᱟᱨ! ᱤᱸ SUVIDHA AI — NVIDIA NIM ᱨᱮᱭᱟᱜ। ᱵᱤᱡᱽᱞᱤ, ᱜᱮᱥ, ᱱᱟᱜᱟᱨ ᱥᱮᱵᱟᱭ ᱢᱮᱫ ᱠᱟᱱᱟᱢ। ᱢᱤᱫ ᱞᱟᱦᱟᱛᱤᱭᱟ?",
-        sd:  "السلام عليڪم! مان SUVIDHA AI آهيان — NVIDIA NIM سان. بجلي، گيس، شهري خدمتن ۾ مدد. ڇا گهرجي؟",
-      };
-      const welcomeText = greetings[userLang] || greetings.en;
+      const welcomeText = t('chatbot.welcome');
       setMessages([{
         id: 1, type: 'bot',
         text: welcomeText,
@@ -141,6 +116,13 @@ const AIChatbot = () => {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Opened from the kiosk shell's bottom-bar "AI Chat" button (VK.jsx)
+  useEffect(() => {
+    const handleOpenChat = () => setIsOpen(true);
+    window.addEventListener('suvidha:open-chat', handleOpenChat);
+    return () => window.removeEventListener('suvidha:open-chat', handleOpenChat);
+  }, []);
 
   // When chatbot opens, stop any ongoing TTS (barge-in to chat)
   useEffect(() => {
@@ -202,7 +184,7 @@ const AIChatbot = () => {
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const data = await resp.json();
 
-      const replyText = data.reply || t('chatbot.error', 'No response received.');
+      const replyText = data.reply || t('chatbot.error');
       conversationHistory.push({ role: 'assistant', content: replyText });
       setLastProvider(data.provider || 'sarvam-105b');
 
@@ -212,7 +194,7 @@ const AIChatbot = () => {
       return { response: replyText, language: data.language || userLang, action: null };
     } catch (err) {
       console.error('[Chatbot] API call failed:', err.message);
-      return { response: t('chatbot.unavailable', 'Service temporarily unavailable. Please use the menu to access services.'), intent: 'error', action: null };
+      return { response: t('chatbot.unavailable'), intent: 'error', action: null };
     }
   }, [location.pathname, userLang, t]);
 
@@ -246,7 +228,7 @@ const AIChatbot = () => {
     // Finalise — extract clean response text and action
     const replyText = (typeof finalResponse === 'object' ? finalResponse?.response : finalResponse)
       || accumulated
-      || t('chatbot.error', 'No response. Please try again.');
+      || t('chatbot.error');
 
     const action = typeof finalResponse === 'object' ? finalResponse?.action : null;
     const suggestions = typeof finalResponse === 'object' ? finalResponse?.suggestions : null;
@@ -338,21 +320,7 @@ const AIChatbot = () => {
 
   return (
     <>
-      {/* Floating button */}
-      {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="fixed z-50 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-100 transition-transform touch-manipulation"
-          style={{ bottom: 96, right: 24, width: 64, height: 64 }}
-          aria-label="Open AI Assistant"
-          title="Ask SUVIDHA AI"
-        >
-          <MessageCircle className="w-8 h-8 text-white" />
-          <span className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 text-white text-xs font-bold rounded-full flex items-center justify-center border-2 border-white">AI</span>
-        </button>
-      )}
-
-      {/* Chat panel */}
+      {/* Chat panel — opened via VK bottom-bar "AI Chat" button (suvidha:open-chat event) */}
       {isOpen && (
         <div
           className={`fixed right-4 z-50 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col transition-all duration-300 ${
@@ -369,10 +337,10 @@ const AIChatbot = () => {
                 <MessageCircle className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-bold text-sm">SUVIDHA AI</h3>
+                <h3 className="font-bold text-sm">{t('chatbot.title')}</h3>
                 {!isMinimized && (
                   <p className="text-xs opacity-80">
-                    {isListening ? '🔴 Listening...' : providerLabel || `${sttLangCode} · Voice enabled`}
+                    {isListening ? t('chatbot.listeningStatus') : providerLabel || `${sttLangCode} · Voice enabled`}
                   </p>
                 )}
               </div>
@@ -446,7 +414,7 @@ const AIChatbot = () => {
                         <span className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                         <span className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                         <span className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                        <span className="text-xs text-gray-400 ml-1">NVIDIA thinking…</span>
+                        <span className="text-xs text-gray-400 ml-1">{t('chatbot.thinking')}</span>
                       </div>
                     </div>
                   </div>
@@ -481,7 +449,7 @@ const AIChatbot = () => {
                   <button
                     onClick={toggleVoice}
                     disabled={isTyping}
-                    title={isListening ? 'Stop listening' : `Speak in ${sttLangCode}`}
+                    title={isListening ? t('chatbot.stopListening') : t('chatbot.speakIn', { lang: sttLangCode })}
                     className={`p-2.5 rounded-xl transition-all touch-manipulation flex-shrink-0 ${
                       isListening
                         ? 'bg-red-500 text-white animate-pulse scale-110'
@@ -509,8 +477,8 @@ const AIChatbot = () => {
                     <button
                       onClick={readLastReply}
                       className="p-2.5 rounded-xl bg-green-100 text-green-700 hover:bg-green-200 active:scale-95 transition-colors touch-manipulation flex-shrink-0"
-                      aria-label="Read reply aloud"
-                      title="Read last reply aloud"
+                      aria-label={t('chatbot.readReplyAloud')}
+                      title={t('chatbot.readReplyAloud')}
                     >
                       <Volume2 className="w-5 h-5" />
                     </button>
@@ -529,8 +497,8 @@ const AIChatbot = () => {
 
                 <p className="text-center text-xs text-gray-400 mt-1.5">
                   {isListening
-                    ? `Listening in ${sttLangCode} · Tap mic to stop`
-                    : 'Voice · Text · EN / हिंदी / অসমীয়া · Interrupt anytime'}
+                    ? t('chatbot.listeningIn', { lang: sttLangCode })
+                    : t('chatbot.footerHint')}
                 </p>
               </div>
             </>

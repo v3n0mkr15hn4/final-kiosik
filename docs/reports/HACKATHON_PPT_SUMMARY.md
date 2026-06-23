@@ -1,7 +1,7 @@
 # SUVIDHA 2026 - Hackathon PPT Summary
 
 Folder reviewed: `kiosk-hackathon-2026-feature`  
-Evaluation source: provided PDF text extracted in `pdf_text.txt`
+Evaluation source: provided PDF text extracted in `../../removable/pdf_text.txt`
 
 ## 1. UI/UX
 
@@ -109,8 +109,8 @@ Security features present in the repo:
 - Session-scoped sensitive data storage and cleanup.
 - Route guards for guest, citizen, and admin access.
 - Audit-style timeline events for status changes.
-- STRIDE threat model documented in `THREAT_MODEL.md`.
-- Compliance report documented in `COMPLIANCE_REPORT.txt`.
+- STRIDE threat model documented in `docs/reports/THREAT_MODEL.md`.
+- Compliance report documented in `docs/reports/COMPLIANCE_REPORT.txt`.
 
 Slide positioning:
 

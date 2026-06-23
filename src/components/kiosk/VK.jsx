@@ -1,6 +1,6 @@
 // ──────────────────────────────────────────────────────────────────
 // SUVIDHA Vertical Kiosk · Shell
-// Source: kiosk design/designs/kiosk-shell.jsx:122-153
+// Source: docs/kiosk-design/designs/kiosk-shell.jsx:122-153
 //
 // Wraps every citizen-facing page on the portrait kiosk.
 //
@@ -27,6 +27,7 @@ import StatusRow from './StatusRow';
 import { useAccessibility } from '../AccessibilityProvider';
 import useKioskScale from '../../hooks/useKioskScale';
 import { useAuth } from '../../hooks/useAuth';
+import { INDIAN_LANGUAGES } from '../../i18n/languageCodes';
 
 function getCitizenName() {
   if (typeof window === 'undefined') return null;
@@ -37,23 +38,8 @@ function getCitizenName() {
 }
 
 function getLanguageLabel(code) {
-  const map = {
-    en: 'English',
-    hi: 'हिन्दी',
-    as: 'অসমীয়া',
-    bn: 'বাংলা',
-    ta: 'தமிழ்',
-    te: 'తెలుగు',
-    gu: 'ગુજરાતી',
-    pa: 'ਪੰਜਾਬੀ',
-    kn: 'ಕನ್ನಡ',
-    ml: 'മലയാളം',
-    or: 'ଓଡ଼ିଆ',
-    mr: 'मराठी',
-    ur: 'اردو',
-  };
   const base = (code || 'en').toLowerCase().split('-')[0];
-  return map[base] || 'English';
+  return INDIAN_LANGUAGES.find((l) => l.code === base)?.native || 'English';
 }
 
 export default function VK({
@@ -71,7 +57,7 @@ export default function VK({
   className = '',
 }) {
   useKioskScale();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { fontSize, setFontSize } = useAccessibility();
   const navigate = useNavigate();
   const auth = (() => { try { return useAuth(); } catch { return null; } })();
@@ -103,6 +89,10 @@ export default function VK({
 
   const openVoice = () => {
     window.dispatchEvent(new CustomEvent('suvidha:activate-ai'));
+  };
+
+  const openChat = () => {
+    window.dispatchEvent(new CustomEvent('suvidha:open-chat'));
   };
 
   const toggleVoiceInstructions = () => {
@@ -141,15 +131,17 @@ export default function VK({
 
   const showLogout = Boolean(auth?.isAuthenticated);
 
+  const a11yClass = fontSize === 'large' ? 'a11y-large' : fontSize === 'xlarge' ? 'a11y-xlarge' : '';
+
   return (
-    <div className={`vk ${className}`} style={{ background: bg }}>
+    <div className={`vk ${a11yClass} ${className}`} style={{ background: bg }}>
       <div className="vk-strip" />
       <div className="vk-top">
         <div className="vk-brand">
           <div className="mk"><Logo size={32} /></div>
           <div>
             <div className="nm">SUVIDHA</div>
-            <div className="sub">Smart Urban Helpdesk</div>
+            <div className="sub">{t('app.brandSubtitle')}</div>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
@@ -157,15 +149,15 @@ export default function VK({
             type="button"
             className="chip"
             onClick={onBack || (() => navigate(-1))}
-            aria-label="Back"
+            aria-label={t('app.back')}
           >
-            <I d={ic.back} size={20} /> Back
+            <I d={ic.back} size={20} /> {t('app.back')}
           </button>
           <button type="button" className="chip" onClick={onLanguage}>
             <I d={ic.globe} size={20} /> {langLabel}
           </button>
           <button type="button" className="chip" onClick={onHelp}>
-            <I d={ic.help} size={20} /> Help
+            <I d={ic.help} size={20} /> {t('app.help')}
           </button>
           {citizen && (
             <span className="chip">
@@ -177,10 +169,10 @@ export default function VK({
               type="button"
               className="chip"
               onClick={handleLogout}
-              aria-label="Logout"
+              aria-label={t('app.logout')}
               style={{ background: 'var(--err, #b91c1c)', color: 'white', borderColor: 'transparent' }}
             >
-              <I d={ic.x} size={20} /> Logout
+              <I d={ic.x} size={20} /> {t('app.logout')}
             </button>
           )}
         </div>
@@ -193,24 +185,27 @@ export default function VK({
       {showBottom && (
         <div className="vk-bottom">
           <button type="button" className="btn btn-quiet" onClick={toggleLarger}>
-            <I d={ic.type} size={22} /> A+ Larger text
+            <I d={ic.type} size={22} /> {t('vk.largerText')}
           </button>
           <button type="button" className="btn btn-quiet" onClick={openVoice}>
-            <I d={ic.voice} size={22} /> Voice mode
+            <I d={ic.voice} size={22} /> {t('vk.voiceMode')}
+          </button>
+          <button type="button" className="btn btn-quiet" onClick={openChat}>
+            <I d={ic.chat} size={22} /> {t('vk.aiChat')}
           </button>
           <button
             type="button"
             className="btn btn-quiet"
             onClick={toggleVoiceInstructions}
             aria-pressed={voiceOn}
-            aria-label={voiceOn ? 'Turn voice instructions off' : 'Turn voice instructions on'}
+            aria-label={voiceOn ? t('vk.voiceOff') : t('vk.voiceOn')}
             style={voiceOn ? undefined : { opacity: 0.85 }}
           >
-            <I d={ic.voice} size={22} /> {voiceOn ? 'Voice On' : 'Voice Off'}
+            <I d={ic.voice} size={22} /> {voiceOn ? t('vk.voiceOn') : t('vk.voiceOff')}
           </button>
           <div style={{ flex: 1 }} />
           <button type="button" className="btn btn-err" onClick={openEmergency}>
-            <I d={ic.sos} size={24} /> EMERGENCY
+            <I d={ic.sos} size={24} /> {t('vk.emergency')}
           </button>
         </div>
       )}

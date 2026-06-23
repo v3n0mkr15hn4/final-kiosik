@@ -3,14 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, ArrowLeft, Droplets, Search, FileText, UserCog } from 'lucide-react';
 import {
-  Header,
   Button,
   Input,
   Select,
   TextArea,
   Modal,
   LoadingSpinner,
-  PageContainer,
   DepartmentHeader,
   SectionTitle,
   ServiceCard,
@@ -18,6 +16,7 @@ import {
   ResponsiveGrid,
   ActionButton
 } from '../components';
+import { VK } from '../components/kiosk';
 import QRUpload from '../components/QRUpload';
 import { states, cities, wards, serviceCategories } from '../utils/constants';
 import { generateRequestId, getCurrentTimestamp } from '../utils/helpers';
@@ -170,19 +169,16 @@ const Water = () => {
 
   if (loading) {
     return (
-      <PageContainer tone="water">
-        <Header showLogout />
+      <VK bg="var(--surface-1)">
         <div className="flex items-center justify-center min-h-[60vh]">
           <LoadingSpinner size="large" message={t('app.loading')} />
         </div>
-      </PageContainer>
+      </VK>
     );
   }
 
   return (
-    <PageContainer tone="water">
-      <Header showLogout />
-
+    <VK bg="var(--surface-1)">
       <main className="max-w-6xl mx-auto px-4 py-8">
         <DepartmentHeader
           title={t('water.title')}
@@ -396,7 +392,7 @@ const Water = () => {
         onConfirm={handleConfirmSubmit}
         onCancel={() => setShowConfirmModal(false)}
       />
-    </PageContainer>
+    </VK>
   );
 };
 

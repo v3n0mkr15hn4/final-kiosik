@@ -7,29 +7,29 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { changeLanguageSafe } from '../i18n';
 import { useSession } from '../context/SessionContext';
 import { VK } from '../components/kiosk';
+import { INDIAN_LANGUAGES } from '../i18n/languageCodes';
+import { getSarvamLangCode } from '../utils/languageConfig';
+
+const RTL_LANGS = ['ur', 'ks', 'sd'];
 
 // ui = i18next code, sarvam = Sarvam language code stored in session, native = label
-const LANGS = [
-  { ui: 'en', sarvam: 'en-IN', native: 'English' },
-  { ui: 'hi', sarvam: 'hi-IN', native: 'हिन्दी' },
-  { ui: 'ta', sarvam: 'ta-IN', native: 'தமிழ்' },
-  { ui: 'te', sarvam: 'te-IN', native: 'తెలుగు' },
-  { ui: 'kn', sarvam: 'kn-IN', native: 'ಕನ್ನಡ' },
-  { ui: 'ml', sarvam: 'ml-IN', native: 'മലയാളം' },
-  { ui: 'bn', sarvam: 'bn-IN', native: 'বাংলা' },
-  { ui: 'mr', sarvam: 'mr-IN', native: 'मराठी' },
-  { ui: 'gu', sarvam: 'gu-IN', native: 'ગુજરાતી' },
-  { ui: 'pa', sarvam: 'pa-IN', native: 'ਪੰਜਾਬੀ' },
-  { ui: 'or', sarvam: 'or-IN', native: 'ଓଡ଼ିଆ' },
-  { ui: 'as', sarvam: 'as-IN', native: 'অসমীয়া' },
-];
+const LANGS = INDIAN_LANGUAGES.map((l) => ({
+  ui: l.code,
+  sarvam: getSarvamLangCode(l.code),
+  native: l.native,
+  rtl: l.rtl,
+}));
 
 export default function LanguageSelection() {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const { setLanguage } = useSession();
+  const activeLanguage = (i18n.resolvedLanguage || i18n.language || 'en').toLowerCase().split('-')[0];
+  const headingDirection = RTL_LANGS.includes(activeLanguage) ? 'rtl' : 'ltr';
 
   const handlePick = async (lang) => {
     setLanguage(lang.sarvam);           // session language (drives TTS speaker + STT)
@@ -43,8 +43,9 @@ export default function LanguageSelection() {
     <VK bg="var(--cream)" showStatus={false}>
       <div style={styles.inner}>
         <header style={styles.header}>
-          <h1 className="h2" style={styles.title}>Select Your Language</h1>
-          <p className="body-l" style={styles.subtitle}>अपनी भाषा चुनें · உங்கள் மொழியைத் தேர்ந்தெடுக்கவும்</p>
+          <h1 className="h2" style={{ ...styles.title, direction: headingDirection }}>
+            {t('language.selectionTitle')}
+          </h1>
         </header>
 
         <div style={styles.grid}>
@@ -53,7 +54,7 @@ export default function LanguageSelection() {
               key={lang.sarvam}
               type="button"
               onClick={() => handlePick(lang)}
-              style={styles.card}
+              style={{ ...styles.card, direction: lang.rtl ? 'rtl' : 'ltr' }}
               aria-label={`Select ${lang.native}`}
             >
               {lang.native}
@@ -72,18 +73,18 @@ const styles = {
     padding: '120px 0 40px', boxSizing: 'border-box',
   },
   header: { textAlign: 'center', marginBottom: 96, flexShrink: 0 },
-  title: { color: 'var(--indigo-900, #1e1b4b)', margin: 0 },
-  subtitle: { color: 'var(--ink-700, #374151)', marginTop: 24 },
+  title: { color: 'var(--indigo-900, #1e1b4b)', margin: 0, fontFamily: 'var(--font-multi, inherit)' },
   grid: {
     flex: 1,
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gridTemplateRows: 'repeat(4, minmax(260px, 1fr))',
-    gap: 36,
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gridAutoRows: 'minmax(180px, auto)',
+    gap: 28,
     minHeight: 0,
+    overflowY: 'auto',
   },
   card: {
-    minHeight: 260,
+    minHeight: 180,
     border: '2px solid var(--indigo-300, #a5b4fc)',
     borderRadius: 32,
     background: 'white',

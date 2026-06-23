@@ -1,20 +1,21 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { VK } from '../components/kiosk';
 import RealtimeNavigationMap from '../components/RealtimeNavigationMap';
 import { STATES, DISTRICTS, ALL_OFFICES } from '../data/officeData';
 
-export const CATEGORIES = [
-  { id: 'all',         label: 'All',          icon: '🏛️' },
-  { id: 'hospital',    label: 'Hospitals',    icon: '🏥' },
-  { id: 'municipal',   label: 'Municipal',    icon: '🏢' },
-  { id: 'police',      label: 'Police',       icon: '🚔' },
-  { id: 'electricity', label: 'Electricity',  icon: '⚡' },
-  { id: 'water',       label: 'Water Board',  icon: '💧' },
-  { id: 'revenue',     label: 'Revenue',      icon: '📋' },
-  { id: 'transport',   label: 'Transport',    icon: '🚌' },
-  { id: 'aadhaar',     label: 'Aadhaar',      icon: '🪪' },
-  { id: 'welfare',     label: 'Welfare',      icon: '🤝' },
-  { id: 'fire',        label: 'Fire Station', icon: '🚒' },
+const getCategories = (t) => [
+  { id: 'all',         label: t('officeLocator.catAll'),          icon: '🏛️' },
+  { id: 'hospital',    label: t('officeLocator.catHospitals'),    icon: '🏥' },
+  { id: 'municipal',   label: t('officeLocator.catMunicipal'),    icon: '🏢' },
+  { id: 'police',      label: t('officeLocator.catPolice'),       icon: '🚔' },
+  { id: 'electricity', label: t('officeLocator.catElectricity'),  icon: '⚡' },
+  { id: 'water',       label: t('officeLocator.catWaterBoard'),   icon: '💧' },
+  { id: 'revenue',     label: t('officeLocator.catRevenue'),      icon: '📋' },
+  { id: 'transport',   label: t('officeLocator.catTransport'),    icon: '🚌' },
+  { id: 'aadhaar',     label: t('officeLocator.catAadhaar'),      icon: '🪪' },
+  { id: 'welfare',     label: t('officeLocator.catWelfare'),      icon: '🤝' },
+  { id: 'fire',        label: t('officeLocator.catFireStation'),  icon: '🚒' },
 ];
 
 // Haversine distance in km
@@ -31,6 +32,8 @@ function etaMin(km) { return Math.round((km / 30) * 60); }
 function formatDist(km) { return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`; }
 
 export default function OfficeLocator() {
+  const { t } = useTranslation();
+  const CATEGORIES = getCategories(t);
   const [selectedState,    setSelectedState]    = useState('AS');
   const [selectedDistrict, setSelectedDistrict] = useState('Guwahati');
   const [activeCategory,   setActiveCategory]   = useState('all');
@@ -110,8 +113,8 @@ export default function OfficeLocator() {
         <div style={{ padding: '14px 14px 0', flexShrink: 0 }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
             <div>
-              <h2 style={{ margin:0, fontSize:16, fontWeight:700, color:'#0f172a' }}>🏛️ Office Locator</h2>
-              <p style={{ margin:0, fontSize:11, color:'#64748b', marginTop:1 }}>Find & navigate to government offices</p>
+              <h2 style={{ margin:0, fontSize:16, fontWeight:700, color:'#0f172a' }}>🏛️ {t('officeLocator.title')}</h2>
+              <p style={{ margin:0, fontSize:11, color:'#64748b', marginTop:1 }}>{t('officeLocator.subtitle')}</p>
             </div>
             {isMobile && (
               <button onClick={() => setSidebarOpen(false)}
@@ -133,14 +136,14 @@ export default function OfficeLocator() {
               transition:'all 0.15s'
             }}
           >
-            📍 {nearbyMode ? 'Showing Nearby Offices' : 'Show Nearby Offices'}
+            📍 {nearbyMode ? t('officeLocator.showingNearbyOffices') : t('officeLocator.showNearbyOffices')}
           </button>
 
           {/* Search */}
           <div style={{ position:'relative', marginBottom:8 }}>
             <span style={{ position:'absolute', left:10, top:'50%', transform:'translateY(-50%)', fontSize:13, pointerEvents:'none' }}>🔍</span>
             <input type="text" className="sidebar-search"
-              placeholder="Search offices, addresses…"
+              placeholder={t('officeLocator.searchPlaceholder')}
               value={searchQuery}
               onChange={e => { setSearchQuery(e.target.value); setNearbyMode(false); }}
             />
@@ -150,22 +153,22 @@ export default function OfficeLocator() {
             <>
               {/* State */}
               <div style={{ marginBottom:6 }}>
-                <label style={{ fontSize:10, fontWeight:600, color:'#64748b', textTransform:'uppercase', letterSpacing:'0.05em', display:'block', marginBottom:3 }}>State</label>
+                <label style={{ fontSize:10, fontWeight:600, color:'#64748b', textTransform:'uppercase', letterSpacing:'0.05em', display:'block', marginBottom:3 }}>{t('officeLocator.state')}</label>
                 <select className="sidebar-select" value={selectedState} onChange={e => handleStateChange(e.target.value)}>
                   {STATES.map(s => <option key={s.code} value={s.code}>{s.name}</option>)}
                 </select>
               </div>
               {/* District */}
               <div style={{ marginBottom:8 }}>
-                <label style={{ fontSize:10, fontWeight:600, color:'#64748b', textTransform:'uppercase', letterSpacing:'0.05em', display:'block', marginBottom:3 }}>District</label>
+                <label style={{ fontSize:10, fontWeight:600, color:'#64748b', textTransform:'uppercase', letterSpacing:'0.05em', display:'block', marginBottom:3 }}>{t('officeLocator.district')}</label>
                 <select className="sidebar-select" value={selectedDistrict} onChange={e => setSelectedDistrict(e.target.value)}>
-                  <option value="">All Districts</option>
+                  <option value="">{t('officeLocator.allDistricts')}</option>
                   {(DISTRICTS[selectedState] || []).map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
               </div>
               {/* Categories */}
               <div style={{ marginBottom:10 }}>
-                <label style={{ fontSize:10, fontWeight:600, color:'#64748b', textTransform:'uppercase', letterSpacing:'0.05em', display:'block', marginBottom:5 }}>Category</label>
+                <label style={{ fontSize:10, fontWeight:600, color:'#64748b', textTransform:'uppercase', letterSpacing:'0.05em', display:'block', marginBottom:5 }}>{t('officeLocator.category')}</label>
                 <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
                   {CATEGORIES.map(cat => (
                     <button key={cat.id}
@@ -182,10 +185,10 @@ export default function OfficeLocator() {
           {/* Count row */}
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', paddingBottom:8, borderBottom:'1px solid #f1f5f9' }}>
             <span style={{ fontSize:12, color:'#64748b' }}>
-              <strong style={{ color:'#1d4ed8' }}>{filteredOffices?.length ?? 0}</strong> offices found
+              {t('officeLocator.officesFound', { count: filteredOffices?.length ?? 0 })}
             </span>
             <span style={{ fontSize:11, color:'#94a3b8' }}>
-              {nearbyMode ? '📍 Near you' : `Near: ${STATES.find(s => s.code === selectedState)?.name}`}
+              {nearbyMode ? t('officeLocator.nearYou') : t('officeLocator.nearState', { state: STATES.find(s => s.code === selectedState)?.name })}
             </span>
           </div>
         </div>
@@ -195,10 +198,10 @@ export default function OfficeLocator() {
           {!filteredOffices || filteredOffices.length === 0 ? (
             <div style={{ textAlign:'center', padding:'28px 16px', color:'#94a3b8' }}>
               <div style={{ fontSize:28, marginBottom:6 }}>🗺️</div>
-              <p style={{ fontSize:13, margin:0 }}>No offices found.</p>
+              <p style={{ fontSize:13, margin:0 }}>{t('officeLocator.noOfficesFound')}</p>
               <button onClick={() => { setActiveCategory('all'); setSearchQuery(''); setNearbyMode(false); }}
                 style={{ marginTop:8, fontSize:12, color:'#3b82f6', background:'none', border:'none', cursor:'pointer', textDecoration:'underline' }}>
-                Clear filters
+                {t('officeLocator.clearFilters')}
               </button>
             </div>
           ) : (
@@ -215,17 +218,17 @@ export default function OfficeLocator() {
           <div style={{ display:'flex', alignItems:'center', gap:5 }}>
             <span className="status-dot-open" />
             <span style={{ fontSize:11, color:'#64748b' }}>
-              {nearbyMode ? 'Showing nearest offices' : `Kiosk: ${STATES.find(s => s.code === selectedState)?.name}`}
+              {nearbyMode ? t('officeLocator.showingNearest') : t('officeLocator.kioskState', { state: STATES.find(s => s.code === selectedState)?.name })}
             </span>
           </div>
-          <p style={{ margin:'3px 0 0', fontSize:10, color:'#94a3b8' }}>Voice auto-on · Routes via OSRM</p>
+          <p style={{ margin:'3px 0 0', fontSize:10, color:'#94a3b8' }}>{t('officeLocator.voiceAutoOn')}</p>
         </div>
       </aside>
 
       {/* ══ MAP ══ */}
       <main className="office-map-area">
         {!sidebarOpen && (
-          <button onClick={() => setSidebarOpen(true)} className="sidebar-toggle" aria-label="Open sidebar">
+          <button onClick={() => setSidebarOpen(true)} className="sidebar-toggle" aria-label={t('officeLocator.openSidebar')}>
             <span style={{ fontSize:11 }}>▶</span>
           </button>
         )}
@@ -242,7 +245,7 @@ export default function OfficeLocator() {
               borderRadius:8, padding:'5px 10px', fontSize:12, fontWeight:600,
               color:'#374151', cursor:'pointer', boxShadow:'0 2px 8px rgba(0,0,0,0.10)',
               display:'flex', alignItems:'center', gap:4,
-            }}>◀ Hide</button>
+            }}>◀ {t('officeLocator.hide')}</button>
         )}
       </main>
         </div>
@@ -251,7 +254,9 @@ export default function OfficeLocator() {
 }
 
 function OfficeCard({ office, isActive, onNavigate }) {
-  const cat = CATEGORIES.find(c => c.id === office.category) || CATEGORIES[0];
+  const { t } = useTranslation();
+  const categories = getCategories(t);
+  const cat = categories.find(c => c.id === office.category) || categories[0];
   return (
     <div className={`office-card${isActive ? ' active' : ''}`} style={{ marginBottom:7 }}>
       <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:6 }}>

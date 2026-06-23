@@ -1,5 +1,6 @@
 import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { VoiceAssistantProvider } from './ai/provider/VoiceAssistantProvider';
 import { SessionProvider } from './context/SessionContext';
 import AccessibilityProvider, { useAccessibility } from './components/AccessibilityProvider';
@@ -67,6 +68,7 @@ const AI_EXCLUDED_PATHS = new Set([
 ]);
 
 function LoadingScreen() {
+  const { t } = useTranslation();
   return (
     <div style={{
       width: '100%', height: '100%',
@@ -79,7 +81,7 @@ function LoadingScreen() {
           borderTopColor: 'transparent', borderRadius: '50%',
           animation: 'spin 0.8s linear infinite', margin: '0 auto 12px',
         }} />
-        <div>Loading SUVIDHA…</div>
+        <div>{t('app.loadingSplash')}</div>
       </div>
     </div>
   );

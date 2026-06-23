@@ -361,9 +361,9 @@ const Receipt = () => {
               size="xlarge"
               fullWidth
               icon={Download}
-              aria-label="Save as PDF (use browser Save as PDF in print dialog)"
+              aria-label={t('receipt.saveAsPdf')}
             >
-              Save as PDF
+              {t('receipt.saveAsPdfButton')}
             </Button>
           </div>
 

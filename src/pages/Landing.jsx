@@ -1,6 +1,6 @@
 // ──────────────────────────────────────────────────────────────────
 // Landing — Vertical Kiosk (1080×1920)
-// Design source: kiosk design/designs/vertical-pages-v1.jsx:103-174 (VLanding)
+// Design source: docs/kiosk-design/designs/vertical-pages-v1.jsx:103-174 (VLanding)
 // Keeps existing wiring: useAuth, changeLanguageSafe, speak, navigation.
 // ──────────────────────────────────────────────────────────────────
 
@@ -71,7 +71,7 @@ export default function Landing() {
           <div className="mk"><Logo size={36} /></div>
           <div>
             <div className="nm">SUVIDHA</div>
-            <div className="sub">Smart Urban Helpdesk</div>
+            <div className="sub">{t('app.brandSubtitle')}</div>
           </div>
         </div>
         <span className="chip" style={{ fontFamily: 'var(--font-mono)' }}>{stamp}</span>
@@ -276,7 +276,7 @@ export default function Landing() {
             setFontSize(next);
           }}
         >
-          <I d={ic.type} size={22} /> A+ Larger
+          <I d={ic.type} size={22} /> {t('vk.largerText')}
         </button>
         <button
           type="button"
@@ -288,7 +288,7 @@ export default function Landing() {
             sessionStorage.setItem('userMode', next);
           }}
         >
-          <I d={ic.voice} size={22} /> {userMode === 'blind' ? 'Voice On' : 'Voice mode'}
+          <I d={ic.voice} size={22} /> {userMode === 'blind' ? t('vk.voiceOn') : t('vk.voiceMode')}
         </button>
         <button
           type="button"
@@ -306,8 +306,8 @@ export default function Landing() {
         >
           <I d={ic.voice} size={22} />{' '}
           {(localStorage.getItem('voiceInstructionsEnabled') ?? 'true') === 'true'
-            ? 'Voice On'
-            : 'Voice Off'}
+            ? t('vk.voiceOn')
+            : t('vk.voiceOff')}
         </button>
         <div style={{ flex: 1 }} />
         <button
@@ -315,7 +315,7 @@ export default function Landing() {
           className="btn btn-err"
           onClick={() => window.dispatchEvent(new CustomEvent('suvidha:open-emergency'))}
         >
-          <I d={ic.sos} size={24} /> EMERGENCY
+          <I d={ic.sos} size={24} /> {t('vk.emergency')}
         </button>
       </div>
     </div>

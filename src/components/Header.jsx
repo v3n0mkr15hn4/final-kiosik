@@ -98,7 +98,7 @@ const Header = ({ showBack = true, showHome = true, showLogout = false }) => {
               {showLangDropdown && (
                 <div className="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 z-[100] w-80 max-h-[70vh] overflow-y-auto">
                   <div className="p-2 border-b border-gray-100">
-                    <p className="text-xs text-gray-500 px-2 py-1 font-medium">4 Languages</p>
+                    <p className="text-xs text-gray-500 px-2 py-1 font-medium">{ALL_LANGUAGES.length} Languages</p>
                   </div>
                   <div className="grid grid-cols-2 gap-1 p-2">
                     {ALL_LANGUAGES.map((lang) => (

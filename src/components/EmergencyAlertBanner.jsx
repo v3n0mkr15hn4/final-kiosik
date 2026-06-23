@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
 import { alertAPI } from '../utils/apiService';
 
@@ -39,6 +40,7 @@ const MOCK_ALERTS = [
 ];
 
 const EmergencyAlertBanner = () => {
+  const { t, i18n } = useTranslation();
   const [alerts, setAlerts] = useState([]);
   const [expanded, setExpanded] = useState(false);
   const location = useLocation();
@@ -57,7 +59,7 @@ const EmergencyAlertBanner = () => {
   if (alerts.length === 0) return null;
   if (KIOSK_SHELL_ROUTES.has(location.pathname)) return null;
 
-  const lang = localStorage.getItem('i18nextLng') || 'en';
+  const lang = i18n.language || 'en';
   const getText = (alert) => {
     if (lang === 'hi') return alert.titleHi || alert.title;
     if (lang === 'ta') return alert.titleTa || alert.title;
@@ -90,7 +92,7 @@ const EmergencyAlertBanner = () => {
         <div className="flex items-center bg-red-600 px-3 gap-1.5 flex-shrink-0">
           <AlertTriangle className="w-3.5 h-3.5 text-white" aria-hidden />
           <span className="text-white text-[11px] font-black uppercase tracking-widest leading-none">
-            {lang === 'hi' ? 'आपातकाल' : lang === 'ta' ? 'அவசரம்' : 'EMERGENCY'}
+            {t('vk.emergency')}
           </span>
         </div>
 
@@ -108,9 +110,9 @@ const EmergencyAlertBanner = () => {
         <button
           onClick={() => setExpanded(v => !v)}
           className="flex items-center px-3 gap-1 text-xs text-gray-500 hover:bg-gray-50 border-l border-gray-200 flex-shrink-0 transition-colors"
-          aria-label={expanded ? 'Collapse alerts' : 'Expand alerts'}
+          aria-label={expanded ? t('emergency.collapseAlerts') : t('emergency.expandAlerts')}
         >
-          <span className="hidden sm:inline">{alerts.length} alert{alerts.length > 1 ? 's' : ''}</span>
+          <span className="hidden sm:inline">{t('emergency.alertsCount', { count: alerts.length })}</span>
           {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
       </div>
@@ -125,7 +127,7 @@ const EmergencyAlertBanner = () => {
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-900 leading-snug">{getText(alert)}</p>
-                <p className="text-xs text-gray-400 mt-0.5">Source: {alert.source}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{t('emergency.source')}: {alert.source}</p>
               </div>
             </div>
           ))}

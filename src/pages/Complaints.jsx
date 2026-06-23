@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Camera, Upload, MapPin, AlertTriangle, Lightbulb, Droplet, Shield, Wind, Construction, HelpCircle } from 'lucide-react';
 import {
-  Header,
   Button,
   Card,
   Input,
@@ -12,6 +11,7 @@ import {
   Modal,
   LoadingSpinner
 } from '../components';
+import { VK } from '../components/kiosk';
 import { states, cities, wards, complaintTypes } from '../utils/constants';
 import { generateComplaintId, getCurrentTimestamp } from '../utils/helpers';
 import { complaintAPI } from '../utils/apiService';
@@ -185,19 +185,16 @@ const Complaints = () => {
 
   if (loading && !useCurrentLocation) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-government-grey to-white">
-        <Header showLogout />
+      <VK bg="var(--surface-1)">
         <div className="flex items-center justify-center min-h-[60vh]">
           <LoadingSpinner size="large" message={t('app.loading')} />
         </div>
-      </div>
+      </VK>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-government-grey to-white">
-      <Header showLogout />
-
+    <VK bg="var(--surface-1)">
       <main className="max-w-4xl mx-auto px-4 py-8">
         {/* Title */}
         <div className="text-center mb-8">
@@ -474,7 +471,7 @@ const Complaints = () => {
         onConfirm={handleConfirmSubmit}
         onCancel={() => setShowConfirmModal(false)}
       />
-    </div>
+    </VK>
   );
 };
 

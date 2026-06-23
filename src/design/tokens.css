@@ -1,7 +1,7 @@
 /* ──────────────────────────────────────────────────────────────────
    SUVIDHA Vertical Kiosk — Design Tokens
-   Source of truth: kiosk design/tokens.md
-   oklch() values from kiosk design/designs/SUVIDHA Vertical Kiosk v2.html
+   Source of truth: docs/kiosk-design/tokens.md
+   oklch() values from docs/kiosk-design/designs/SUVIDHA Vertical Kiosk v2.html
    ────────────────────────────────────────────────────────────────── */
 
 :root {
@@ -57,7 +57,10 @@
   /* Fonts */
   --font-ui:    "Plus Jakarta Sans", "Noto Sans", system-ui, sans-serif;
   --font-multi: "Noto Sans", "Noto Sans Devanagari", "Noto Sans Bengali",
-                "Noto Sans Tamil", system-ui, sans-serif;
+                "Noto Sans Tamil", "Noto Sans Telugu", "Noto Sans Kannada",
+                "Noto Sans Malayalam", "Noto Sans Gujarati", "Noto Sans Gurmukhi",
+                "Noto Sans Oriya", "Noto Sans Arabic", "Noto Sans Ol Chiki",
+                "Noto Sans Meetei Mayek", system-ui, sans-serif;
   --font-mono:  "JetBrains Mono", ui-monospace, monospace;
 }
 
