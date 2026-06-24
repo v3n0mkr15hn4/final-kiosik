@@ -467,7 +467,7 @@ const ElectricityComplaint = () => {
                 >
                   {t('app.back')}
                 </Button>
-                <Button onClick={handleSubmit} size="xlarge">
+                <Button onClick={handleSubmit} size="large">
                   {t('app.submit')}
                 </Button>
               </div>

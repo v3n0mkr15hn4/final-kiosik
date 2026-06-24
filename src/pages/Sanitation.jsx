@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Trash2, Droplets, AlertTriangle, UserCog, Search, FileText } from 'lucide-react';
-import { Button, Input, Select, TextArea, Modal, LoadingSpinner } from '../components';
-import { VK, I, ic } from '../components/kiosk';
-import { SanitationIcon } from '../assets/icons';
+import { Modal, LoadingSpinner } from '../components';
+import { VK, DD, I, ic } from '../components/kiosk';
 import QRUpload from '../components/QRUpload';
 import { states, cities, wards } from '../utils/constants';
 import { generateRequestId, getCurrentTimestamp } from '../utils/helpers';
@@ -37,54 +35,42 @@ const Sanitation = () => {
   const mainServices = [
     {
       id: 'wastePickup',
-      LucideIcon: Trash2,
+      glyph: ic.trash,
       title: t('sanitation.wastePickup', 'Waste Pickup Request'),
       description: t('home.sanitationWasteDesc', 'Schedule household or commercial waste collection'),
-      color: '#059669',
-      bg: 'color-mix(in oklab, #059669 12%, white)',
     },
     {
       id: 'drainageCleaning',
-      LucideIcon: Droplets,
+      glyph: ic.drop,
       title: t('sanitation.drainageCleaning', 'Drainage Cleaning'),
       description: t('home.sanitationDrainageDesc', 'Report blocked or overflowing drainage lines'),
-      color: '#0891b2',
-      bg: 'color-mix(in oklab, #0891b2 12%, white)',
     },
     {
       id: 'sewageIssue',
-      LucideIcon: AlertTriangle,
+      glyph: ic.help,
       title: t('sanitation.sewageIssue', 'Sewage Issue'),
       description: t('home.sanitationSewageDesc', 'Report sewage overflow or pipeline damage'),
-      color: '#d97706',
-      bg: 'color-mix(in oklab, #d97706 12%, white)',
     },
     {
       id: '_profile',
-      LucideIcon: UserCog,
+      glyph: ic.user,
       title: t('home.sanitationProfile', 'Update Profile'),
       description: t('home.sanitationProfileDesc', 'Update credentials and sanitation details'),
       path: '/consumer-profile?org=sanitation',
-      color: '#0369a1',
-      bg: 'color-mix(in oklab, #0369a1 12%, white)',
     },
     {
       id: '_track',
-      LucideIcon: Search,
+      glyph: ic.track,
       title: t('home.sanitationTrack', 'Track Request'),
       description: t('home.sanitationTrackDesc', 'Check real-time status of your requests'),
       path: '/track-status',
-      color: '#475569',
-      bg: 'color-mix(in oklab, #475569 12%, white)',
     },
     {
       id: '_receipt',
-      LucideIcon: FileText,
+      glyph: ic.receipt,
       title: t('home.sanitationReceipt', 'View Receipts'),
       description: t('home.sanitationReceiptDesc', 'View and print transaction receipts'),
       path: '/receipt?org=sanitation',
-      color: '#65a30d',
-      bg: 'color-mix(in oklab, #65a30d 12%, white)',
     },
   ];
 
@@ -166,7 +152,7 @@ const Sanitation = () => {
 
   if (loading) {
     return (
-      <VK bg="color-mix(in oklab, #059669 4%, white)">
+      <VK bg="color-mix(in oklab, var(--dept-waste) 5%, var(--surface-0))">
         <div className="flex items-center justify-center min-h-[60vh]">
           <LoadingSpinner size="large" message={t('app.loading')} />
         </div>
@@ -175,66 +161,54 @@ const Sanitation = () => {
   }
 
   return (
-    <VK bg="color-mix(in oklab, #059669 4%, white)">
+    <VK bg="color-mix(in oklab, var(--dept-waste) 5%, var(--surface-0))">
       {step === 1 ? (
         <>
           {/* Dept header */}
-          <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <div style={{
-              width: 120, height: 120, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #10b981, #059669)',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: 20, boxShadow: '0 8px 32px rgba(5,150,105,0.3)',
-            }}>
-              <SanitationIcon size={60} color="#fff" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 40, marginBottom: 48 }}>
+            <DD color="var(--dept-waste)" glyph={ic.trash} size={168} isz={92} />
+            <div>
+              <div className="label-tag" style={{ color: 'var(--dept-waste)', marginBottom: 14 }}>
+                Sanitation Department
+              </div>
+              <h1 className="h2">{t('sanitation.title', 'Sanitation Department')}</h1>
+              <p className="body-l" style={{ marginTop: 14, color: 'var(--ink-500)' }}>
+                {t('sanitation.subtitle', 'Waste Pickup · Drainage · Sewage · Street Cleaning')}
+              </p>
             </div>
-            <h1 className="h2" style={{ marginBottom: 10 }}>
-              {t('sanitation.title', 'Sanitation Department')}
-            </h1>
-            <p className="body-l" style={{ color: 'var(--ink-500)' }}>
-              {t('sanitation.subtitle', 'Waste Pickup · Drainage · Sewage · Street Cleaning')}
-            </p>
           </div>
 
           {/* Service grid — 3 cols for kiosk */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, marginBottom: 32 }}>
-            {mainServices.map((s) => {
-              const Icon = s.LucideIcon;
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => {
-                    if (s.path) {
-                      navigate(s.path);
-                    } else {
-                      setSelectedCategory(s.id);
-                      setStep(2);
-                    }
-                  }}
-                  className="tile"
-                  style={{
-                    minHeight: 260,
-                    padding: 32,
-                    alignItems: 'flex-start',
-                    textAlign: 'left',
-                    gap: 20,
-                    borderTop: `6px solid ${s.color}`,
-                    touchAction: 'manipulation',
-                  }}
-                  aria-label={s.title}
-                >
-                  <div style={{
-                    width: 72, height: 72, borderRadius: 20,
-                    background: s.bg, display: 'grid', placeItems: 'center', flexShrink: 0,
-                  }}>
-                    <Icon size={36} style={{ color: s.color }} strokeWidth={2} />
-                  </div>
-                  <div className="nm" style={{ fontSize: 26, lineHeight: 1.3 }}>{s.title}</div>
-                  <div className="sub" style={{ fontSize: 20, marginTop: 'auto' }}>{s.description}</div>
-                </button>
-              );
-            })}
+            {mainServices.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => {
+                  if (s.path) {
+                    navigate(s.path);
+                  } else {
+                    setSelectedCategory(s.id);
+                    setStep(2);
+                  }
+                }}
+                className="tile"
+                style={{
+                  minHeight: 260,
+                  padding: 32,
+                  alignItems: 'flex-start',
+                  textAlign: 'left',
+                  gap: 20,
+                  borderTop: '8px solid var(--dept-waste)',
+                  touchAction: 'manipulation',
+                }}
+                aria-label={s.title}
+              >
+                <DD color="var(--dept-waste)" glyph={s.glyph} size={120} isz={64} />
+                <div className="nm" style={{ fontSize: 26, lineHeight: 1.3 }}>{s.title}</div>
+                <div className="sub" style={{ fontSize: 20, marginTop: 'auto' }}>{s.description}</div>
+              </button>
+            ))}
           </div>
 
           <button
@@ -249,49 +223,91 @@ const Sanitation = () => {
       ) : (
         /* Service Request Form */
         <div>
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <div style={{
-              width: 80, height: 80, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #10b981, #059669)',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: 12, boxShadow: '0 4px 16px rgba(5,150,105,0.25)',
-            }}>
-              <SanitationIcon size={40} color="#fff" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 32, marginBottom: 40 }}>
+            <DD color="var(--dept-waste)" glyph={ic.trash} size={128} isz={72} />
+            <div>
+              <div className="label-tag" style={{ color: 'var(--dept-waste)', marginBottom: 12 }}>
+                Sanitation · New request
+              </div>
+              <h1 className="h2">{t(`sanitation.${selectedCategory}`)}</h1>
             </div>
-            <h1 className="h2" style={{ marginBottom: 6 }}>
-              {t('sanitation.title', 'Sanitation Department')}
-            </h1>
           </div>
 
-          <div className="bg-white rounded-kiosk-lg shadow-kiosk p-6 md:p-8">
-            <div className="mb-6 p-4 bg-green-50 rounded-kiosk border border-green-200">
-              <p className="text-kiosk-base font-semibold text-green-800">
-                Selected: {t(`sanitation.${selectedCategory}`)}
-              </p>
+          <div className="card">
+            <span className="badge b-info" style={{ marginBottom: 44 }}>
+              Selected · {t(`sanitation.${selectedCategory}`)}
+            </span>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '36px 40px' }}>
+              <div>
+                <label className="flab">{t('form.name')} *</label>
+                <input className="field" value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} placeholder={t('form.enterName')} required />
+                {errors.name && <div className="meta" style={{ color: 'var(--err)' }}>{errors.name}</div>}
+              </div>
+              <div>
+                <label className="flab">{t('form.mobile')} *</label>
+                <input className="field" type="tel" value={formData.mobile} onChange={(e) => handleInputChange('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))} placeholder={t('form.enterMobile')} required />
+                {errors.mobile && <div className="meta" style={{ color: 'var(--err)' }}>{errors.mobile}</div>}
+              </div>
             </div>
 
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input label={t('form.name')} value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} placeholder={t('form.enterName')} error={errors.name} required />
-                <Input label={t('form.mobile')} type="tel" value={formData.mobile} onChange={(e) => handleInputChange('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))} placeholder={t('form.enterMobile')} error={errors.mobile} required />
+            <div style={{ marginTop: 36 }}>
+              <label className="flab">{t('form.email')}</label>
+              <input className="field" type="email" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} placeholder={t('form.enterEmail')} />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 40, marginTop: 36 }}>
+              <div>
+                <label className="flab">{t('form.state')} *</label>
+                <select className="field" value={formData.state} onChange={(e) => handleInputChange('state', e.target.value)} required>
+                  <option value="">{t('form.selectState')}</option>
+                  {states.map(s => <option key={s.id} value={s.id}>{getLocalizedName(s)}</option>)}
+                </select>
+                {errors.state && <div className="meta" style={{ color: 'var(--err)' }}>{errors.state}</div>}
               </div>
-
-              <Input label={t('form.email')} type="email" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} placeholder={t('form.enterEmail')} />
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Select label={t('form.state')} value={formData.state} onChange={(e) => handleInputChange('state', e.target.value)} placeholder={t('form.selectState')} options={states.map(s => ({ value: s.id, label: getLocalizedName(s) }))} error={errors.state} required />
-                <Select label={t('form.city')} value={formData.city} onChange={(e) => handleInputChange('city', e.target.value)} placeholder={t('form.selectCity')} options={availableCities.map(c => ({ value: c.id, label: getLocalizedName(c) }))} error={errors.city} required disabled={!formData.state} />
-                <Select label={t('form.ward')} value={formData.ward} onChange={(e) => handleInputChange('ward', e.target.value)} placeholder={t('form.selectWard')} options={availableWards.map(w => ({ value: w.id, label: w.name }))} error={errors.ward} required disabled={!formData.city} />
+              <div>
+                <label className="flab">{t('form.city')} *</label>
+                <select className="field" value={formData.city} onChange={(e) => handleInputChange('city', e.target.value)} disabled={!formData.state} required>
+                  <option value="">{t('form.selectCity')}</option>
+                  {availableCities.map(c => <option key={c.id} value={c.id}>{getLocalizedName(c)}</option>)}
+                </select>
+                {errors.city && <div className="meta" style={{ color: 'var(--err)' }}>{errors.city}</div>}
               </div>
+              <div>
+                <label className="flab">{t('form.ward')} *</label>
+                <select className="field" value={formData.ward} onChange={(e) => handleInputChange('ward', e.target.value)} disabled={!formData.city} required>
+                  <option value="">{t('form.selectWard')}</option>
+                  {availableWards.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                </select>
+                {errors.ward && <div className="meta" style={{ color: 'var(--err)' }}>{errors.ward}</div>}
+              </div>
+            </div>
 
-              <Input label={t('form.address')} value={formData.address} onChange={(e) => handleInputChange('address', e.target.value)} placeholder={t('form.enterAddress')} error={errors.address} required />
-              <TextArea label={t('form.description')} value={formData.description} onChange={(e) => handleInputChange('description', e.target.value)} placeholder={t('form.enterDescription')} error={errors.description} required rows={4} maxLength={500} />
+            <div style={{ marginTop: 36 }}>
+              <label className="flab">{t('form.address')} *</label>
+              <input className="field" value={formData.address} onChange={(e) => handleInputChange('address', e.target.value)} placeholder={t('form.enterAddress')} required />
+              {errors.address && <div className="meta" style={{ color: 'var(--err)' }}>{errors.address}</div>}
+            </div>
+
+            <div style={{ marginTop: 36 }}>
+              <label className="flab">{t('form.description')} *</label>
+              <textarea className="field" style={{ minHeight: 240 }} value={formData.description} onChange={(e) => handleInputChange('description', e.target.value)} placeholder={t('form.enterDescription')} required maxLength={500} />
+              {errors.description && <div className="meta" style={{ color: 'var(--err)' }}>{errors.description}</div>}
+            </div>
+
+            <div style={{ marginTop: 36 }}>
+              <label className="flab">{t('form.uploadDocuments')}</label>
               <QRUpload label={t('form.uploadDocuments')} onUploadComplete={(uploadedFiles) => setFiles(uploadedFiles)} maxFiles={5} />
+            </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-between pt-6 border-t">
-                <Button variant="secondary" onClick={() => setStep(1)} size="large">{t('app.back')}</Button>
-                <Button onClick={handleSubmit} size="xlarge">{t('app.submit')}</Button>
-              </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 32, marginTop: 52,
+                          paddingTop: 44, borderTop: '1.5px solid var(--line)' }}>
+              <button className="btn btn-ghost" onClick={() => setStep(1)}>
+                <I d={ic.back} size={40} /> {t('app.back')}
+              </button>
+              <button className="btn btn-pri" onClick={handleSubmit}>
+                {t('app.submit')}
+              </button>
             </div>
           </div>
         </div>

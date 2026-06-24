@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Printer, Download, IndianRupee, CalendarDays, Gauge } from 'lucide-react';
-import { Button } from '../components';
-import { VK } from '../components/kiosk';
+import { VK, DD, I, ic } from '../components/kiosk';
 import { formatDateShort } from '../utils/helpers';
 
 /**
@@ -32,113 +30,85 @@ const GasBills = () => {
   const locale = i18n.language === 'hi' ? 'hi-IN' : i18n.language === 'as' ? 'as-IN' : 'en-IN';
 
   return (
-    <VK bg="color-mix(in oklab, #dc2626 4%, white)">
+    <VK bg="color-mix(in oklab, var(--dept-gas) 5%, var(--surface-0))">
       <div>
-        {/* Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-kiosk-2xl md:text-kiosk-3xl font-bold text-gray-800">
-            {t('gasBills.title', 'Gas Bills')}
-          </h1>
-          <p className="text-kiosk-base text-gray-500 mt-1">
-            {userName}
-          </p>
+        {/* Dept header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 40, marginBottom: 48 }}>
+          <DD color="var(--dept-gas)" glyph={ic.receipt} size={128} isz={72} />
+          <div>
+            <h1 className="h2">{t('gasBills.title', 'Gas Bills')}</h1>
+            <p className="body-l" style={{ marginTop: 14, color: 'var(--ink-500)' }}>{userName}</p>
+          </div>
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-xl shadow-md p-5 border-l-4 border-red-500">
-            <div className="flex items-center gap-3">
-              <IndianRupee className="w-8 h-8 text-red-500" />
-              <div>
-                <p className="text-sm text-gray-500">{t('gasBills.currentDue', 'Current Due')}</p>
-                <p className="text-2xl font-bold text-red-600">₹{totalDue.toLocaleString()}</p>
-              </div>
-            </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, marginBottom: 36 }}>
+          <div className="card" style={{ borderTop: '8px solid var(--err)' }}>
+            <div className="meta">{t('gasBills.currentDue', 'Current Due')}</div>
+            <div className="h3" style={{ marginTop: 8, color: 'var(--err)' }}>₹{totalDue.toLocaleString()}</div>
           </div>
-          <div className="bg-white rounded-xl shadow-md p-5 border-l-4 border-green-500">
-            <div className="flex items-center gap-3">
-              <CalendarDays className="w-8 h-8 text-green-500" />
-              <div>
-                <p className="text-sm text-gray-500">{t('gasBills.billsPaid', 'Bills Paid')}</p>
-                <p className="text-2xl font-bold text-green-600">{totalPaid}</p>
-              </div>
-            </div>
+          <div className="card" style={{ borderTop: '8px solid var(--ok)' }}>
+            <div className="meta">{t('gasBills.billsPaid', 'Bills Paid')}</div>
+            <div className="h3" style={{ marginTop: 8, color: 'var(--ok)' }}>{totalPaid}</div>
           </div>
-          <div className="bg-white rounded-xl shadow-md p-5 border-l-4 border-blue-500">
-            <div className="flex items-center gap-3">
-              <Gauge className="w-8 h-8 text-blue-500" />
-              <div>
-                <p className="text-sm text-gray-500">{t('gasBills.latestUnits', 'Latest Units')}</p>
-                <p className="text-2xl font-bold text-blue-600">{latestUnits} SCM</p>
-              </div>
-            </div>
+          <div className="card" style={{ borderTop: '8px solid var(--dept-gas)' }}>
+            <div className="meta">{t('gasBills.latestUnits', 'Latest Units')}</div>
+            <div className="h3" style={{ marginTop: 8, color: 'var(--dept-gas)' }}>{latestUnits} SCM</div>
           </div>
         </div>
 
         {/* Bill List */}
-        <div className="space-y-4">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {bills.map((bill) => (
-            <div key={bill.id} className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+            <div key={bill.id} className="card" style={{ padding: 0, overflow: 'hidden' }}>
               <button
                 onClick={() => setExpandedBill(expandedBill === bill.id ? null : bill.id)}
-                className="w-full flex items-center justify-between p-5 text-left touch-manipulation hover:bg-gray-50 transition-colors"
+                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 28, textAlign: 'left', touchAction: 'manipulation', background: 'none', border: 'none', cursor: 'pointer' }}
                 aria-label={`${bill.month} - ₹${bill.amount}`}
               >
-                <div className="flex items-center gap-4">
-                  <div className={`w-3 h-3 rounded-full ${bill.status === 'paid' ? 'bg-green-500' : 'bg-red-500'}`} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+                  <span className={`badge ${bill.status === 'paid' ? 'b-ok' : 'b-err'}`} style={{ width: 16, height: 16, borderRadius: '50%', padding: 0 }} />
                   <div>
-                    <h3 className="text-kiosk-base font-bold text-gray-800">{bill.month}</h3>
-                    <p className="text-sm text-gray-500">{bill.units} SCM • Due: {formatDateShort(bill.dueDate, locale)}</p>
+                    <div className="body" style={{ fontWeight: 700 }}>{bill.month}</div>
+                    <div className="meta" style={{ marginTop: 4 }}>{bill.units} SCM · Due: {formatDateShort(bill.dueDate, locale)}</div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-kiosk-lg font-bold text-gray-800">₹{bill.amount.toLocaleString()}</p>
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    bill.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                  }`}>
-                    {bill.status === 'paid' ? '✅ Paid' : '⏳ Unpaid'}
+                <div style={{ textAlign: 'right' }}>
+                  <div className="body" style={{ fontWeight: 700 }}>₹{bill.amount.toLocaleString()}</div>
+                  <span className={`badge ${bill.status === 'paid' ? 'b-ok' : 'b-err'}`} style={{ marginTop: 6 }}>
+                    {bill.status === 'paid' ? 'Paid' : 'Unpaid'}
                   </span>
                 </div>
               </button>
 
               {/* Expanded Details */}
               {expandedBill === bill.id && (
-                <div className="px-5 pb-5 border-t border-gray-100 bg-gray-50">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-4 text-sm">
+                <div style={{ padding: '0 28px 28px', borderTop: '1.5px solid var(--line)' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, padding: '24px 0' }}>
                     <div>
-                      <p className="text-gray-500">Bill ID</p>
-                      <p className="font-semibold text-gray-800">{bill.id}</p>
+                      <div className="meta">Bill ID</div>
+                      <div className="body" style={{ fontWeight: 700 }}>{bill.id}</div>
                     </div>
                     <div>
-                      <p className="text-gray-500">Reading Date</p>
-                      <p className="font-semibold text-gray-800">{formatDateShort(bill.readingDate, locale)}</p>
+                      <div className="meta">Reading Date</div>
+                      <div className="body" style={{ fontWeight: 700 }}>{formatDateShort(bill.readingDate, locale)}</div>
                     </div>
                     <div>
-                      <p className="text-gray-500">Previous Reading</p>
-                      <p className="font-semibold text-gray-800">{bill.previousReading}</p>
+                      <div className="meta">Previous Reading</div>
+                      <div className="body" style={{ fontWeight: 700 }}>{bill.previousReading}</div>
                     </div>
                     <div>
-                      <p className="text-gray-500">Current Reading</p>
-                      <p className="font-semibold text-gray-800">{bill.currentReading}</p>
+                      <div className="meta">Current Reading</div>
+                      <div className="body" style={{ fontWeight: 700 }}>{bill.currentReading}</div>
                     </div>
                   </div>
-                  <div className="flex gap-3">
-                    <Button
-                      variant="outline"
-                      size="small"
-                      icon={Download}
-                      onClick={() => window.print()}
-                    >
-                      Download
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="small"
-                      icon={Printer}
-                      onClick={() => window.print()}
-                    >
-                      Print
-                    </Button>
+                  <div style={{ display: 'flex', gap: 16 }}>
+                    <button className="btn btn-ghost" onClick={() => window.print()}>
+                      <I d={ic.download} size={32} /> Download
+                    </button>
+                    <button className="btn btn-ghost" onClick={() => window.print()}>
+                      <I d={ic.print} size={32} /> Print
+                    </button>
                   </div>
                 </div>
               )}
@@ -147,15 +117,10 @@ const GasBills = () => {
         </div>
 
         {/* Back Button */}
-        <div className="mt-8 text-center">
-          <Button
-            variant="outline"
-            size="large"
-            icon={ArrowLeft}
-            onClick={() => navigate('/home')}
-          >
-            {t('home.backToOrgs', 'Back to Home')}
-          </Button>
+        <div style={{ marginTop: 40, textAlign: 'center' }}>
+          <button className="btn btn-quiet" style={{ fontSize: 22, padding: '18px 48px' }} onClick={() => navigate('/home')}>
+            <I d={ic.back} size={24} /> {t('home.backToOrgs', 'Back to Home')}
+          </button>
         </div>
       </div>
     </VK>

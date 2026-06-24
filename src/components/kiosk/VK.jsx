@@ -28,6 +28,8 @@ import { useAccessibility } from '../AccessibilityProvider';
 import useKioskScale from '../../hooks/useKioskScale';
 import { useAuth } from '../../hooks/useAuth';
 import { INDIAN_LANGUAGES } from '../../i18n/languageCodes';
+import { ALL_LANGUAGES } from '../../utils/languageConfig';
+import { changeLanguageSafe } from '../../i18n';
 
 function getCitizenName() {
   if (typeof window === 'undefined') return null;
@@ -40,6 +42,54 @@ function getCitizenName() {
 function getLanguageLabel(code) {
   const base = (code || 'en').toLowerCase().split('-')[0];
   return INDIAN_LANGUAGES.find((l) => l.code === base)?.native || 'English';
+}
+
+// Lightweight kiosk-styled overlay — sized for big touch UI, unlike the
+// Tailwind Modal (max-w-lg) which is tuned for normal-density citizen pages
+// and wraps kiosk-scale text into a narrow, cramped column.
+function Sheet({ open, onClose, title, width = 640, children }) {
+  if (!open) return null;
+  return (
+    <div
+      role="presentation"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 200,
+        background: 'rgba(15,23,42,0.55)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 24,
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        style={{
+          background: 'white', borderRadius: 28,
+          width: '100%', maxWidth: width,
+          maxHeight: '80vh', overflowY: 'auto',
+          padding: 32, boxShadow: '0 24px 64px rgba(0,0,0,0.25)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <h2 style={{ fontSize: 30, fontWeight: 800, color: 'var(--indigo-900, #1e3a8a)', margin: 0 }}>{title}</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              width: 44, height: 44, borderRadius: '50%', border: 'none',
+              background: 'var(--surface-2, #f1f5f9)', cursor: 'pointer',
+              display: 'grid', placeItems: 'center', flexShrink: 0,
+            }}
+          >
+            <I d={ic.x} size={20} />
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
 }
 
 export default function VK({
@@ -61,6 +111,10 @@ export default function VK({
   const { fontSize, setFontSize } = useAccessibility();
   const navigate = useNavigate();
   const auth = (() => { try { return useAuth(); } catch { return null; } })();
+
+  const [showLangModal, setShowLangModal] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [loadingLang, setLoadingLang] = useState(null);
 
   const [voiceOn, setVoiceOn] = useState(() => {
     if (typeof window === 'undefined') return true;
@@ -108,6 +162,37 @@ export default function VK({
     window.dispatchEvent(new CustomEvent('suvidha:open-emergency'));
   };
 
+  const handleLanguageClick = () => {
+    if (onLanguage) { onLanguage(); return; }
+    setShowLangModal(true);
+  };
+
+  const handleSelectLanguage = async (langCode) => {
+    setLoadingLang(langCode);
+    try {
+      await changeLanguageSafe(langCode);
+    } catch {}
+    setLoadingLang(null);
+    setShowLangModal(false);
+  };
+
+  const handleHelpClick = () => {
+    if (onHelp) { onHelp(); return; }
+    setShowHelpModal(true);
+  };
+
+  const helpActions = [
+    { icon: ic.type, label: t('vk.largerText'), run: toggleLarger },
+    { icon: ic.voice, label: t('vk.voiceMode'), run: openVoice },
+    { icon: ic.chat, label: t('vk.aiChat'), run: openChat },
+    { icon: ic.sos, label: t('vk.emergency'), run: openEmergency },
+  ];
+
+  const runHelpAction = (run) => {
+    run();
+    setShowHelpModal(false);
+  };
+
   const handleLogout = async () => {
     try {
       await auth?.logout?.();
@@ -153,10 +238,10 @@ export default function VK({
           >
             <I d={ic.back} size={20} /> {t('app.back')}
           </button>
-          <button type="button" className="chip" onClick={onLanguage}>
+          <button type="button" className="chip" onClick={handleLanguageClick}>
             <I d={ic.globe} size={20} /> {langLabel}
           </button>
-          <button type="button" className="chip" onClick={onHelp}>
+          <button type="button" className="chip" onClick={handleHelpClick}>
             <I d={ic.help} size={20} /> {t('app.help')}
           </button>
           {citizen && (
@@ -209,6 +294,52 @@ export default function VK({
           </button>
         </div>
       )}
+
+      <Sheet open={showLangModal} onClose={() => setShowLangModal(false)} title={t('language.select')} width={760}>
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12,
+        }}>
+          {ALL_LANGUAGES.map((l) => (
+            <button
+              key={l.code}
+              type="button"
+              disabled={loadingLang !== null}
+              onClick={() => handleSelectLanguage(l.code)}
+              style={{
+                padding: '16px 12px', borderRadius: 14, cursor: 'pointer',
+                fontSize: 18, fontWeight: 600, textAlign: 'center',
+                border: i18n.language === l.code ? '2px solid var(--indigo-700, #4338ca)' : '1.5px solid var(--line, #e2e8f0)',
+                background: i18n.language === l.code ? 'var(--indigo-700, #4338ca)' : 'white',
+                color: i18n.language === l.code ? 'white' : 'var(--ink-700, #334155)',
+                opacity: loadingLang === l.code ? 0.6 : 1,
+              }}
+            >
+              {l.native}
+            </button>
+          ))}
+        </div>
+      </Sheet>
+
+      <Sheet open={showHelpModal} onClose={() => setShowHelpModal(false)} title={t('app.help')} width={520}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {helpActions.map((a) => (
+            <button
+              key={a.label}
+              type="button"
+              onClick={() => runHelpAction(a.run)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 16,
+                padding: '18px 20px', borderRadius: 16,
+                border: '1.5px solid var(--line, #e2e8f0)', background: 'white',
+                fontSize: 20, fontWeight: 600, color: 'var(--ink-700, #334155)',
+                cursor: 'pointer', textAlign: 'left',
+              }}
+            >
+              <I d={a.icon} size={24} /> {a.label}
+            </button>
+          ))}
+        </div>
+      </Sheet>
     </div>
   );
 }

@@ -1,15 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Search, FileText, Phone, Clock, Printer, Download, ArrowLeft, Ticket, AlertCircle, ChevronsUp } from 'lucide-react';
-import {
-  Button,
-  Input,
-  Timeline,
-  LoadingSpinner
-} from '../components';
-import { VK } from '../components/kiosk';
-import { mockTrackingData, statusConfig } from '../utils/constants';
+import { Timeline, LoadingSpinner } from '../components';
+import { VK, I, ic } from '../components/kiosk';
+import { mockTrackingData } from '../utils/constants';
 import { formatDate } from '../utils/helpers';
 import { trackAPI } from '../utils/apiService';
 
@@ -103,218 +97,193 @@ const TrackStatus = () => {
   };
 
   const getStatusBadge = (status) => {
-    const config = statusConfig[status] || statusConfig.submitted;
+    const classMap = {
+      submitted: 'b-info',
+      'in-progress': '',
+      resolved: 'b-ok',
+      overdue: 'b-err',
+    };
     return (
-      <span className={`px-4 py-2 rounded-full text-kiosk-base font-semibold ${config.bgColor} ${config.textColor}`}>
+      <span className={`badge ${classMap[status] || 'b-warn'}`}>
         {t(`tracking.${status}`, status)}
       </span>
     );
   };
 
   const searchTabs = [
-    { key: 'requestId', label: t('tracking.requestId', 'Request ID'), icon: FileText, placeholder: 'e.g. SVD-TEST-001' },
-    { key: 'ticketId',  label: t('tracking.ticketId', 'Ticket ID'),   icon: Ticket,   placeholder: 'e.g. TKT-2026-001' },
-    { key: 'mobile',    label: t('form.mobile', 'Mobile'),            icon: Phone,    placeholder: t('auth.enterMobile', '10-digit mobile') },
+    { key: 'requestId', label: t('tracking.requestId', 'Request ID'), glyph: ic.doc, placeholder: 'e.g. SVD-TEST-001' },
+    { key: 'ticketId',  label: t('tracking.ticketId', 'Ticket ID'),   glyph: ic.receipt, placeholder: 'e.g. TKT-2026-001' },
+    { key: 'mobile',    label: t('form.mobile', 'Mobile'),            glyph: ic.phone, placeholder: t('auth.enterMobile', '10-digit mobile') },
   ];
 
   return (
-    <VK bg="var(--surface-1, #f8fafc)">
+    <VK bg="var(--surface-1)">
       <div>
-        <div className="text-center mb-8">
-          <h1 className="text-kiosk-2xl md:text-kiosk-3xl font-bold text-government-blue">
-            {t('tracking.title', 'Track Your Request')}
-          </h1>
-          <p className="text-kiosk-lg text-gray-600 mt-2">
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+          <h1 className="h2">{t('tracking.title', 'Track Your Request')}</h1>
+          <p className="body-l" style={{ marginTop: 14, color: 'var(--ink-500)' }}>
             {t('tracking.subtitle', 'Enter your Request ID, Ticket ID, or mobile number')}
           </p>
         </div>
 
-        <div className="bg-white rounded-kiosk-lg shadow-kiosk p-6 md:p-8 mb-8">
+        <div className="card" style={{ marginBottom: 36 }}>
           {/* Search Type Toggle — 3 tabs */}
-          <div className="flex justify-center mb-6">
-            <div className="inline-flex bg-gray-100 rounded-kiosk p-1 flex-wrap gap-1">
-              {searchTabs.map(({ key, label, icon: Icon }) => (
-                <button
-                  key={key}
-                  onClick={() => { setSearchType(key); setSearchQuery(''); setResult(null); setSearched(false); }}
-                  className={`px-5 py-3 rounded-kiosk text-kiosk-base font-semibold transition-all flex items-center gap-2
-                    ${searchType === key ? 'bg-government-blue text-white shadow-lg' : 'text-gray-600 hover:bg-gray-200'}`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {label}
-                </button>
-              ))}
-            </div>
+          <div style={{ display: 'flex', gap: 20, marginBottom: 36 }}>
+            {searchTabs.map((tab) => (
+              <button
+                key={tab.key}
+                className={`chip${searchType === tab.key ? ' act' : ''}`}
+                style={{ flex: 1, justifyContent: 'center' }}
+                onClick={() => { setSearchType(tab.key); setSearchQuery(''); setResult(null); setSearched(false); }}
+              >
+                <I d={tab.glyph} size={28} /> {tab.label}
+              </button>
+            ))}
           </div>
 
           {/* Search Input */}
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <Input
-                value={searchQuery}
-                onChange={(e) => {
-                  const raw = e.target.value;
-                  const value = searchType === 'mobile'
-                    ? raw.replace(/\D/g, '').slice(0, 10)
-                    : raw.toUpperCase();
-                  setSearchQuery(value);
-                  setError('');
-                }}
-                onKeyPress={handleKeyPress}
-                placeholder={searchTabs.find(t => t.key === searchType)?.placeholder}
-                icon={searchTabs.find(t => t.key === searchType)?.icon}
-                error={error}
-              />
-            </div>
-            <Button
-              onClick={handleSearch}
-              disabled={loading || !searchQuery.trim()}
-              size="large"
-              icon={Search}
-              className="md:w-auto"
-            >
+          <div style={{ display: 'flex', gap: 28 }}>
+            <input
+              className="field"
+              style={{ flex: 1 }}
+              value={searchQuery}
+              onChange={(e) => {
+                const raw = e.target.value;
+                const value = searchType === 'mobile'
+                  ? raw.replace(/\D/g, '').slice(0, 10)
+                  : raw.toUpperCase();
+                setSearchQuery(value);
+                setError('');
+              }}
+              onKeyPress={handleKeyPress}
+              placeholder={searchTabs.find(tab => tab.key === searchType)?.placeholder}
+            />
+            <button className="btn btn-pri" style={{ minWidth: 280 }} onClick={handleSearch} disabled={loading || !searchQuery.trim()}>
               {t('tracking.search', 'Search')}
-            </Button>
+            </button>
+          </div>
+          {error && <div className="meta" style={{ color: 'var(--err)', marginTop: 12 }}>{error}</div>}
+
+          <div className="meta" style={{ marginTop: 24, color: 'var(--indigo-700)' }}>
+            <strong>Demo:</strong> Request IDs - SVD-TEST-001, SVD-TEST-002, SVD-TEST-003 | Ticket IDs - TKT-2026-001, TKT-2026-002, TKT-2026-003 | Mobile - 9876543210
           </div>
 
-          <div className="mt-4 p-4 bg-blue-50 rounded-kiosk border border-blue-200">
-            <p className="text-kiosk-sm text-blue-700">
-              <strong>Demo:</strong> Request IDs - SVD-TEST-001, SVD-TEST-002, SVD-TEST-003 &nbsp;|&nbsp; Ticket IDs - TKT-2026-001, TKT-2026-002, TKT-2026-003 &nbsp;|&nbsp; Mobile - 9876543210
-            </p>
-          </div>
-
-          <div className="mt-4 flex justify-start">
-            <Button variant="outline" onClick={() => navigate('/home')} size="large" icon={ArrowLeft}>
-              {t('home.backToOrgs', 'Back to Home')}
-            </Button>
+          <div style={{ marginTop: 24 }}>
+            <button className="btn btn-ghost" onClick={() => navigate('/home')}>
+              <I d={ic.back} size={32} /> {t('home.backToOrgs', 'Back to Home')}
+            </button>
           </div>
         </div>
 
         {loading && (
-          <div className="flex justify-center py-12">
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
             <LoadingSpinner size="large" message={t('app.loading', 'Searching...')} />
           </div>
         )}
 
         {!loading && searched && (
           result ? (
-            <div className="bg-white rounded-kiosk-lg shadow-kiosk overflow-hidden animate-fade-in">
+            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
               {/* Status Header */}
-              <div className="bg-government-blue text-white p-6">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                  <div>
-                    <p className="text-kiosk-sm opacity-80">{t('tracking.requestId', 'Request ID')}</p>
-                    <p className="text-kiosk-2xl font-bold">{result.requestId}</p>
+              <div style={{ background: 'var(--indigo-700)', color: 'var(--cream)', padding: '40px 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 24 }}>
+                <div>
+                  <div className="label-tag" style={{ color: 'rgba(255,255,255,.65)' }}>
+                    {t('tracking.requestId', 'Request ID')}
                   </div>
-                  <div className="flex items-center gap-3">
-                    {getStatusBadge(result.status)}
-                    <button
-                      aria-label={t('tracking.downloadPdf')}
-                      className="p-2 bg-white/10 rounded-full hover:bg-white/20"
-                      onClick={() => window.print()}
-                    >
-                      <Download className="w-5 h-5" />
-                    </button>
-                    <button
-                      aria-label={t('tracking.printStatus')}
-                      className="p-2 bg-white/10 rounded-full hover:bg-white/20"
-                      onClick={() => window.print()}
-                    >
-                      <Printer className="w-5 h-5" />
-                    </button>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 56, fontWeight: 700, marginTop: 10 }}>
+                    {result.requestId}
                   </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                  {getStatusBadge(result.status)}
+                  <button aria-label={t('tracking.downloadPdf')} className="btn btn-ghost" style={{ color: 'var(--cream)' }} onClick={() => window.print()}>
+                    <I d={ic.download} size={32} />
+                  </button>
+                  <button aria-label={t('tracking.printStatus')} className="btn btn-ghost" style={{ color: 'var(--cream)' }} onClick={() => window.print()}>
+                    <I d={ic.print} size={32} />
+                  </button>
                 </div>
               </div>
 
               {/* SLA Countdown Banner */}
               {slaCountdown && result.status !== 'resolved' && result.status !== 'closed' && (
-                <div className={`px-6 py-3 flex items-center gap-3 ${slaCountdown.overdue ? 'bg-red-50 border-b border-red-200' : 'bg-amber-50 border-b border-amber-200'}`}>
-                  {slaCountdown.overdue ? (
-                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-                  ) : (
-                    <Clock className="w-5 h-5 text-amber-600 flex-shrink-0" />
-                  )}
+                <div style={{
+                  background: slaCountdown.overdue ? 'color-mix(in oklab, var(--err) 10%, white)' : 'color-mix(in oklab, var(--warn) 12%, white)',
+                  padding: '28px 48px', display: 'flex', gap: 24, alignItems: 'center', borderBottom: '1.5px solid var(--line)', flexWrap: 'wrap',
+                }}>
+                  <I d={ic.clock} size={48} style={{ color: slaCountdown.overdue ? 'var(--err)' : 'var(--warn)' }} />
                   <div>
-                    {slaCountdown.overdue ? (
-                      <p className="text-sm font-semibold text-red-700">{t('tracking.slaBreached')}</p>
-                    ) : (
-                      <p className="text-sm font-semibold text-amber-700">
-                        {t('tracking.slaDeadline', { count: slaCountdown.daysLeft })}
-                        &nbsp;({slaCountdown.dueDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })})
-                      </p>
-                    )}
-                    <p className="text-xs text-gray-500 mt-0.5">{t('tracking.committedSla')}: {result.sla}</p>
+                    <div className="body" style={{ fontWeight: 600, color: slaCountdown.overdue ? 'var(--err)' : 'var(--warn)' }}>
+                      {slaCountdown.overdue
+                        ? t('tracking.slaBreached')
+                        : t('tracking.slaDeadline', { count: slaCountdown.daysLeft })}
+                    </div>
+                    <div className="meta" style={{ marginTop: 4 }}>{t('tracking.committedSla')}: {result.sla}</div>
                   </div>
                   {slaCountdown.overdue && !escalated && (
-                    <button
-                      onClick={() => {
-                        setEscalated(true);
-                        alert(t('tracking.escalationRaised', { requestId: result.requestId }));
-                      }}
-                      className="ml-auto flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl text-sm font-bold hover:bg-red-700 touch-manipulation"
-                      aria-label={t('tracking.escalate')}
-                    >
-                      <ChevronsUp className="w-4 h-4" /> {t('tracking.escalate')}
+                    <button className="btn btn-err" style={{ marginLeft: 'auto' }} onClick={() => { setEscalated(true); alert(t('tracking.escalationRaised', { requestId: result.requestId })); }}>
+                      <I d={ic.sos} size={36} /> {t('tracking.escalate')}
                     </button>
                   )}
                   {escalated && (
-                    <span className="ml-auto text-sm font-semibold text-red-700 bg-red-50 px-3 py-1 rounded-full">
-                      ✅ Escalated
-                    </span>
+                    <span className="badge b-err" style={{ marginLeft: 'auto' }}>Escalated</span>
                   )}
                 </div>
               )}
               {result.status === 'resolved' && (
-                <div className="px-6 py-3 bg-green-50 border-b border-green-200 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-green-600" />
-                  <p className="text-sm font-medium text-green-700">Resolved within SLA: {result.sla}</p>
+                <div style={{ padding: '24px 48px', background: 'color-mix(in oklab, var(--ok) 10%, white)', borderBottom: '1.5px solid var(--line)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <I d={ic.clock} size={24} style={{ color: 'var(--ok)' }} />
+                  <span className="meta" style={{ color: 'var(--ok)', fontWeight: 600 }}>Resolved within SLA: {result.sla}</span>
                 </div>
               )}
 
               {/* Details */}
-              <div className="p-6 border-b">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <p className="text-kiosk-sm text-gray-500">{t('receipt.citizenName', 'Name')}</p>
-                    <p className="text-kiosk-lg font-semibold text-gray-800">{result.citizenName}</p>
-                  </div>
-                  <div>
-                    <p className="text-kiosk-sm text-gray-500">{t('form.mobile', 'Mobile')}</p>
-                    <p className="text-kiosk-lg font-semibold text-gray-800">+91 {result.mobile}</p>
-                  </div>
-                  <div>
-                    <p className="text-kiosk-sm text-gray-500">{t('receipt.serviceCategory', 'Service')}</p>
-                    <p className="text-kiosk-lg font-semibold text-gray-800">{result.serviceCategory}</p>
-                  </div>
-                  <div>
-                    <p className="text-kiosk-sm text-gray-500">{t('tracking.lastUpdated', 'Last Updated')}</p>
-                    <p className="text-kiosk-lg font-semibold text-gray-800">
-                      {formatDate(result.lastUpdated, i18n.language === 'hi' ? 'hi-IN' : i18n.language === 'as' ? 'as-IN' : 'en-IN')}
-                    </p>
+              <div style={{ padding: 48, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 36, borderBottom: '1.5px solid var(--line)' }}>
+                <div>
+                  <div className="meta">{t('receipt.citizenName', 'Name')}</div>
+                  <div className="body" style={{ fontWeight: 600, marginTop: 8 }}>{result.citizenName}</div>
+                </div>
+                <div>
+                  <div className="meta">{t('form.mobile', 'Mobile')}</div>
+                  <div className="body" style={{ fontWeight: 600, marginTop: 8 }}>+91 {result.mobile}</div>
+                </div>
+                <div>
+                  <div className="meta">{t('receipt.serviceCategory', 'Service')}</div>
+                  <div className="body" style={{ fontWeight: 600, marginTop: 8 }}>{result.serviceCategory}</div>
+                </div>
+                <div>
+                  <div className="meta">{t('tracking.lastUpdated', 'Last Updated')}</div>
+                  <div className="body" style={{ fontWeight: 600, marginTop: 8 }}>
+                    {formatDate(result.lastUpdated, i18n.language === 'hi' ? 'hi-IN' : i18n.language === 'as' ? 'as-IN' : 'en-IN')}
                   </div>
                 </div>
               </div>
 
               {/* Officer + Timeline */}
-              <div className="p-6">
+              <div style={{ padding: 48 }}>
                 {result.assignedOfficer && (
-                  <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-kiosk">
-                    <p className="text-xs text-blue-500 uppercase tracking-wider mb-2">Assigned Officer & Department</p>
-                    <p className="text-sm font-bold text-blue-900">{result.assignedOfficer.name}</p>
-                    <p className="text-sm text-blue-700">{result.assignedOfficer.designation}</p>
-                    {result.department && <p className="text-sm text-blue-600 mt-1">Department: {result.department}</p>}
-                    {result.assignedOfficer.contact && <p className="text-xs text-blue-500 mt-1">{result.assignedOfficer.contact}</p>}
+                  <div style={{ background: 'var(--indigo-100)', borderRadius: 20, padding: '32px 36px', marginBottom: 48 }}>
+                    <div className="label-tag" style={{ color: 'var(--indigo-700)', marginBottom: 12 }}>
+                      Assigned officer &amp; department
+                    </div>
+                    <div className="body" style={{ fontWeight: 700, color: 'var(--indigo-900)' }}>
+                      {result.assignedOfficer.name} · {result.assignedOfficer.designation}
+                    </div>
+                    {result.department && (
+                      <div className="meta" style={{ marginTop: 6 }}>{result.department}</div>
+                    )}
+                    {result.assignedOfficer.contact && <div className="meta" style={{ marginTop: 4 }}>{result.assignedOfficer.contact}</div>}
                   </div>
                 )}
-                <h3 className="text-kiosk-xl font-bold text-gray-800 mb-6">{t('tracking.timeline', 'Timeline')}</h3>
+                <h3 className="h3" style={{ marginBottom: 36 }}>{t('tracking.timeline', 'Timeline')}</h3>
                 <Timeline events={result.timeline} currentStatus={result.status} />
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-kiosk-lg shadow-kiosk p-12 text-center animate-fade-in">
-              <h3 className="text-kiosk-xl font-bold text-gray-600 mb-2">{t('tracking.noResults', 'No results found')}</h3>
-              <p className="text-kiosk-base text-gray-500">
-                Please check the {searchTabs.find(t => t.key === searchType)?.label} and try again.
+            <div className="card" style={{ textAlign: 'center', padding: 64 }}>
+              <h3 className="h3" style={{ color: 'var(--ink-500)', marginBottom: 8 }}>{t('tracking.noResults', 'No results found')}</h3>
+              <p className="body-l" style={{ color: 'var(--ink-500)' }}>
+                Please check the {searchTabs.find(tab => tab.key === searchType)?.label} and try again.
               </p>
             </div>
           )

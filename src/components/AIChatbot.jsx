@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { MessageCircle, X, Minus, Send, Mic, MicOff, Volume2, VolumeX, Zap } from 'lucide-react';
 import { naturalSpeak, startBargeInListener, stopBargeInListener } from '../utils/naturalVoice';
 import { stopTTS } from '../utils/ttsService';
 import { startSTT, stopSTT } from '../ai/voice/speechRecognition';
 import SYSTEM_PROMPT from '../ai/prompts/systemPrompt';
+import { I, ic } from './kiosk';
 
 const extractContext = (pathname) => {
   if (pathname.includes('electric')) return 'electricity';
@@ -81,7 +81,6 @@ const AIChatbot = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -323,186 +322,194 @@ const AIChatbot = () => {
       {/* Chat panel — opened via VK bottom-bar "AI Chat" button (suvidha:open-chat event) */}
       {isOpen && (
         <div
-          className={`fixed right-4 z-50 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col transition-all duration-300 ${
-            isMinimized ? 'bottom-24 w-72 h-14' : 'bottom-4 w-[420px] h-[580px]'
-          }`}
-          style={{ maxHeight: 'calc(100vh - 100px)' }}
-          role="dialog"
-          aria-label="SUVIDHA AI Assistant"
+          style={{
+            position: 'fixed', right: 0, top: 0, bottom: 0, width: 900,
+            background: 'var(--surface-0)', borderLeft: '1px solid var(--line)',
+            boxShadow: '-40px 0 90px rgba(20,16,31,.28)',
+            display: 'flex', flexDirection: 'column', zIndex: 9000,
+          }}
+          role="dialog" aria-label="SUVIDHA AI Assistant"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-t-2xl flex-shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center">
-                <MessageCircle className="w-5 h-5" />
+          <div style={{
+            background: 'var(--indigo-700)', color: 'var(--cream)',
+            padding: '40px 44px', display: 'flex', alignItems: 'center', gap: 24, flexShrink: 0,
+          }}>
+            <div style={{ width: 96, height: 96, borderRadius: 26, background: 'rgba(255,255,255,.16)', display: 'grid', placeItems: 'center' }}>
+              <I d={ic.chat} size={52} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 46, fontWeight: 800, letterSpacing: '-.01em' }}>
+                {t('chatbot.title')}
               </div>
-              <div>
-                <h3 className="font-bold text-sm">{t('chatbot.title')}</h3>
-                {!isMinimized && (
-                  <p className="text-xs opacity-80">
-                    {isListening ? t('chatbot.listeningStatus') : providerLabel || `${sttLangCode} · Voice enabled`}
-                  </p>
-                )}
+              <div style={{ fontSize: 28, opacity: .85, marginTop: 8, display: 'flex', alignItems: 'center', gap: 14 }}>
+                <span style={{ width: 18, height: 18, borderRadius: '50%', background: isListening ? 'var(--warn)' : 'var(--ok)', display: 'inline-block' }} />
+                {isListening ? t('chatbot.listeningStatus') : providerLabel}
               </div>
             </div>
-            <div className="flex items-center gap-1">
-              {/* Stop speaking */}
-              {isSpeakingReply && (
-                <button onClick={stopSpeaking} className="p-1.5 rounded-lg hover:bg-white/20 transition-colors" aria-label="Stop speaking">
-                  <VolumeX className="w-4 h-4" />
-                </button>
-              )}
-              <button onClick={() => setIsMinimized(!isMinimized)} className="p-1.5 rounded-lg hover:bg-white/20 transition-colors" aria-label={isMinimized ? 'Maximize' : 'Minimize'}>
-                <Minus className="w-4 h-4" />
+            {messages.some(m => m.type === 'bot' && m.id !== 1) && !isSpeakingReply && (
+              <button
+                style={{ width: 80, height: 80, borderRadius: 22, background: 'rgba(255,255,255,.14)', border: 'none', color: 'var(--cream)', cursor: 'pointer', display: 'grid', placeItems: 'center' }}
+                onClick={readLastReply}
+                aria-label={t('chatbot.readReplyAloud')}
+              >
+                <I d={ic.voice} size={44} />
               </button>
-              <button onClick={() => { setIsOpen(false); setIsMinimized(false); stopListening(); stopTTS(); }} className="p-1.5 rounded-lg hover:bg-white/20 transition-colors" aria-label="Close chatbot">
-                <X className="w-4 h-4" />
+            )}
+            {isSpeakingReply && (
+              <button
+                style={{ width: 80, height: 80, borderRadius: 22, background: 'rgba(255,255,255,.14)', border: 'none', color: 'var(--cream)', cursor: 'pointer', display: 'grid', placeItems: 'center' }}
+                onClick={stopSpeaking}
+                aria-label="Stop speaking"
+              >
+                <I d={ic.voice} size={44} />
               </button>
-            </div>
+            )}
+            <button
+              style={{ width: 80, height: 80, borderRadius: 22, background: 'rgba(255,255,255,.14)', border: 'none', color: 'var(--cream)', cursor: 'pointer', display: 'grid', placeItems: 'center' }}
+              onClick={() => { setIsOpen(false); stopListening(); stopTTS(); }}
+              aria-label="Close"
+            >
+              <I d={ic.x} size={44} />
+            </button>
           </div>
 
-          {!isMinimized && (
-            <>
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3" role="log" aria-live="polite" aria-label="Chat messages">
-                {messages.map((msg) => (
-                  <div key={msg.id} className={`flex flex-col ${msg.type === 'user' ? 'items-end' : 'items-start'}`}>
-                    <div className={`max-w-[90%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                      msg.type === 'user'
-                        ? 'bg-blue-600 text-white rounded-br-md'
-                        : 'bg-gray-100 text-gray-800 rounded-bl-md'
-                    }`}>
-                      {msg.text}
-                      {msg.streaming && (
-                        <span className="inline-block w-1.5 h-3.5 bg-indigo-500 rounded-sm ml-0.5 animate-pulse align-middle" />
-                      )}
-                    </div>
-                    {/* AI-suggested quick replies */}
-                    {msg.type === 'bot' && !msg.streaming && msg.suggestions?.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-1.5 max-w-[90%]">
-                        {msg.suggestions.map((s, i) => (
-                          <button key={i} onClick={() => handleSuggestionClick(s)}
-                            className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-medium hover:bg-indigo-100 transition-colors touch-manipulation border border-indigo-200">
-                            {s}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    {/* Language + Provider badge on last bot message */}
-                    {msg.type === 'bot' && !msg.streaming && (
-                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                        {msg.language && msg.language !== 'en' && (
-                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-orange-100 text-orange-700 border border-orange-200">
-                            🇮🇳 {msg.language.toUpperCase()}
-                          </span>
-                        )}
-                        {msg.provider && (
-                          <div className="flex items-center gap-1 text-[10px] text-gray-400">
-                            <Zap size={9} className="text-green-500" />
-                            {PROVIDER_LABELS[msg.provider] || msg.provider}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
+          {/* Messages */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: 44, display: 'flex', flexDirection: 'column', gap: 32, background: 'var(--surface-1)' }}
+               role="log" aria-live="polite" aria-label="Chat messages">
+            {messages.map((msg) => (
+              <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.type === 'user' ? 'flex-end' : 'flex-start' }}>
+                <div style={{
+                  maxWidth: 660,
+                  background: msg.type === 'user' ? 'var(--indigo-700)' : '#fff',
+                  color: msg.type === 'user' ? 'var(--cream)' : 'var(--ink-900)',
+                  border: msg.type === 'bot' ? '1px solid var(--line)' : 'none',
+                  borderRadius: msg.type === 'user' ? '32px 32px 10px 32px' : '32px 32px 32px 10px',
+                  padding: '32px 38px', fontSize: 34, lineHeight: 1.55,
+                  boxShadow: msg.type === 'bot' ? 'var(--shadow-1)' : 'none',
+                }}>
+                  {msg.text}
+                  {msg.streaming && (
+                    <span style={{ display: 'inline-block', width: 8, height: 28, background: 'var(--indigo-500)', borderRadius: 3, marginLeft: 6, animation: 'dot 1s infinite' }} />
+                  )}
+                </div>
 
-                {isTyping && !messages.some(m => m.streaming) && (
-                  <div className="flex justify-start">
-                    <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-bl-md">
-                      <div className="flex gap-1.5 items-center">
-                        <span className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <span className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <span className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                        <span className="text-xs text-gray-400 ml-1">{t('chatbot.thinking')}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Context suggestions when idle */}
-                {!isTyping && messages.length > 0 && messages[messages.length - 1]?.type === 'bot' && !messages[messages.length - 1]?.suggestions?.length && (
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {getSuggestionsByContext(context, t).map((s, i) => (
-                      <button key={i} onClick={() => handleSuggestionClick(s)}
-                        className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-xs font-medium hover:bg-blue-100 active:bg-blue-200 transition-colors touch-manipulation border border-blue-200">
+                {/* AI-suggested quick replies */}
+                {msg.type === 'bot' && !msg.streaming && msg.suggestions?.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 16, maxWidth: 700 }}>
+                    {msg.suggestions.map((s, i) => (
+                      <button key={i}
+                              style={{ background: 'var(--indigo-100)', color: 'var(--indigo-700)', border: '1.5px solid color-mix(in oklab,var(--indigo-700) 22%,white)', borderRadius: 999, padding: '20px 30px', fontSize: 28, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                              onClick={() => handleSuggestionClick(s)}>
                         {s}
                       </button>
                     ))}
                   </div>
                 )}
 
-                <div ref={chatEndRef} />
+                {/* Language + Provider badge on last bot message */}
+                {msg.type === 'bot' && !msg.streaming && (msg.language && msg.language !== 'en' || msg.provider) && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 10, flexWrap: 'wrap' }}>
+                    {msg.language && msg.language !== 'en' && (
+                      <span className="badge b-warn">{msg.language.toUpperCase()}</span>
+                    )}
+                    {msg.provider && (
+                      <span className="meta">{PROVIDER_LABELS[msg.provider] || msg.provider}</span>
+                    )}
+                  </div>
+                )}
               </div>
+            ))}
 
-              {/* Voice error */}
-              {voiceError && (
-                <div className="px-4 pb-1">
-                  <p className="text-xs text-red-500 text-center">{voiceError}</p>
-                </div>
-              )}
-
-              {/* Input area */}
-              <div className="p-3 border-t border-gray-100 flex-shrink-0">
-                <div className="flex gap-2 items-center">
-                  {/* Mic button */}
-                  <button
-                    onClick={toggleVoice}
-                    disabled={isTyping}
-                    title={isListening ? t('chatbot.stopListening') : t('chatbot.speakIn', { lang: sttLangCode })}
-                    className={`p-2.5 rounded-xl transition-all touch-manipulation flex-shrink-0 ${
-                      isListening
-                        ? 'bg-red-500 text-white animate-pulse scale-110'
-                        : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200 active:scale-95'
-                    } disabled:opacity-50`}
-                    aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
-                  >
-                    {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            {/* Context suggestions when idle */}
+            {!isTyping && messages.length > 0 && messages.at(-1)?.type === 'bot' && !messages.at(-1)?.suggestions?.length && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+                {getSuggestionsByContext(context, t).map((s, i) => (
+                  <button key={i}
+                          style={{ background: 'var(--indigo-100)', color: 'var(--indigo-700)', border: '1.5px solid color-mix(in oklab,var(--indigo-700) 22%,white)', borderRadius: 999, padding: '20px 30px', fontSize: 28, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                          onClick={() => handleSuggestionClick(s)}>
+                    {s}
                   </button>
-
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder={isListening ? t('chatbot.listening', 'Listening...') : t('chatbot.placeholder', 'Ask anything about government services...')}
-                    className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    disabled={isTyping || isListening}
-                    maxLength={500}
-                  />
-
-                  {/* Read last reply aloud */}
-                  {messages.some(m => m.type === 'bot' && m.id !== 1) && !isSpeakingReply && (
-                    <button
-                      onClick={readLastReply}
-                      className="p-2.5 rounded-xl bg-green-100 text-green-700 hover:bg-green-200 active:scale-95 transition-colors touch-manipulation flex-shrink-0"
-                      aria-label={t('chatbot.readReplyAloud')}
-                      title={t('chatbot.readReplyAloud')}
-                    >
-                      <Volume2 className="w-5 h-5" />
-                    </button>
-                  )}
-
-                  {/* Send */}
-                  <button
-                    onClick={handleSend}
-                    disabled={!input.trim() || isTyping || isListening}
-                    className="p-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed active:scale-95 transition-colors touch-manipulation flex-shrink-0"
-                    aria-label="Send message"
-                  >
-                    <Send className="w-5 h-5" />
-                  </button>
-                </div>
-
-                <p className="text-center text-xs text-gray-400 mt-1.5">
-                  {isListening
-                    ? t('chatbot.listeningIn', { lang: sttLangCode })
-                    : t('chatbot.footerHint')}
-                </p>
+                ))}
               </div>
-            </>
+            )}
+
+            {/* Typing dots */}
+            {isTyping && !messages.some(m => m.streaming) && (
+              <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 32, padding: '28px 36px', display: 'flex', alignItems: 'center', gap: 14, boxShadow: 'var(--shadow-1)', alignSelf: 'flex-start' }}>
+                {[0, 180, 360].map(delay => (
+                  <span key={delay} style={{ width: 20, height: 20, borderRadius: '50%', background: 'var(--ok)', display: 'inline-block', animation: `dot 1.2s ${delay}ms infinite` }} />
+                ))}
+              </div>
+            )}
+            <div ref={chatEndRef} />
+          </div>
+
+          {/* Voice error */}
+          {voiceError && (
+            <div style={{ padding: '0 44px 16px' }}>
+              <span className="badge b-err">{voiceError}</span>
+            </div>
           )}
+
+          {/* Input row */}
+          <div style={{ padding: '36px 44px', borderTop: '1px solid var(--line)', background: 'var(--surface-0)', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+              {/* Mic */}
+              <button
+                onClick={toggleVoice}
+                disabled={isTyping}
+                style={{
+                  width: 104, height: 104, borderRadius: '50%', border: 'none', cursor: 'pointer',
+                  flexShrink: 0, display: 'grid', placeItems: 'center',
+                  background: isListening ? 'var(--err)' : 'var(--indigo-100)',
+                  color: isListening ? '#fff' : 'var(--indigo-700)',
+                }}
+                aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
+              >
+                <I d={ic.voice} size={52} />
+              </button>
+
+              {/* Text input */}
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder={isListening ? t('chatbot.listening') : t('chatbot.placeholder')}
+                disabled={isTyping || isListening}
+                maxLength={500}
+                style={{
+                  flex: 1, background: '#fff', border: '2px solid var(--line)',
+                  borderRadius: 999, padding: '28px 44px',
+                  fontSize: 34, fontFamily: 'inherit', color: 'var(--ink-900)',
+                  outline: 'none', minHeight: 104,
+                }}
+              />
+
+              {/* Send */}
+              <button
+                onClick={handleSend}
+                disabled={!input.trim() || isTyping || isListening}
+                style={{
+                  width: 104, height: 104, borderRadius: '50%', border: 'none', cursor: 'pointer',
+                  flexShrink: 0, display: 'grid', placeItems: 'center',
+                  background: (!input.trim() || isTyping || isListening) ? 'var(--ink-300)' : 'var(--indigo-700)',
+                  color: 'var(--cream)',
+                  boxShadow: (!input.trim() || isTyping || isListening) ? 'none' : 'var(--shadow-2)',
+                }}
+              >
+                <I d={ic.arrow} size={52} />
+              </button>
+            </div>
+
+            <div className="meta" style={{ textAlign: 'center', marginTop: 20, fontSize: 26 }}>
+              {isListening
+                ? t('chatbot.listeningIn', { lang: sttLangCode })
+                : t('chatbot.footerHint')}
+            </div>
+          </div>
         </div>
       )}
     </>

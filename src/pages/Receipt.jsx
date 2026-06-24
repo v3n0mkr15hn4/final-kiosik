@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle, Printer, Home, PlusCircle, Download, Mail, MessageSquare, Maximize2, Share2 } from 'lucide-react';
-import { Button } from '../components';
-import { VK } from '../components/kiosk';
+import { VK, I, ic } from '../components/kiosk';
 import SendToPhone from '../components/SendToPhone';
 import { formatDate, formatDateShort, printReceipt } from '../utils/helpers';
 import { getReceipts } from '../utils/receipts';
@@ -110,23 +108,18 @@ const Receipt = () => {
 
   if (!receiptData) {
     return (
-      <VK bg="var(--surface-1, #f8fafc)">
+      <VK bg="var(--surface-1)">
         <div>
-          <div className="bg-white rounded-kiosk-lg shadow-kiosk p-8 text-center">
-            <h1 className="text-kiosk-2xl font-bold text-gray-800 mb-3">No Receipts Found</h1>
-            <p className="text-kiosk-base text-gray-600 mb-6">
+          <div className="card" style={{ textAlign: 'center' }}>
+            <h1 className="h2" style={{ marginBottom: 12 }}>No Receipts Found</h1>
+            <p className="body-l" style={{ color: 'var(--ink-500)', marginBottom: 28 }}>
               {requestedOrg
                 ? `No receipts found for ${requestedOrg} for this user.`
                 : 'No receipts found for this user yet.'}
             </p>
-            <Button
-              onClick={() => navigate('/home')}
-              variant="outline"
-              size="large"
-              icon={Home}
-            >
-              {t('receipt.goHome')}
-            </Button>
+            <button className="btn btn-ghost" onClick={() => navigate('/home')}>
+              <I d={ic.back} size={32} /> {t('receipt.goHome')}
+            </button>
           </div>
         </div>
       </VK>
@@ -203,53 +196,41 @@ const Receipt = () => {
   };
 
   return (
-    <VK bg="var(--surface-1, #f8fafc)">
+    <VK bg="var(--surface-1)">
       <div style={{ maxWidth: 760, margin: '0 auto' }}>
         {/* Success Animation */}
-        <div className="text-center mb-8 animate-fade-in">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-green-500 rounded-full mb-6 animate-pulse-slow">
-            <CheckCircle className="w-12 h-12 text-white" />
+        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+          <div style={{
+            width: 176, height: 176, borderRadius: '50%', margin: '0 auto 36px',
+            background: 'color-mix(in oklab, var(--ok) 16%, white)',
+            color: 'var(--ok)', display: 'grid', placeItems: 'center',
+          }}>
+            <I d={ic.check} size={100} sw={2.4} />
           </div>
-          <h1 className="text-kiosk-2xl md:text-kiosk-3xl font-bold text-green-600">
-            {t('modal.successTitle')}
-          </h1>
-          <p className="text-kiosk-lg text-gray-600 mt-2">
+          <h1 className="h2" style={{ color: 'var(--ok)' }}>{t('modal.successTitle')}</h1>
+          <p className="body-l" style={{ marginTop: 14, color: 'var(--ink-500)' }}>
             {t('receipt.subtitle')}
           </p>
         </div>
 
         {receiptList.length > 1 && (
-          <div className="bg-white rounded-kiosk-lg shadow-kiosk p-4 mb-4 print:hidden">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <p className="text-sm text-gray-600">
+          <div className="card print:hidden" style={{ marginBottom: 24, padding: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+              <span className="meta">
                 Showing receipt {activeReceiptIndex + 1} of {receiptList.length}
-              </p>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handlePreviousReceipt}
-                  disabled={activeReceiptIndex === 0}
-                  className="px-3 py-2 text-sm rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <button type="button" className="chip" onClick={handlePreviousReceipt} disabled={activeReceiptIndex === 0}>
                   Previous
                 </button>
-                <select
-                  value={activeReceiptIndex}
-                  onChange={handleSelectReceipt}
-                  className="px-3 py-2 text-sm rounded-lg border border-gray-300 bg-white max-w-[280px]"
-                >
+                <select className="field" style={{ maxWidth: 280 }} value={activeReceiptIndex} onChange={handleSelectReceipt}>
                   {receiptList.map((receipt, index) => (
                     <option key={`${receipt.requestId}-${index}`} value={index}>
                       {receipt.requestId} - {formatDateShort(receipt.timestamp, i18n.language === 'hi' ? 'hi-IN' : i18n.language === 'ta' ? 'ta-IN' : 'en-IN')}
                     </option>
                   ))}
                 </select>
-                <button
-                  type="button"
-                  onClick={handleNextReceipt}
-                  disabled={activeReceiptIndex === receiptList.length - 1}
-                  className="px-3 py-2 text-sm rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+                <button type="button" className="chip" onClick={handleNextReceipt} disabled={activeReceiptIndex === receiptList.length - 1}>
                   Next
                 </button>
               </div>
@@ -258,179 +239,119 @@ const Receipt = () => {
         )}
 
         {/* Receipt Card - Printable Area */}
-        <div id="receipt-content" className={`bg-white rounded-kiosk-lg shadow-kiosk overflow-hidden print:shadow-none ${thermalMode ? 'max-w-[300px] mx-auto text-sm' : ''}`}>
+        <div id="receipt-content" className="card print:shadow-none" style={{ padding: 0, overflow: 'hidden', maxWidth: thermalMode ? 300 : undefined, margin: thermalMode ? '0 auto' : undefined }}>
           {/* Receipt Header */}
-          <div className="bg-government-blue text-white p-6 text-center print:bg-gray-800">
-            <h2 className="text-kiosk-2xl font-bold mb-1">{t('app.title')}</h2>
-            <p className="text-kiosk-sm opacity-80">{t('app.subtitle')}</p>
+          <div style={{ background: 'var(--indigo-700)', color: 'var(--cream)', textAlign: 'center', padding: '48px 56px' }}>
+            <div className="label-tag" style={{ color: 'rgba(255,255,255,.65)' }}>
+              SUVIDHA · Government of Assam
+            </div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 30, letterSpacing: '.1em', marginTop: 24, opacity: .85 }}>
+              {t('receipt.requestId')}
+            </div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 80, fontWeight: 700, letterSpacing: '.04em', marginTop: 8 }}>
+              {receiptData.requestId}
+            </div>
           </div>
 
           {/* Receipt Body */}
-          <div className="p-6 md:p-8">
-            {/* Request ID - Highlighted */}
-            <div className="bg-blue-50 border-2 border-government-blue rounded-kiosk p-6 mb-6 text-center">
-              <p className="text-kiosk-sm text-gray-600 mb-2">{t('receipt.requestId')}</p>
-              <p className="text-kiosk-3xl font-bold text-government-blue tracking-wider">
-                {receiptData.requestId}
-              </p>
+          <div style={{ padding: '48px 56px' }}>
+            <div className="receipt-row">
+              <span className="k">{t('receipt.citizenName')}</span>
+              <span className="v">{receiptData.citizenName}</span>
             </div>
-
-            {/* Details Grid */}
-            <div className="space-y-4">
-              <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                <span className="text-kiosk-base text-gray-600">{t('receipt.citizenName')}</span>
-                <span className="text-kiosk-lg font-semibold text-gray-800">{receiptData.citizenName}</span>
-              </div>
-
-              <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                <span className="text-kiosk-base text-gray-600">{t('form.mobile')}</span>
-                <span className="text-kiosk-lg font-semibold text-gray-800">+91 {receiptData.mobile}</span>
-              </div>
-
-              <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                <span className="text-kiosk-base text-gray-600">{t('receipt.serviceCategory')}</span>
-                <span className="text-kiosk-lg font-semibold text-gray-800">{receiptData.serviceCategory}</span>
-              </div>
-
-              <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                <span className="text-kiosk-base text-gray-600">{t('receipt.submissionTime')}</span>
-                <span className="text-kiosk-lg font-semibold text-gray-800">
-                  {formatDate(receiptData.timestamp, i18n.language === 'hi' ? 'hi-IN' : i18n.language === 'ta' ? 'ta-IN' : 'en-IN')}
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                <span className="text-kiosk-base text-gray-600">{t('receipt.status')}</span>
-                <span className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-kiosk-base font-semibold">
-                  {t('tracking.submitted')}
-                </span>
-              </div>
+            <div className="receipt-row">
+              <span className="k">{t('form.mobile')}</span>
+              <span className="v">+91 {receiptData.mobile}</span>
+            </div>
+            <div className="receipt-row">
+              <span className="k">{t('receipt.serviceCategory')}</span>
+              <span className="v">{receiptData.serviceCategory}</span>
+            </div>
+            <div className="receipt-row">
+              <span className="k">{t('receipt.submissionTime')}</span>
+              <span className="v">
+                {formatDate(receiptData.timestamp, i18n.language === 'hi' ? 'hi-IN' : i18n.language === 'ta' ? 'ta-IN' : 'en-IN')}
+              </span>
+            </div>
+            <div className="receipt-row">
+              <span className="k">{t('receipt.status')}</span>
+              <span className="badge b-ok">{t('tracking.submitted')}</span>
             </div>
 
             {/* Track Message */}
-            <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-kiosk">
-              <p className="text-kiosk-base text-yellow-800">
-                📋 {t('receipt.trackMessage')}
-              </p>
+            <div style={{ background: 'var(--indigo-100)', borderRadius: 20, padding: '32px 36px', marginTop: 40 }}>
+              <div className="body" style={{ color: 'var(--indigo-900)' }}>
+                {t('receipt.trackMessage')}
+              </div>
             </div>
 
             {/* SLA Info */}
             {receiptData.sla && (
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-kiosk">
-                <p className="text-kiosk-base text-blue-800">
-                  ⏱️ Expected Resolution: <strong>{receiptData.sla}</strong>
-                </p>
+              <div style={{ background: 'var(--indigo-100)', borderRadius: 20, padding: '32px 36px', marginTop: 24 }}>
+                <div className="body" style={{ color: 'var(--indigo-900)' }}>
+                  Expected Resolution: <strong>{receiptData.sla}</strong>
+                </div>
               </div>
             )}
 
             {/* Thank You */}
-            <div className="mt-6 text-center">
-              <p className="text-kiosk-lg text-gray-600">{t('receipt.thankYou')}</p>
+            <div style={{ marginTop: 36, textAlign: 'center' }}>
+              <p className="body-l" style={{ color: 'var(--ink-500)' }}>{t('receipt.thankYou')}</p>
             </div>
           </div>
 
           {/* Receipt Footer - Print Only */}
-          <div className="hidden print:block border-t border-gray-200 p-4 text-center">
-            <p className="text-sm text-gray-500">
-              Generated on {formatDate(new Date())} • SUVIDHA 2026 Kiosk System
+          <div className="hidden print:block" style={{ borderTop: '1.5px solid var(--line)', padding: 24, textAlign: 'center' }}>
+            <p className="meta">
+              Generated on {formatDate(new Date())} · SUVIDHA 2026 Kiosk System
             </p>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="meta" style={{ marginTop: 4 }}>
               This is a computer-generated receipt and does not require a signature.
             </p>
           </div>
         </div>
 
         {/* Action Buttons - Hide on Print */}
-        <div className="mt-8 space-y-4 print:hidden">
+        <div className="print:hidden" style={{ marginTop: 40, display: 'flex', flexDirection: 'column', gap: 24 }}>
           {/* Send to Phone */}
           <SendToPhone documentType="Receipt" documentId={receiptData.requestId} />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Button
-              onClick={handlePrint}
-              variant="primary"
-              size="xlarge"
-              fullWidth
-              icon={Printer}
-            >
-              {t('receipt.print')}
-            </Button>
-            <Button
-              onClick={handlePrint}
-              variant="secondary"
-              size="xlarge"
-              fullWidth
-              icon={Download}
-              aria-label={t('receipt.saveAsPdf')}
-            >
-              {t('receipt.saveAsPdfButton')}
-            </Button>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
+            <button className="btn btn-pri" onClick={handlePrint}>
+              <I d={ic.print} size={44} /> {t('receipt.print')}
+            </button>
+            <button className="btn btn-ghost" onClick={handlePrint} aria-label={t('receipt.saveAsPdf')}>
+              <I d={ic.download} size={44} /> {t('receipt.saveAsPdfButton')}
+            </button>
           </div>
 
           {/* Email / SMS / WhatsApp Delivery */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Button
-              onClick={handleSendEmail}
-              variant={emailSent ? 'primary' : 'outline'}
-              size="large"
-              fullWidth
-              icon={Mail}
-              disabled={emailSent}
-            >
-              {emailSent ? '✅ Email Sent!' : 'Send via Email'}
-            </Button>
-            <Button
-              onClick={handleSendSMS}
-              variant={smsSent ? 'primary' : 'outline'}
-              size="large"
-              fullWidth
-              icon={MessageSquare}
-              disabled={smsSent}
-            >
-              {smsSent ? '✅ SMS Sent!' : 'Send via SMS'}
-            </Button>
-            <Button
-              onClick={handleSendWhatsApp}
-              variant={whatsappSent ? 'primary' : 'outline'}
-              size="large"
-              fullWidth
-              icon={Share2}
-              disabled={whatsappSent}
-            >
-              {whatsappSent ? '✅ WhatsApp Sent!' : 'Send via WhatsApp'}
-            </Button>
+          <div style={{ display: 'flex', gap: 24 }}>
+            <button className="chip" style={{ flex: 1, justifyContent: 'center' }} onClick={handleSendEmail} disabled={emailSent}>
+              {emailSent ? `✓ ${t('receipt.emailSent', 'Email Sent!')}` : 'Email'}
+            </button>
+            <button className="chip" style={{ flex: 1, justifyContent: 'center' }} onClick={handleSendSMS} disabled={smsSent}>
+              {smsSent ? `✓ ${t('receipt.smsSent', 'SMS Sent!')}` : 'SMS'}
+            </button>
+            <button className="chip" style={{ flex: 1, justifyContent: 'center' }} onClick={handleSendWhatsApp} disabled={whatsappSent}>
+              {whatsappSent ? '✓ WhatsApp Sent!' : 'WhatsApp'}
+            </button>
           </div>
 
           {/* Thermal Print Toggle */}
-          <div className="flex items-center justify-center">
-            <button
-              onClick={() => setThermalMode(!thermalMode)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${thermalMode ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}
-            >
-              <Maximize2 className="w-4 h-4" />
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <button className={`chip${thermalMode ? ' act' : ''}`} onClick={() => setThermalMode(!thermalMode)}>
               {thermalMode ? 'Normal Mode' : 'Thermal Print Mode'}
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Button
-              onClick={handleNewRequest}
-              variant="outline"
-              size="large"
-              fullWidth
-              icon={PlusCircle}
-            >
-              {t('receipt.newRequest')}
-            </Button>
-            <Button
-              onClick={handleGoHome}
-              variant="ghost"
-              size="large"
-              fullWidth
-              icon={Home}
-            >
-              {t('receipt.goHome')}
-            </Button>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
+            <button className="btn btn-ghost" onClick={handleNewRequest}>
+              <I d={ic.plus} size={32} /> {t('receipt.newRequest')}
+            </button>
+            <button className="btn btn-quiet" onClick={handleGoHome}>
+              <I d={ic.back} size={32} /> {t('receipt.goHome')}
+            </button>
           </div>
         </div>
       </div>

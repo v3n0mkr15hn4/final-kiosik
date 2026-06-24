@@ -30,6 +30,11 @@ body,
   box-sizing: border-box;
 }
 
+@keyframes dot {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40%           { transform: scale(1);   opacity: 1; }
+}
+
 body {
   font-family: 'Inter', 'Noto Sans', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;

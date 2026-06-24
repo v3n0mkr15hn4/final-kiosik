@@ -1,21 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  Landmark,
-  Search,
-  ArrowLeft,
-  CheckCircle,
-  AlertCircle,
-} from 'lucide-react';
-import {
-  Header,
-  Button,
-  Input,
-  Modal,
-  LoadingSpinner,
-} from '../components';
-import { VK } from '../components/kiosk';
+import { Modal, LoadingSpinner } from '../components';
+import { VK, DD, I, ic } from '../components/kiosk';
 import { generateRequestId, getCurrentTimestamp } from '../utils/helpers';
 import { addReceipt } from '../utils/receipts';
 
@@ -117,8 +104,7 @@ const PropertyTaxPayment = () => {
 
   if (loading) {
     return (
-      <VK bg="color-mix(in oklab, #4338ca 4%, white)">
-        
+      <VK bg="color-mix(in oklab, var(--dept-water) 5%, var(--surface-0))">
         <div className="flex items-center justify-center min-h-[60vh]">
           <LoadingSpinner size="large" message={step === 1 ? 'Looking up property...' : 'Processing payment...'} />
         </div>
@@ -127,130 +113,98 @@ const PropertyTaxPayment = () => {
   }
 
   return (
-    <VK bg="color-mix(in oklab, #4338ca 4%, white)">
-      
-
+    <VK bg="color-mix(in oklab, var(--dept-water) 5%, var(--surface-0))">
       <div>
-        {/* Title */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-400 to-purple-600 rounded-full mb-4 shadow-lg">
-            <Landmark className="w-8 h-8 text-white" />
+        {/* Dept header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 40, marginBottom: 48 }}>
+          <DD color="var(--dept-water)" glyph={ic.building} size={128} isz={72} />
+          <div>
+            <h1 className="h2">{t('municipal.propertyTax', 'Property Tax Payment')}</h1>
+            <p className="body-l" style={{ marginTop: 14, color: 'var(--ink-500)' }}>
+              Pay your municipal property tax online
+            </p>
           </div>
-          <h1 className="text-kiosk-2xl font-bold text-gray-800">
-            {t('municipal.propertyTax', 'Property Tax Payment')}
-          </h1>
-          <p className="text-kiosk-base text-gray-500 mt-1">
-            Pay your municipal property tax online
-          </p>
         </div>
 
         {/* Step 1: Property Lookup */}
         {step === 1 && (
-          <div className="bg-white rounded-kiosk-lg shadow-kiosk p-6 md:p-8">
-            <h2 className="text-kiosk-lg font-bold text-gray-800 mb-6 text-center">
+          <div className="card">
+            <h2 className="h3" style={{ textAlign: 'center', marginBottom: 36 }}>
               Enter Property Details
             </h2>
 
-            <Input
-              label={t('municipal.propertyId', 'Property ID / House Number')}
+            <label className="flab">{t('municipal.propertyId', 'Property ID / House Number')} *</label>
+            <input
+              className="field"
               value={propertyId}
               onChange={(e) => { setPropertyId(e.target.value.toUpperCase()); setError(''); }}
               placeholder={t('municipal.enterPropertyId', 'e.g., PROP-2024-001')}
-              error={error}
-              icon={Search}
               required
             />
+            {error && <div className="meta" style={{ color: 'var(--err)' }}>{error}</div>}
 
             {/* Demo hint */}
-            <div className="mt-4 p-3 bg-blue-50 rounded-kiosk border border-blue-200">
-              <p className="text-sm text-blue-700">
-                <strong>Demo:</strong> Try "PROP-2024-001" (₹8,500) or "PROP-2024-002" (₹36,000 with arrears)
-              </p>
+            <div className="meta" style={{ marginTop: 20, color: 'var(--indigo-700)' }}>
+              <strong>Demo:</strong> Try "PROP-2024-001" (₹8,500) or "PROP-2024-002" (₹36,000 with arrears)
             </div>
 
-            <div className="mt-8 flex justify-between">
-              <Button variant="outline" onClick={() => navigate('/municipal-menu')} size="large" icon={ArrowLeft}>
-                {t('app.back')}
-              </Button>
-              <Button onClick={handleLookup} size="xlarge" icon={Search} iconPosition="right" disabled={!propertyId.trim()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 32, marginTop: 48, paddingTop: 40, borderTop: '1.5px solid var(--line)' }}>
+              <button className="btn btn-ghost" onClick={() => navigate('/municipal-menu')}>
+                <I d={ic.back} size={40} /> {t('app.back')}
+              </button>
+              <button className="btn btn-pri btn-xl" onClick={handleLookup} disabled={!propertyId.trim()}>
                 Look Up Property
-              </Button>
+              </button>
             </div>
           </div>
         )}
 
         {/* Step 2: Property Details + Payment */}
         {step === 2 && propertyData && (
-          <div className="space-y-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
             {/* Property Details Card */}
-            <div className="bg-white rounded-kiosk-lg shadow-kiosk overflow-hidden">
-              <div className="bg-indigo-600 text-white p-5">
-                <p className="text-xs opacity-80 uppercase tracking-wider">Property Tax Assessment</p>
-                <p className="text-kiosk-xl font-bold mt-1">{propertyData.propertyId}</p>
+            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+              <div style={{ background: 'var(--indigo-700)', color: 'var(--cream)', padding: 28 }}>
+                <div className="label-tag" style={{ color: 'var(--cream)', opacity: 0.8 }}>Property Tax Assessment</div>
+                <div className="h3" style={{ marginTop: 8, color: 'var(--cream)' }}>{propertyData.propertyId}</div>
               </div>
-              <div className="p-6 space-y-3">
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-500">Owner Name</span>
-                  <span className="text-sm font-semibold text-gray-800">{propertyData.ownerName}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-500">Address</span>
-                  <span className="text-sm font-semibold text-gray-800 text-right max-w-[60%]">{propertyData.address}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-500">Property Type</span>
-                  <span className="text-sm font-semibold text-gray-800">{propertyData.propertyType}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-500">Built-Up Area</span>
-                  <span className="text-sm font-semibold text-gray-800">{propertyData.area}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-500">Zone</span>
-                  <span className="text-sm font-semibold text-gray-800">{propertyData.zone}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-500">Financial Year</span>
-                  <span className="text-sm font-semibold text-gray-800">{propertyData.financialYear}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-sm text-gray-500">Last Paid</span>
-                  <span className="text-sm font-semibold text-gray-800">{propertyData.lastPaidDate}</span>
-                </div>
+              <div style={{ padding: 28 }}>
+                <div className="receipt-row"><span className="k">Owner Name</span><span className="v">{propertyData.ownerName}</span></div>
+                <div className="receipt-row"><span className="k">Address</span><span className="v">{propertyData.address}</span></div>
+                <div className="receipt-row"><span className="k">Property Type</span><span className="v">{propertyData.propertyType}</span></div>
+                <div className="receipt-row"><span className="k">Built-Up Area</span><span className="v">{propertyData.area}</span></div>
+                <div className="receipt-row"><span className="k">Zone</span><span className="v">{propertyData.zone}</span></div>
+                <div className="receipt-row"><span className="k">Financial Year</span><span className="v">{propertyData.financialYear}</span></div>
+                <div className="receipt-row"><span className="k">Last Paid</span><span className="v">{propertyData.lastPaidDate}</span></div>
               </div>
             </div>
 
             {/* Payment Breakdown */}
-            <div className="bg-white rounded-kiosk-lg shadow-kiosk p-6">
-              <h3 className="text-kiosk-base font-bold text-gray-800 mb-4">Payment Breakdown</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between py-2">
-                  <span className="text-sm text-gray-600">Current Year Tax</span>
-                  <span className="text-sm font-semibold text-gray-800">₹{propertyData.currentDue.toLocaleString('en-IN')}</span>
+            <div className="card">
+              <h3 className="h3" style={{ marginBottom: 24 }}>Payment Breakdown</h3>
+              <div className="receipt-row"><span className="k">Current Year Tax</span><span className="v">₹{propertyData.currentDue.toLocaleString('en-IN')}</span></div>
+              {propertyData.arrears > 0 && (
+                <div className="receipt-row">
+                  <span className="k" style={{ color: 'var(--err)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <I d={ic.sos} size={24} /> Arrears
+                  </span>
+                  <span className="v" style={{ color: 'var(--err)' }}>₹{propertyData.arrears.toLocaleString('en-IN')}</span>
                 </div>
-                {propertyData.arrears > 0 && (
-                  <div className="flex justify-between py-2">
-                    <span className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="w-4 h-4" /> Arrears
-                    </span>
-                    <span className="text-sm font-semibold text-red-600">₹{propertyData.arrears.toLocaleString('en-IN')}</span>
-                  </div>
-                )}
-                <div className="flex justify-between py-3 border-t-2 border-indigo-200 mt-2">
-                  <span className="text-kiosk-base font-bold text-indigo-700">Total Payable</span>
-                  <span className="text-kiosk-xl font-bold text-indigo-700">₹{propertyData.totalPayable.toLocaleString('en-IN')}</span>
-                </div>
+              )}
+              <div className="receipt-row" style={{ borderTop: '2px solid var(--indigo-300)', marginTop: 12, paddingTop: 20 }}>
+                <span className="k" style={{ fontWeight: 700, color: 'var(--indigo-700)' }}>Total Payable</span>
+                <span className="v" style={{ fontSize: 28, color: 'var(--indigo-700)' }}>₹{propertyData.totalPayable.toLocaleString('en-IN')}</span>
               </div>
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-between">
-              <Button variant="outline" onClick={() => { setStep(1); setPropertyData(null); }} size="large" icon={ArrowLeft}>
-                Search Again
-              </Button>
-              <Button onClick={handlePay} size="xlarge" icon={CheckCircle} iconPosition="right">
-                Pay ₹{propertyData.totalPayable.toLocaleString('en-IN')}
-              </Button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 32 }}>
+              <button className="btn btn-ghost" onClick={() => { setStep(1); setPropertyData(null); }}>
+                <I d={ic.back} size={40} /> Search Again
+              </button>
+              <button className="btn btn-pri btn-xl" onClick={handlePay}>
+                <I d={ic.check} size={40} /> Pay ₹{propertyData.totalPayable.toLocaleString('en-IN')}
+              </button>
             </div>
           </div>
         )}

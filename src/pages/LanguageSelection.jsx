@@ -5,7 +5,7 @@
 // Plays NO voice — voice is opt-in on the next step.
 // ──────────────────────────────────────────────────────────────────
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { changeLanguageSafe } from '../i18n';
@@ -15,6 +15,33 @@ import { INDIAN_LANGUAGES } from '../i18n/languageCodes';
 import { getSarvamLangCode } from '../utils/languageConfig';
 
 const RTL_LANGS = ['ur', 'ks', 'sd'];
+
+// "Select Your Language" rotated through each language's own script every 3s.
+const TITLE_TRANSLATIONS = [
+  'Select Your Language',
+  'अपनी भाषा चुनें',
+  'আপোনাৰ ভাষা বাছক',
+  'உங்கள் மொழியைத் தேர்ந்தெடுக்கவும்',
+  'আপনার ভাষা নির্বাচন করুন',
+  'नोंथांनि राव बासिख',
+  'अपणी भाषा चुनो',
+  'તમારી ભાષા પસંદ કરો',
+  'ನಿಮ್ಮ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ',
+  'तुमची भास निवडा',
+  'پنٛنۍ زبان ژارٕو',
+  'अपन भाषा चुनू',
+  'നിങ്ങളുടെ ഭാഷ തിരഞ്ഞെടുക്കുക',
+  'ꯑꯗꯣꯝꯒꯤ ꯂꯣꯟ ꯈꯟꯕꯤꯌꯨ',
+  'आपली भाषा निवडा',
+  'आफ्नो भाषा छनोट गर्नुहोस्',
+  'ଆପଣଙ୍କ ଭାଷା ବାଛନ୍ତୁ',
+  'ਆਪਣੀ ਭਾਸ਼ਾ ਚੁਣੋ',
+  'स्वभाषां चिनुत',
+  'ᱟᱢᱟᱜ ᱵᱷᱟᱥᱟ ᱵᱟᱪᱷᱟᱣ',
+  'پنهنجي ٻولي چونڊيو',
+  'మీ భాషను ఎంచుకోండి',
+  'اپنی زبان منتخب کریں',
+];
 
 // ui = i18next code, sarvam = Sarvam language code stored in session, native = label
 const LANGS = INDIAN_LANGUAGES.map((l) => ({
@@ -31,6 +58,14 @@ export default function LanguageSelection() {
   const activeLanguage = (i18n.resolvedLanguage || i18n.language || 'en').toLowerCase().split('-')[0];
   const headingDirection = RTL_LANGS.includes(activeLanguage) ? 'rtl' : 'ltr';
 
+  const [titleIdx, setTitleIdx] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setTitleIdx((i) => (i + 1) % TITLE_TRANSLATIONS.length);
+    }, 3000);
+    return () => clearInterval(id);
+  }, []);
+
   const handlePick = async (lang) => {
     setLanguage(lang.sarvam);           // session language (drives TTS speaker + STT)
     try { await changeLanguageSafe(lang.ui); } catch { /* UI strings best-effort */ }
@@ -44,7 +79,7 @@ export default function LanguageSelection() {
       <div style={styles.inner}>
         <header style={styles.header}>
           <h1 className="h2" style={{ ...styles.title, direction: headingDirection }}>
-            {t('language.selectionTitle')}
+            {TITLE_TRANSLATIONS[titleIdx]}
           </h1>
         </header>
 

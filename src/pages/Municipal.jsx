@@ -1,25 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight, ArrowLeft, Search, FileText, UserCog } from 'lucide-react';
-import {
-  Header,
-  Button,
-  Input,
-  Select,
-  TextArea,
-  Modal,
-  LoadingSpinner,
-  PageContainer,
-  DepartmentHeader,
-  SectionTitle,
-  ServiceCard,
-  UtilityCard,
-  ResponsiveGrid,
-  ActionButton
-} from '../components';
-import { VK } from '../components/kiosk';
-import { MunicipalIcon } from '../assets/icons';
+import { Modal, LoadingSpinner } from '../components';
+import { VK, DD, I, ic } from '../components/kiosk';
 import QRUpload from '../components/QRUpload';
 import { states, cities, wards, serviceCategories } from '../utils/constants';
 import { generateRequestId, getCurrentTimestamp } from '../utils/helpers';
@@ -73,34 +56,27 @@ const Municipal = () => {
 
   const categories = serviceCategories.municipal;
 
-  const theme = {
-    gradient: 'from-indigo-500 via-violet-500 to-purple-600',
-    softGradient: 'from-indigo-50 via-indigo-100 to-violet-100',
-    accentClass: 'text-indigo-600',
-    darkIcon: '#4338ca',
-  };
-
   const utilityServices = [
     {
       id: 'track',
       title: t('home.muniTrack', 'Track Request / Complaint'),
       description: t('home.muniTrackDesc', 'Monitor status of submitted applications'),
       path: '/track-status',
-      Icon: Search,
+      glyph: ic.track,
     },
     {
       id: 'profile',
       title: t('home.muniProfile', 'Update Profile / Credentials'),
       description: t('home.muniProfileDesc', 'Update consumer details and contact info'),
       path: '/consumer-profile?org=municipal',
-      Icon: UserCog,
+      glyph: ic.user,
     },
     {
       id: 'receipt',
       title: t('home.muniReceipt', 'Receipt Generation'),
       description: t('home.muniReceiptDesc', 'View and print transaction receipts'),
       path: '/receipt?org=municipal',
-      Icon: FileText,
+      glyph: ic.receipt,
     },
   ];
 
@@ -203,8 +179,7 @@ const Municipal = () => {
 
   if (loading) {
     return (
-      <VK bg="color-mix(in oklab, #4338ca 4%, white)">
-        
+      <VK bg="color-mix(in oklab, var(--dept-water) 5%, var(--surface-0))">
         <div className="flex items-center justify-center min-h-[60vh]">
           <LoadingSpinner size="large" message={t('app.loading')} />
         </div>
@@ -213,218 +188,194 @@ const Municipal = () => {
   }
 
   return (
-    <VK bg="color-mix(in oklab, #4338ca 4%, white)">
-      
-
+    <VK bg="color-mix(in oklab, var(--dept-water) 5%, var(--surface-0))">
       <div>
-        <DepartmentHeader
-          title={t('municipal.title')}
-          subtitle={t('municipal.subtitle')}
-          icon={MunicipalIcon}
-          iconProps={{ size: 40, color: '#ffffff' }}
-          gradient="from-indigo-500 to-purple-600"
-        />
+        {/* Dept header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 40, marginBottom: 48 }}>
+          <DD color="var(--dept-water)" glyph={ic.drop} size={168} isz={92} />
+          <div>
+            <div className="label-tag" style={{ color: 'var(--dept-water)', marginBottom: 14 }}>
+              Guwahati Municipal
+            </div>
+            <h1 className="h2">{t('municipal.title')}</h1>
+            <p className="body-l" style={{ marginTop: 14, color: 'var(--ink-500)' }}>
+              {t('municipal.subtitle')}
+            </p>
+          </div>
+        </div>
 
         {/* Step Indicator */}
-        <div className="flex items-center justify-center mb-8">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${step >= 1 ? 'bg-government-blue text-white' : 'bg-gray-200 text-gray-500'}`}>
-            1
-          </div>
-          <div className={`w-20 h-1 ${step >= 2 ? 'bg-government-blue' : 'bg-gray-200'}`} />
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${step >= 2 ? 'bg-government-blue text-white' : 'bg-gray-200 text-gray-500'}`}>
-            2
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0, marginBottom: 36 }}>
+          <span className={`badge ${step >= 1 ? 'b-info' : ''}`} style={{ width: 48, height: 48, borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: 22, fontWeight: 800 }}>1</span>
+          <div style={{ width: 80, height: 4, background: step >= 2 ? 'var(--dept-water)' : 'var(--line)' }} />
+          <span className={`badge ${step >= 2 ? 'b-info' : ''}`} style={{ width: 48, height: 48, borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: 22, fontWeight: 800 }}>2</span>
         </div>
 
         {step === 1 ? (
           <>
-            <SectionTitle title={t('form.selectCategory')} className="mb-4" />
-            <ResponsiveGrid variant="services" className="mb-8">
+            <div className="label-tag" style={{ marginBottom: 24 }}>{t('form.selectCategory')}</div>
+            <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', marginBottom: 44 }}>
               {categories.map((category) => (
-                <ServiceCard
+                <button
                   key={category.id}
-                  title={t(category.key)}
-                  icon={MunicipalIcon}
-                  iconProps={{ size: 28, color: '#ffffff' }}
-                  gradient={theme.gradient}
-                  selected={selectedCategory === category.id}
-                  badge={selectedCategory === category.id ? t('app.selected', 'Selected') : undefined}
+                  type="button"
+                  className={`chip${selectedCategory === category.id ? ' act' : ''}`}
                   onClick={() => setSelectedCategory(category.id)}
-                  accessibilityLabel={t(category.key)}
-                />
+                  aria-label={t(category.key)}
+                >
+                  {t(category.key)}
+                </button>
               ))}
-            </ResponsiveGrid>
+            </div>
 
-            <SectionTitle
-              title={t('home.utilitiesHistory', 'Utilities & History')}
-              icon={UserCog}
-              accentClass={theme.accentClass}
-              className="mb-4"
-            />
-            <ResponsiveGrid variant="utilities" className="mb-8">
+            <div className="label-tag" style={{ marginBottom: 24 }}>{t('home.utilitiesHistory', 'Utilities & History')}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, marginBottom: 36 }}>
               {utilityServices.map((service) => (
-                <UtilityCard
+                <button
                   key={service.id}
-                  title={service.title}
-                  description={service.description}
-                  icon={service.Icon}
-                  iconProps={{ className: 'w-6 h-6 text-indigo-700' }}
-                  gradient={theme.softGradient}
+                  type="button"
                   onClick={() => navigate(service.path)}
-                  accessibilityLabel={service.title}
-                />
+                  className="tile"
+                  style={{
+                    minHeight: 220, padding: 28, alignItems: 'flex-start', textAlign: 'left',
+                    gap: 18, borderTop: '8px solid var(--dept-water)', touchAction: 'manipulation',
+                  }}
+                  aria-label={service.title}
+                >
+                  <DD color="var(--dept-water)" glyph={service.glyph} size={96} isz={52} />
+                  <div className="nm" style={{ fontSize: 22 }}>{service.title}</div>
+                  <div className="sub" style={{ fontSize: 18 }}>{service.description}</div>
+                </button>
               ))}
-            </ResponsiveGrid>
+            </div>
 
-            <div className="flex flex-col sm:flex-row justify-between gap-4">
-              <ActionButton
-                variant="outline"
-                onClick={() => navigate('/home')}
-                icon={ArrowLeft}
-              >
-                {t('home.backToOrgs', 'Back to Home')}
-              </ActionButton>
-              <ActionButton
-                onClick={() => setStep(2)}
-                disabled={!selectedCategory}
-                icon={ArrowRight}
-                iconPosition="right"
-                variant="primary"
-              >
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 32 }}>
+              <button className="btn btn-ghost" onClick={() => navigate('/home')}>
+                <I d={ic.back} size={40} /> {t('home.backToOrgs', 'Back to Home')}
+              </button>
+              <button className="btn btn-pri btn-xl" disabled={!selectedCategory} onClick={() => setStep(2)}>
                 {t('app.next')}
-              </ActionButton>
+              </button>
             </div>
           </>
         ) : (
-          <div className="bg-white rounded-kiosk-lg shadow-kiosk p-6 md:p-8">
-            <div className="mb-6 p-4 bg-indigo-50 rounded-kiosk border border-indigo-200">
-              <p className="text-kiosk-base font-semibold text-indigo-800">
-                Selected: {t(`municipal.${selectedCategory}`)}
-              </p>
-            </div>
+          <div className="card">
+            <span className="badge b-info" style={{ marginBottom: 44 }}>
+              Selected · {t(`municipal.${selectedCategory}`)}
+            </span>
 
-            <div className="space-y-6">
-              {selectedCategory === 'waterConnection' && (
-                <div className="p-4 bg-indigo-50 rounded-kiosk border border-indigo-200">
-                  <h3 className="text-kiosk-base font-bold text-indigo-800 mb-4">Water Connection Details (SRS Module 17)</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Select label={t('municipal.connectionType')} value={formData.waterConnectionType || ''} onChange={e => handleInputChange('waterConnectionType', e.target.value)} options={[{value:'domestic',label:'🏠 Domestic (Household)'},{value:'commercial',label:'🏢 Commercial'},{value:'industrial',label:'🏭 Industrial'},{value:'institutional',label:'🏫 Institutional/Govt'},{value:'upgrade',label:'⬆️ Upgrade Existing'}]} placeholder={t('municipal.selectConnectionType')} required />
-                    <Select label={t('municipal.pipeSize')} value={formData.pipeSize || ''} onChange={e => handleInputChange('pipeSize', e.target.value)} options={[{value:'0.5inch',label:'½ inch (Standard domestic)'},{value:'1inch',label:'1 inch (Small commercial)'},{value:'2inch',label:'2 inch (Large commercial)'},{value:'3inch',label:'3 inch+ (Industrial)'}]} placeholder={t('municipal.selectPipeSize')} />
-                    <Input label={t('municipal.plotArea')} type="number" value={formData.plotArea || ''} onChange={e => handleInputChange('plotArea', e.target.value)} placeholder="e.g. 1500" />
-                    <Input label={t('municipal.numberOfFloors')} type="number" value={formData.floorCount || ''} onChange={e => handleInputChange('floorCount', e.target.value)} placeholder="e.g. 3" />
+            {selectedCategory === 'waterConnection' && (
+              <div style={{ marginBottom: 36 }}>
+                <div className="label-tag" style={{ marginBottom: 20 }}>Water Connection Details</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
+                  <div>
+                    <label className="flab">{t('municipal.connectionType')} *</label>
+                    <select className="field" value={formData.waterConnectionType || ''} onChange={e => handleInputChange('waterConnectionType', e.target.value)} required>
+                      <option value="">{t('municipal.selectConnectionType')}</option>
+                      <option value="domestic">Domestic (Household)</option>
+                      <option value="commercial">Commercial</option>
+                      <option value="industrial">Industrial</option>
+                      <option value="institutional">Institutional/Govt</option>
+                      <option value="upgrade">Upgrade Existing</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="flab">{t('municipal.pipeSize')}</label>
+                    <select className="field" value={formData.pipeSize || ''} onChange={e => handleInputChange('pipeSize', e.target.value)}>
+                      <option value="">{t('municipal.selectPipeSize')}</option>
+                      <option value="0.5inch">½ inch (Standard domestic)</option>
+                      <option value="1inch">1 inch (Small commercial)</option>
+                      <option value="2inch">2 inch (Large commercial)</option>
+                      <option value="3inch">3 inch+ (Industrial)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="flab">{t('municipal.plotArea')}</label>
+                    <input className="field" type="number" value={formData.plotArea || ''} onChange={e => handleInputChange('plotArea', e.target.value)} placeholder="e.g. 1500" />
+                  </div>
+                  <div>
+                    <label className="flab">{t('municipal.numberOfFloors')}</label>
+                    <input className="field" type="number" value={formData.floorCount || ''} onChange={e => handleInputChange('floorCount', e.target.value)} placeholder="e.g. 3" />
                   </div>
                 </div>
-              )}
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                  label={t('form.name')}
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  placeholder={t('form.enterName')}
-                  error={errors.name}
-                  required
-                />
-                <Input
-                  label={t('form.mobile')}
-                  type="tel"
-                  value={formData.mobile}
-                  onChange={(e) => handleInputChange('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  placeholder={t('form.enterMobile')}
-                  error={errors.mobile}
-                  required
-                />
               </div>
+            )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                  label={t('form.email')}
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder={t('form.enterEmail')}
-                />
-                <Input
-                  label={t('municipal.propertyId')}
-                  value={formData.propertyId}
-                  onChange={(e) => handleInputChange('propertyId', e.target.value)}
-                  placeholder={t('municipal.enterPropertyId')}
-                />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '36px 40px' }}>
+              <div>
+                <label className="flab">{t('form.name')} *</label>
+                <input className="field" value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} placeholder={t('form.enterName')} required />
+                {errors.name && <div className="meta" style={{ color: 'var(--err)' }}>{errors.name}</div>}
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Select
-                  label={t('form.state')}
-                  value={formData.state}
-                  onChange={(e) => handleInputChange('state', e.target.value)}
-                  placeholder={t('form.selectState')}
-                  options={states.map(s => ({ value: s.id, label: getLocalizedName(s) }))}
-                  error={errors.state}
-                  required
-                />
-                <Select
-                  label={t('form.city')}
-                  value={formData.city}
-                  onChange={(e) => handleInputChange('city', e.target.value)}
-                  placeholder={t('form.selectCity')}
-                  options={availableCities.map(c => ({ value: c.id, label: getLocalizedName(c) }))}
-                  error={errors.city}
-                  required
-                  disabled={!formData.state}
-                />
-                <Select
-                  label={t('form.ward')}
-                  value={formData.ward}
-                  onChange={(e) => handleInputChange('ward', e.target.value)}
-                  placeholder={t('form.selectWard')}
-                  options={availableWards.map(w => ({ value: w.id, label: w.name }))}
-                  error={errors.ward}
-                  required
-                  disabled={!formData.city}
-                />
+              <div>
+                <label className="flab">{t('form.mobile')} *</label>
+                <input className="field" type="tel" value={formData.mobile} onChange={(e) => handleInputChange('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))} placeholder={t('form.enterMobile')} required />
+                {errors.mobile && <div className="meta" style={{ color: 'var(--err)' }}>{errors.mobile}</div>}
               </div>
+            </div>
 
-              <Input
-                label={t('form.address')}
-                value={formData.address}
-                onChange={(e) => handleInputChange('address', e.target.value)}
-                placeholder={t('form.enterAddress')}
-                error={errors.address}
-                required
-              />
-
-              <TextArea
-                label={t('form.description')}
-                value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder={t('form.enterDescription')}
-                error={errors.description}
-                required
-                rows={4}
-                maxLength={500}
-              />
-
-              <QRUpload
-                label={t('form.uploadDocuments')}
-                onUploadComplete={(uploadedFiles) => setFiles(uploadedFiles)}
-                maxFiles={5}
-              />
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-between pt-6 border-t">
-                <Button
-                  variant="secondary"
-                  onClick={handleFormBack}
-                  size="large"
-                >
-                  {t('app.back')}
-                </Button>
-                <Button
-                  onClick={handleSubmit}
-                  size="xlarge"
-                >
-                  {t('app.submit')}
-                </Button>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '36px 40px', marginTop: 36 }}>
+              <div>
+                <label className="flab">{t('form.email')}</label>
+                <input className="field" type="email" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} placeholder={t('form.enterEmail')} />
               </div>
+              <div>
+                <label className="flab">{t('municipal.propertyId')}</label>
+                <input className="field" value={formData.propertyId} onChange={(e) => handleInputChange('propertyId', e.target.value)} placeholder={t('municipal.enterPropertyId')} />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 40, marginTop: 36 }}>
+              <div>
+                <label className="flab">{t('form.state')} *</label>
+                <select className="field" value={formData.state} onChange={(e) => handleInputChange('state', e.target.value)} required>
+                  <option value="">{t('form.selectState')}</option>
+                  {states.map(s => <option key={s.id} value={s.id}>{getLocalizedName(s)}</option>)}
+                </select>
+                {errors.state && <div className="meta" style={{ color: 'var(--err)' }}>{errors.state}</div>}
+              </div>
+              <div>
+                <label className="flab">{t('form.city')} *</label>
+                <select className="field" value={formData.city} onChange={(e) => handleInputChange('city', e.target.value)} disabled={!formData.state} required>
+                  <option value="">{t('form.selectCity')}</option>
+                  {availableCities.map(c => <option key={c.id} value={c.id}>{getLocalizedName(c)}</option>)}
+                </select>
+                {errors.city && <div className="meta" style={{ color: 'var(--err)' }}>{errors.city}</div>}
+              </div>
+              <div>
+                <label className="flab">{t('form.ward')} *</label>
+                <select className="field" value={formData.ward} onChange={(e) => handleInputChange('ward', e.target.value)} disabled={!formData.city} required>
+                  <option value="">{t('form.selectWard')}</option>
+                  {availableWards.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                </select>
+                {errors.ward && <div className="meta" style={{ color: 'var(--err)' }}>{errors.ward}</div>}
+              </div>
+            </div>
+
+            <div style={{ marginTop: 36 }}>
+              <label className="flab">{t('form.address')} *</label>
+              <input className="field" value={formData.address} onChange={(e) => handleInputChange('address', e.target.value)} placeholder={t('form.enterAddress')} required />
+              {errors.address && <div className="meta" style={{ color: 'var(--err)' }}>{errors.address}</div>}
+            </div>
+
+            <div style={{ marginTop: 36 }}>
+              <label className="flab">{t('form.description')} *</label>
+              <textarea className="field" style={{ minHeight: 240 }} value={formData.description} onChange={(e) => handleInputChange('description', e.target.value)} placeholder={t('form.enterDescription')} required maxLength={500} />
+              {errors.description && <div className="meta" style={{ color: 'var(--err)' }}>{errors.description}</div>}
+            </div>
+
+            <div style={{ marginTop: 36 }}>
+              <label className="flab">{t('form.uploadDocuments')}</label>
+              <QRUpload label={t('form.uploadDocuments')} onUploadComplete={(uploadedFiles) => setFiles(uploadedFiles)} maxFiles={5} />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 32, marginTop: 52, paddingTop: 44, borderTop: '1.5px solid var(--line)' }}>
+              <button className="btn btn-ghost" onClick={handleFormBack}>
+                <I d={ic.back} size={40} /> {t('app.back')}
+              </button>
+              <button className="btn btn-pri" onClick={handleSubmit}>
+                {t('app.submit')}
+              </button>
             </div>
           </div>
         )}

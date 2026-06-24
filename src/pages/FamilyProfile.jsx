@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Baby, Heart, Users, Sparkles, Search, FileText, Plus, Save, X, AlertCircle } from 'lucide-react';
-import { Button, Input, Modal } from '../components';
-import { VK, I, ic } from '../components/kiosk';
-import { FamilyIcon } from '../assets/icons';
-import DependentCard from '../components/DependentCard';
+import { Modal } from '../components';
+import { VK, DD, I, ic } from '../components/kiosk';
 
 const FamilyProfile = () => {
   const { t, i18n } = useTranslation();
@@ -44,54 +41,42 @@ const FamilyProfile = () => {
   const menuCards = [
     {
       id: 'addChild',
-      LucideIcon: Baby,
+      glyph: ic.family,
       title: t('familyProfile.addChildTitle'),
       description: t('familyProfile.addChildDesc'),
-      color: '#ec4899',
-      bg: 'color-mix(in oklab, #ec4899 12%, white)',
     },
     {
       id: 'addParent',
-      LucideIcon: Heart,
+      glyph: ic.heart,
       title: t('familyProfile.addParentTitle'),
       description: t('familyProfile.addParentDesc'),
-      color: '#f59e0b',
-      bg: 'color-mix(in oklab, #f59e0b 12%, white)',
     },
     {
       id: 'viewFamily',
-      LucideIcon: Users,
+      glyph: ic.user,
       title: t('familyProfile.viewFamilyTitle'),
       description: t('familyProfile.viewFamilyDesc'),
-      color: '#0369a1',
-      bg: 'color-mix(in oklab, #0369a1 12%, white)',
     },
     {
       id: 'schemes',
-      LucideIcon: Sparkles,
+      glyph: ic.shield,
       title: t('familyProfile.schemesTitle'),
       description: t('familyProfile.schemesDesc'),
       path: '/schemes',
-      color: '#7c3aed',
-      bg: 'color-mix(in oklab, #7c3aed 12%, white)',
     },
     {
       id: 'track',
-      LucideIcon: Search,
+      glyph: ic.track,
       title: t('familyProfile.trackTitle'),
       description: t('familyProfile.trackDesc'),
       path: '/track-status',
-      color: '#475569',
-      bg: 'color-mix(in oklab, #475569 12%, white)',
     },
     {
       id: 'receipt',
-      LucideIcon: FileText,
+      glyph: ic.receipt,
       title: t('familyProfile.receiptTitle'),
       description: t('familyProfile.receiptDesc'),
       path: '/receipt',
-      color: '#059669',
-      bg: 'color-mix(in oklab, #059669 12%, white)',
     },
   ];
 
@@ -150,74 +135,62 @@ const FamilyProfile = () => {
   const parents = dependents.filter((d) => d.relationship === 'elderly_parent');
 
   return (
-    <VK bg="color-mix(in oklab, #3b82f6 4%, white)">
+    <VK bg="color-mix(in oklab, var(--saffron-500) 6%, var(--surface-0))">
 
       {/* ── MENU LANDING ── */}
       {view === 'menu' && (
         <>
-          <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <div style={{
-              width: 120, height: 120, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #3b82f6, #4f46e5)',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: 20, boxShadow: '0 8px 32px rgba(59,130,246,0.3)',
-            }}>
-              <FamilyIcon size={60} color="#fff" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 40, marginBottom: 48 }}>
+            <DD color="var(--saffron-700)" glyph={ic.family} size={168} isz={92} />
+            <div>
+              <div className="label-tag" style={{ color: 'var(--saffron-700)', marginBottom: 14 }}>
+                My Family
+              </div>
+              <h1 className="h2">{t('familyProfile.title', 'Family Profile')}</h1>
+              <p className="body-l" style={{ marginTop: 14, color: 'var(--ink-500)' }}>
+                {t('familyProfile.subtitle', 'Manage dependents · Children · Elderly parents · Scheme benefits')}
+              </p>
             </div>
-            <h1 className="h2" style={{ marginBottom: 10 }}>
-              {t('familyProfile.title', 'Family Profile')}
-            </h1>
-            <p className="body-l" style={{ color: 'var(--ink-500)' }}>
-              {t('familyProfile.subtitle', 'Manage dependents · Children · Elderly parents · Scheme benefits')}
-            </p>
           </div>
 
           {/* Service grid — 3 cols for kiosk */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, marginBottom: 32 }}>
-            {menuCards.map((s) => {
-              const Icon = s.LucideIcon;
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => {
-                    if (s.path) {
-                      navigate(s.path);
-                    } else if (s.id === 'addChild') {
-                      setFormData(f => ({ ...f, relationship: 'child' }));
-                      setShowForm(true);
-                      setView('manage');
-                    } else if (s.id === 'addParent') {
-                      setFormData(f => ({ ...f, relationship: 'elderly_parent' }));
-                      setShowForm(true);
-                      setView('manage');
-                    } else {
-                      setView('manage');
-                    }
-                  }}
-                  className="tile"
-                  style={{
-                    minHeight: 260,
-                    padding: 32,
-                    alignItems: 'flex-start',
-                    textAlign: 'left',
-                    gap: 20,
-                    borderTop: `6px solid ${s.color}`,
-                    touchAction: 'manipulation',
-                  }}
-                  aria-label={s.title}
-                >
-                  <div style={{
-                    width: 72, height: 72, borderRadius: 20,
-                    background: s.bg, display: 'grid', placeItems: 'center', flexShrink: 0,
-                  }}>
-                    <Icon size={36} style={{ color: s.color }} strokeWidth={2} />
-                  </div>
-                  <div className="nm" style={{ fontSize: 26, lineHeight: 1.3 }}>{s.title}</div>
-                  <div className="sub" style={{ fontSize: 20, marginTop: 'auto' }}>{s.description}</div>
-                </button>
-              );
-            })}
+            {menuCards.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => {
+                  if (s.path) {
+                    navigate(s.path);
+                  } else if (s.id === 'addChild') {
+                    setFormData(f => ({ ...f, relationship: 'child' }));
+                    setShowForm(true);
+                    setView('manage');
+                  } else if (s.id === 'addParent') {
+                    setFormData(f => ({ ...f, relationship: 'elderly_parent' }));
+                    setShowForm(true);
+                    setView('manage');
+                  } else {
+                    setView('manage');
+                  }
+                }}
+                className="tile"
+                style={{
+                  minHeight: 260,
+                  padding: 32,
+                  alignItems: 'flex-start',
+                  textAlign: 'left',
+                  gap: 20,
+                  borderTop: '8px solid var(--saffron-700)',
+                  touchAction: 'manipulation',
+                }}
+                aria-label={s.title}
+              >
+                <DD color="var(--saffron-700)" glyph={s.glyph} size={120} isz={64} />
+                <div className="nm" style={{ fontSize: 26, lineHeight: 1.3 }}>{s.title}</div>
+                <div className="sub" style={{ fontSize: 20, marginTop: 'auto' }}>{s.description}</div>
+              </button>
+            ))}
           </div>
 
           <button
@@ -234,106 +207,73 @@ const FamilyProfile = () => {
       {/* ── MANAGE VIEW ── */}
       {view === 'manage' && (
         <div>
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <div style={{
-              width: 80, height: 80, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #3b82f6, #4f46e5)',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: 12, boxShadow: '0 4px 16px rgba(59,130,246,0.25)',
-            }}>
-              <FamilyIcon size={40} color="#fff" />
-            </div>
-            <h1 className="h2" style={{ marginBottom: 6 }}>
-              {t('familyProfile.title', 'Family Profile')}
-            </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 32, marginBottom: 40 }}>
+            <DD color="var(--saffron-700)" glyph={ic.family} size={128} isz={72} />
+            <h1 className="h2">{t('familyProfile.title', 'Family Profile')}</h1>
           </div>
 
-          {/* Primary citizen info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-full bg-government-blue flex items-center justify-center text-white font-bold text-lg">
+          {/* Primary citizen banner */}
+          <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 32, padding: '40px 48px', marginBottom: 36 }}>
+            <div style={{ width: 104, height: 104, borderRadius: '50%', background: 'var(--indigo-700)', color: 'var(--cream)', display: 'grid', placeItems: 'center', fontSize: 48, fontWeight: 800 }}>
               {userName[0]?.toUpperCase() || 'C'}
             </div>
-            <div>
-              <p className="font-bold text-government-blue">{userName}</p>
-              <p className="text-xs text-blue-600">
-                {t('familyProfile.primaryCitizen')}
-              </p>
+            <div style={{ flex: 1 }}>
+              <div className="body" style={{ fontWeight: 700, color: 'var(--indigo-900)', fontSize: 42 }}>
+                {userName}
+              </div>
+              <div className="meta" style={{ marginTop: 6 }}>{t('familyProfile.primaryCitizen')}</div>
             </div>
+            <span className="badge b-info">Primary</span>
           </div>
 
           {/* Add Dependent Button */}
           {!showForm && (
-            <div className="mb-6">
-              <Button onClick={() => setShowForm(true)} icon={Plus} size="large" fullWidth>
-                {t('familyProfile.addDependent', 'Add Dependent')}
-              </Button>
-            </div>
+            <button className="btn btn-pri" style={{ width: '100%', marginBottom: 52 }} onClick={() => setShowForm(true)}>
+              <I d={ic.plus} size={44} /> {t('familyProfile.addDependent', 'Add Dependent')}
+            </button>
           )}
 
           {/* Add/Edit Form */}
           {showForm && (
-            <div className="bg-white rounded-2xl shadow-kiosk p-6 mb-8 border-2 border-violet-200">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-kiosk-lg font-bold text-gray-800">
-                  {editingId ? t('familyProfile.editDependent', 'Edit Dependent') : t('familyProfile.addNewDependent', 'Add New Dependent')}
-                </h2>
-                <button onClick={resetForm} className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors">
-                  <X className="w-5 h-5 text-gray-600" />
+            <div className="card" style={{ marginBottom: 48, border: '2px solid var(--indigo-300)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 40 }}>
+                <h2 className="h3">{editingId ? t('familyProfile.editDependent', 'Edit Dependent') : t('familyProfile.addNewDependent', 'Add New Dependent')}</h2>
+                <button className="btn btn-quiet" onClick={resetForm}>
+                  <I d={ic.x} size={36} />
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '36px 40px' }}>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">{t('form.name')} *</label>
-                  <input type="text" value={formData.name} onChange={(e) => handleFormChange('name', e.target.value)}
-                    placeholder={t('familyProfile.enterFullName')}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-government-blue focus:ring-2 focus:ring-blue-200 text-base" />
+                  <label className="flab">{t('form.name')} *</label>
+                  <input className="field" value={formData.name} onChange={(e) => handleFormChange('name', e.target.value)} placeholder={t('familyProfile.enterFullName')} />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">{t('familyProfile.relationship')} *</label>
-                  <select value={formData.relationship} onChange={(e) => handleFormChange('relationship', e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-government-blue focus:ring-2 focus:ring-blue-200 text-base">
+                  <label className="flab">{t('familyProfile.relationship')} *</label>
+                  <select className="field" value={formData.relationship} onChange={(e) => handleFormChange('relationship', e.target.value)}>
                     <option value="child">{t('familyProfile.child')}</option>
                     <option value="elderly_parent">{t('familyProfile.elderlyParent')}</option>
                   </select>
                 </div>
-
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    {t('familyProfile.age')} *
-                  </label>
-                  <input type="number" min="0" max="120" value={formData.age} onChange={(e) => handleFormChange('age', e.target.value)}
-                    placeholder={t('familyProfile.age')}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-government-blue focus:ring-2 focus:ring-blue-200 text-base" />
+                  <label className="flab">{t('familyProfile.age')} *</label>
+                  <input className="field" type="number" min="0" max="120" value={formData.age} onChange={(e) => handleFormChange('age', e.target.value)} placeholder={t('familyProfile.age')} />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">{t('schemes.gender')}</label>
-                  <select value={formData.gender} onChange={(e) => handleFormChange('gender', e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-government-blue focus:ring-2 focus:ring-blue-200 text-base">
+                  <label className="flab">{t('schemes.gender')}</label>
+                  <select className="field" value={formData.gender} onChange={(e) => handleFormChange('gender', e.target.value)}>
                     <option value="Male">{t('familyProfile.male')}</option>
                     <option value="Female">{t('familyProfile.female')}</option>
                     <option value="Other">{t('familyProfile.other')}</option>
                   </select>
                 </div>
-
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    {t('familyProfile.aadhaarOptional')}
-                  </label>
-                  <input type="text" value={formData.aadhaar}
-                    onChange={(e) => handleFormChange('aadhaar', e.target.value.replace(/\D/g, '').slice(0, 12))}
-                    placeholder={t('familyProfile.aadhaarPlaceholder')} maxLength={12}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-government-blue focus:ring-2 focus:ring-blue-200 text-base" />
+                  <label className="flab">{t('familyProfile.aadhaarOptional')}</label>
+                  <input className="field" type="text" value={formData.aadhaar} onChange={(e) => handleFormChange('aadhaar', e.target.value.replace(/\D/g, '').slice(0, 12))} placeholder={t('familyProfile.aadhaarPlaceholder')} maxLength={12} />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    {t('familyProfile.disabilityOptional')}
-                  </label>
-                  <select value={formData.disability} onChange={(e) => handleFormChange('disability', e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-government-blue focus:ring-2 focus:ring-blue-200 text-base">
+                  <label className="flab">{t('familyProfile.disabilityOptional')}</label>
+                  <select className="field" value={formData.disability} onChange={(e) => handleFormChange('disability', e.target.value)}>
                     <option value="">{t('familyProfile.none')}</option>
                     <option value="visual">{t('familyProfile.visual')}</option>
                     <option value="physical">{t('familyProfile.physical')}</option>
@@ -344,41 +284,48 @@ const FamilyProfile = () => {
               </div>
 
               {formError && (
-                <div className="flex items-center space-x-2 bg-red-50 border border-red-200 rounded-xl p-3 mb-4">
-                  <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                  <span className="text-sm text-red-700">{formError}</span>
+                <div className="badge b-err" style={{ marginTop: 28, borderRadius: 18, padding: '24px 28px' }}>
+                  {formError}
                 </div>
               )}
 
-              <div className="flex space-x-4">
-                <Button onClick={handleSave} icon={Save} size="large" fullWidth>
-                  {editingId ? t('familyProfile.updateDependent') : t('familyProfile.saveDependent')}
-                </Button>
-                <Button onClick={resetForm} variant="outline" size="large">{t('app.cancel')}</Button>
+              <div style={{ display: 'flex', gap: 28, marginTop: 40 }}>
+                <button className="btn btn-pri btn-xl" style={{ flex: 1 }} onClick={handleSave}>
+                  <I d={ic.check} size={44} /> {editingId ? t('familyProfile.updateDependent') : t('familyProfile.saveDependent')}
+                </button>
+                <button className="btn btn-ghost" onClick={resetForm}>{t('app.cancel')}</button>
               </div>
             </div>
           )}
 
           {/* Dependents list */}
           {dependents.length === 0 && !showForm ? (
-            <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center">
-              <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-kiosk-base text-gray-400 font-medium">{t('familyProfile.noDependents')}</p>
-              <p className="text-sm text-gray-400 mt-1">{t('familyProfile.noDependentsHint')}</p>
+            <div className="card" style={{ textAlign: 'center', border: '2px dashed var(--line)' }}>
+              <I d={ic.family} size={48} style={{ color: 'var(--ink-500)' }} />
+              <p className="body" style={{ marginTop: 12, color: 'var(--ink-500)' }}>{t('familyProfile.noDependents')}</p>
+              <p className="meta" style={{ marginTop: 4 }}>{t('familyProfile.noDependentsHint')}</p>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 36 }}>
               {children.length > 0 && (
                 <div>
-                  <div className="flex items-center mb-3">
-                    <Baby className="w-5 h-5 text-pink-500 mr-2" />
-                    <h2 className="text-kiosk-base font-bold text-gray-800">
-                      {t('familyProfile.children')} ({children.length})
-                    </h2>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="label-tag" style={{ marginBottom: 28 }}>{t('familyProfile.children')} ({children.length})</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
                     {children.map((dep) => (
-                      <DependentCard key={dep.id} dependent={dep} onEdit={handleEdit} onRemove={handleRemove} />
+                      <div key={dep.id} className="card" style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+                        <DD color="var(--dept-health)" glyph={ic.family} size={104} isz={56} />
+                        <div style={{ flex: 1 }}>
+                          <div className="body" style={{ fontWeight: 700, fontSize: 42 }}>{dep.name}</div>
+                          <div style={{ display: 'flex', gap: 16, marginTop: 14 }}>
+                            <span className="badge b-info">{dep.relationship}</span>
+                            <span className="badge b-ok">{dep.age} yrs</span>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: 18 }}>
+                          <button className="chip" onClick={() => handleEdit(dep)}>Edit</button>
+                          <button className="chip" style={{ color: 'var(--err)' }} onClick={() => handleRemove(dep.id)}>Remove</button>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -386,15 +333,23 @@ const FamilyProfile = () => {
 
               {parents.length > 0 && (
                 <div>
-                  <div className="flex items-center mb-3">
-                    <Heart className="w-5 h-5 text-amber-500 mr-2" />
-                    <h2 className="text-kiosk-base font-bold text-gray-800">
-                      {t('familyProfile.elderlyParents')} ({parents.length})
-                    </h2>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="label-tag" style={{ marginBottom: 28 }}>{t('familyProfile.elderlyParents')} ({parents.length})</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
                     {parents.map((dep) => (
-                      <DependentCard key={dep.id} dependent={dep} onEdit={handleEdit} onRemove={handleRemove} />
+                      <div key={dep.id} className="card" style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+                        <DD color="var(--dept-health)" glyph={ic.family} size={104} isz={56} />
+                        <div style={{ flex: 1 }}>
+                          <div className="body" style={{ fontWeight: 700, fontSize: 42 }}>{dep.name}</div>
+                          <div style={{ display: 'flex', gap: 16, marginTop: 14 }}>
+                            <span className="badge b-info">{dep.relationship}</span>
+                            <span className="badge b-ok">{dep.age} yrs</span>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: 18 }}>
+                          <button className="chip" onClick={() => handleEdit(dep)}>Edit</button>
+                          <button className="chip" style={{ color: 'var(--err)' }} onClick={() => handleRemove(dep.id)}>Remove</button>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -403,12 +358,12 @@ const FamilyProfile = () => {
           )}
 
           {dependents.length > 0 && (
-            <div className="mt-8 bg-violet-50 border border-violet-200 rounded-xl p-4">
-              <p className="text-sm text-violet-700">💡 {t('familyProfile.schemesHint')}</p>
+            <div className="card" style={{ marginTop: 36, background: 'color-mix(in oklab, var(--indigo-500) 8%, white)' }}>
+              <p className="meta" style={{ color: 'var(--indigo-700)' }}>{t('familyProfile.schemesHint')}</p>
             </div>
           )}
 
-          <div className="flex justify-center py-6">
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
             <button
               type="button"
               className="btn btn-quiet"

@@ -3,30 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { startSTT, stopSTT } from '../ai/voice/speechRecognition';
 import { useVoiceFormSubmit } from '../hooks/useVoiceFormSubmit';
-import {
-  Building2,
-  Droplets,
-  Waves,
-  Trash2,
-  Lightbulb,
-  AlertTriangle,
-  Beaker,
-  Landmark,
-  HelpCircle,
-  ArrowRight,
-  ArrowLeft,
-  Mic,
-  MicOff,
-} from 'lucide-react';
-import {
-  Button,
-  Input,
-  Select,
-  TextArea,
-  Modal,
-  LoadingSpinner,
-} from '../components';
-import { VK } from '../components/kiosk';
+import { Modal, LoadingSpinner } from '../components';
+import { VK, DD, I, ic } from '../components/kiosk';
 import QRUpload from '../components/QRUpload';
 import { states, cities, wards } from '../utils/constants';
 import { generateComplaintId, getCurrentTimestamp } from '../utils/helpers';
@@ -80,14 +58,14 @@ const MunicipalGrievance = () => {
   }, [isRecording, sttLangCode]);
 
   const grievanceCategories = [
-    { id: 'waterDisruption', label: t('muniGrievance.waterDisruption', 'Water Supply Disruption'), icon: Droplets, color: 'bg-blue-100 text-blue-700 border-blue-300' },
-    { id: 'sewageOverflow', label: t('muniGrievance.sewageOverflow', 'Sewage Overflow or Blockage'), icon: Waves, color: 'bg-amber-100 text-amber-700 border-amber-300' },
-    { id: 'garbageIssue', label: t('muniGrievance.garbageIssue', 'Garbage Collection Irregularity'), icon: Trash2, color: 'bg-green-100 text-green-700 border-green-300' },
-    { id: 'streetlightFailure', label: t('muniGrievance.streetlightFailure', 'Streetlight Failure'), icon: Lightbulb, color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
-    { id: 'roadDamage', label: t('muniGrievance.roadDamage', 'Road Damage and Potholes'), icon: AlertTriangle, color: 'bg-red-100 text-red-700 border-red-300' },
-    { id: 'waterQuality', label: t('muniGrievance.waterQuality', 'Water Quality Complaints'), icon: Beaker, color: 'bg-cyan-100 text-cyan-700 border-cyan-300' },
-    { id: 'propertyTaxError', label: t('muniGrievance.propertyTaxError', 'Property Tax Errors'), icon: Landmark, color: 'bg-purple-100 text-purple-700 border-purple-300' },
-    { id: 'otherMunicipal', label: t('muniGrievance.otherMunicipal', 'Other Municipal Issues'), icon: HelpCircle, color: 'bg-gray-100 text-gray-700 border-gray-300' },
+    { id: 'waterDisruption', label: t('muniGrievance.waterDisruption', 'Water Supply Disruption'), glyph: ic.drop },
+    { id: 'sewageOverflow', label: t('muniGrievance.sewageOverflow', 'Sewage Overflow or Blockage'), glyph: ic.bell },
+    { id: 'garbageIssue', label: t('muniGrievance.garbageIssue', 'Garbage Collection Irregularity'), glyph: ic.trash },
+    { id: 'streetlightFailure', label: t('muniGrievance.streetlightFailure', 'Streetlight Failure'), glyph: ic.bolt },
+    { id: 'roadDamage', label: t('muniGrievance.roadDamage', 'Road Damage and Potholes'), glyph: ic.sos },
+    { id: 'waterQuality', label: t('muniGrievance.waterQuality', 'Water Quality Complaints'), glyph: ic.drop },
+    { id: 'propertyTaxError', label: t('muniGrievance.propertyTaxError', 'Property Tax Errors'), glyph: ic.rupee },
+    { id: 'otherMunicipal', label: t('muniGrievance.otherMunicipal', 'Other Municipal Issues'), glyph: ic.help },
   ];
 
   const getLocalizedName = (item) => {
@@ -169,7 +147,7 @@ const MunicipalGrievance = () => {
 
   if (loading) {
     return (
-      <VK bg="color-mix(in oklab, #4338ca 4%, white)">
+      <VK bg="color-mix(in oklab, var(--dept-water) 5%, var(--surface-0))">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
           <LoadingSpinner size="large" message={t('app.loading')} />
         </div>
@@ -178,122 +156,145 @@ const MunicipalGrievance = () => {
   }
 
   return (
-    <VK bg="color-mix(in oklab, #4338ca 4%, white)">
+    <VK bg="color-mix(in oklab, var(--dept-water) 5%, var(--surface-0))">
       <div>
-        {/* Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-kiosk-2xl md:text-kiosk-3xl font-bold text-gray-800">
-            {t('muniGrievance.title', 'Municipal Grievance Registration')}
-          </h1>
-          <p className="text-kiosk-lg text-gray-600 mt-2">
-            {t('muniGrievance.subtitle', 'Report municipal service issues')}
-          </p>
+        {/* Dept header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 40, marginBottom: 48 }}>
+          <DD color="var(--dept-water)" glyph={ic.chat} size={168} isz={92} />
+          <div>
+            <div className="label-tag" style={{ color: 'var(--dept-water)', marginBottom: 14 }}>
+              Guwahati Municipal
+            </div>
+            <h1 className="h2">{t('muniGrievance.title', 'Municipal Grievance Registration')}</h1>
+            <p className="body-l" style={{ marginTop: 14, color: 'var(--ink-500)' }}>
+              {t('muniGrievance.subtitle', 'Report municipal service issues')}
+            </p>
+          </div>
         </div>
 
         {/* Step Indicator */}
-        <div className="flex items-center justify-center mb-8">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${step >= 1 ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-500'}`}>1</div>
-          <div className={`w-20 h-1 ${step >= 2 ? 'bg-indigo-500' : 'bg-gray-200'}`} />
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${step >= 2 ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-500'}`}>2</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0, marginBottom: 36 }}>
+          <span className={`badge ${step >= 1 ? 'b-info' : ''}`} style={{ width: 48, height: 48, borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: 22, fontWeight: 800 }}>1</span>
+          <div style={{ width: 80, height: 4, background: step >= 2 ? 'var(--dept-water)' : 'var(--line)' }} />
+          <span className={`badge ${step >= 2 ? 'b-info' : ''}`} style={{ width: 48, height: 48, borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: 22, fontWeight: 800 }}>2</span>
         </div>
 
         {step === 1 ? (
-          <div className="bg-white rounded-kiosk-lg shadow-kiosk p-6 md:p-8">
-            <h2 className="text-kiosk-xl font-bold text-gray-800 mb-6 text-center">
+          <div className="card">
+            <h2 className="h3" style={{ textAlign: 'center', marginBottom: 36 }}>
               {t('muniGrievance.selectCategory', 'Select Grievance Category')}
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
               {grievanceCategories.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`
-                    flex items-center gap-4 p-5 rounded-xl border-2 text-left transition-all touch-manipulation
-                    ${selectedCategory === cat.id
-                      ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
-                      : 'border-gray-200 hover:border-indigo-200 hover:bg-indigo-50/50'
-                    }
-                  `}
+                  className="tile"
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 20, padding: 24, textAlign: 'left',
+                    borderTop: '8px solid var(--dept-water)', touchAction: 'manipulation',
+                  }}
                   aria-label={cat.label}
                 >
-                  <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center ${cat.color} border`}>
-                    <cat.icon className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-kiosk-base font-bold text-gray-800">{cat.label}</h3>
+                  <DD color="var(--dept-water)" glyph={cat.glyph} size={72} isz={36} />
+                  <h3 className="nm" style={{ fontSize: 22 }}>{cat.label}</h3>
                 </button>
               ))}
             </div>
 
-            <div className="mt-8 flex justify-between">
-              <Button
-                variant="outline"
-                onClick={() => navigate('/home')}
-                size="large"
-                icon={ArrowLeft}
-              >
-                {t('home.backToOrgs', 'Back to Home')}
-              </Button>
-              <Button onClick={() => setStep(2)} disabled={!selectedCategory} size="xlarge" icon={ArrowRight} iconPosition="right">
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 32, marginTop: 48, paddingTop: 40, borderTop: '1.5px solid var(--line)' }}>
+              <button className="btn btn-ghost" onClick={() => navigate('/home')}>
+                <I d={ic.back} size={40} /> {t('home.backToOrgs', 'Back to Home')}
+              </button>
+              <button className="btn btn-pri btn-xl" disabled={!selectedCategory} onClick={() => setStep(2)}>
                 {t('app.next')}
-              </Button>
+              </button>
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-kiosk-lg shadow-kiosk p-6 md:p-8">
-            <div className="mb-6 p-4 bg-indigo-50 rounded-kiosk border border-indigo-200">
-              <p className="text-kiosk-base font-semibold text-indigo-800">
-                  Category: {grievanceCategories.find(c => c.id === selectedCategory)?.label}
-              </p>
+          <div className="card">
+            <span className="badge b-info" style={{ marginBottom: 44 }}>
+              Category · {grievanceCategories.find(c => c.id === selectedCategory)?.label}
+            </span>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '36px 40px' }}>
+              <div>
+                <label className="flab">{t('form.name')} *</label>
+                <input className="field" data-voice-field="name" value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} placeholder={t('form.enterName')} required />
+                {errors.name && <div className="meta" style={{ color: 'var(--err)' }}>{errors.name}</div>}
+              </div>
+              <div>
+                <label className="flab">{t('form.mobile')} *</label>
+                <input className="field" data-voice-field="mobile" type="tel" value={formData.mobile} onChange={(e) => handleInputChange('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))} placeholder={t('form.enterMobile')} required />
+                {errors.mobile && <div className="meta" style={{ color: 'var(--err)' }}>{errors.mobile}</div>}
+              </div>
             </div>
 
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input label={t('form.name')} value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} placeholder={t('form.enterName')} error={errors.name} required voiceField="name" />
-                <Input label={t('form.mobile')} type="tel" value={formData.mobile} onChange={(e) => handleInputChange('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))} placeholder={t('form.enterMobile')} error={errors.mobile} required voiceField="mobile" />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Select label={t('form.state')} value={formData.state} onChange={(e) => handleInputChange('state', e.target.value)} placeholder={t('form.selectState')} options={states.map(s => ({ value: s.id, label: getLocalizedName(s) }))} error={errors.state} required voiceField="state" />
-                <Select label={t('form.city')} value={formData.city} onChange={(e) => handleInputChange('city', e.target.value)} placeholder={t('form.selectCity')} options={availableCities.map(c => ({ value: c.id, label: getLocalizedName(c) }))} error={errors.city} required disabled={!formData.state} voiceField="city" />
-                <Select label={t('form.ward')} value={formData.ward} onChange={(e) => handleInputChange('ward', e.target.value)} placeholder={t('form.selectWard')} options={availableWards.map(w => ({ value: w.id, label: w.name }))} disabled={!formData.city} voiceField="ward" />
-              </div>
-
-              <Input
-                label={t('muniGrievance.specificLocation', 'Specific Location / Landmark')}
-                value={formData.specificLocation}
-                onChange={(e) => handleInputChange('specificLocation', e.target.value)}
-                placeholder={t('muniGrievance.enterLocation', 'e.g., Near ABC Junction, Main Road')}
-              />
-
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 40, marginTop: 36 }}>
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-kiosk-base font-semibold text-gray-700">
-                    {t('form.description')} <span className="text-red-500">*</span>
-                  </label>
-                  <button
-                    onClick={toggleVoiceInput}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all touch-manipulation ${isRecording ? 'bg-red-500 text-white animate-pulse' : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'}`}
-                    aria-label={isRecording ? 'Stop voice recording' : 'Start voice input'}
-                  >
-                    {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                    {isRecording ? t('gasComplaint.stopRecording', 'Stop Recording') : t('gasComplaint.voiceInput', 'Voice Input')}
-                  </button>
+                <label className="flab">{t('form.state')} *</label>
+                <select className="field" data-voice-field="state" value={formData.state} onChange={(e) => handleInputChange('state', e.target.value)} required>
+                  <option value="">{t('form.selectState')}</option>
+                  {states.map(s => <option key={s.id} value={s.id}>{getLocalizedName(s)}</option>)}
+                </select>
+                {errors.state && <div className="meta" style={{ color: 'var(--err)' }}>{errors.state}</div>}
+              </div>
+              <div>
+                <label className="flab">{t('form.city')} *</label>
+                <select className="field" data-voice-field="city" value={formData.city} onChange={(e) => handleInputChange('city', e.target.value)} disabled={!formData.state} required>
+                  <option value="">{t('form.selectCity')}</option>
+                  {availableCities.map(c => <option key={c.id} value={c.id}>{getLocalizedName(c)}</option>)}
+                </select>
+                {errors.city && <div className="meta" style={{ color: 'var(--err)' }}>{errors.city}</div>}
+              </div>
+              <div>
+                <label className="flab">{t('form.ward')}</label>
+                <select className="field" data-voice-field="ward" value={formData.ward} onChange={(e) => handleInputChange('ward', e.target.value)} disabled={!formData.city}>
+                  <option value="">{t('form.selectWard')}</option>
+                  {availableWards.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 36 }}>
+              <label className="flab">{t('muniGrievance.specificLocation', 'Specific Location / Landmark')}</label>
+              <input className="field" value={formData.specificLocation} onChange={(e) => handleInputChange('specificLocation', e.target.value)} placeholder={t('muniGrievance.enterLocation', 'e.g., Near ABC Junction, Main Road')} />
+            </div>
+
+            <div style={{ marginTop: 36 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <label className="flab" style={{ margin: 0 }}>{t('form.description')} *</label>
+                <button
+                  onClick={toggleVoiceInput}
+                  className={`chip${isRecording ? ' act' : ''}`}
+                  aria-label={isRecording ? 'Stop voice recording' : 'Start voice input'}
+                >
+                  <I d={isRecording ? ic.x : ic.voice} size={28} />
+                  {isRecording ? t('gasComplaint.stopRecording', 'Stop Recording') : t('gasComplaint.voiceInput', 'Voice Input')}
+                </button>
+              </div>
+              {isRecording && (
+                <div className="meta" style={{ marginBottom: 12, color: 'var(--dept-water)' }}>
+                  {t('gasComplaint.recording', 'Listening… Speak now')}
                 </div>
-                {isRecording && (
-                  <div className="mb-2 p-3 bg-indigo-50 border border-indigo-200 rounded-kiosk text-sm text-indigo-700 animate-pulse">
-                    🎤 {t('gasComplaint.recording', 'Listening… Speak now')}
-                  </div>
-                )}
-                <TextArea value={formData.description} onChange={(e) => handleInputChange('description', e.target.value)} placeholder={t('form.enterDescription')} error={errors.description} rows={4} maxLength={1000} voiceField="description" />
-              </div>
+              )}
+              <textarea className="field" data-voice-field="description" style={{ minHeight: 200 }} value={formData.description} onChange={(e) => handleInputChange('description', e.target.value)} placeholder={t('form.enterDescription')} maxLength={1000} />
+              {errors.description && <div className="meta" style={{ color: 'var(--err)' }}>{errors.description}</div>}
+            </div>
 
+            <div style={{ marginTop: 36 }}>
+              <label className="flab">{t('form.uploadDocuments')}</label>
               <QRUpload label={t('form.uploadDocuments')} onUploadComplete={(uploadedFiles) => setFiles(uploadedFiles)} maxFiles={5} />
+            </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-between pt-6 border-t">
-                <Button variant="secondary" onClick={() => setStep(1)} size="large">{t('app.back')}</Button>
-                <Button onClick={handleSubmit} size="xlarge">{t('app.submit')}</Button>
-              </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 32, marginTop: 52, paddingTop: 44, borderTop: '1.5px solid var(--line)' }}>
+              <button className="btn btn-ghost" onClick={() => setStep(1)}>
+                <I d={ic.back} size={40} /> {t('app.back')}
+              </button>
+              <button className="btn btn-pri" onClick={handleSubmit}>
+                {t('app.submit')}
+              </button>
             </div>
           </div>
         )}

@@ -1,13 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  Sparkles, Leaf, Home, Heart, BookOpen, Briefcase,
-  Search, CheckCircle, IndianRupee, Filter, Star, ArrowRight,
-} from 'lucide-react';
-import { Button, Input, Select, LoadingSpinner, Modal } from '../components';
-import { VK, I, ic } from '../components/kiosk';
-import { SchemesIcon } from '../assets/icons';
+import { LoadingSpinner, Modal } from '../components';
+import { VK, DD, I, ic } from '../components/kiosk';
 import { states } from '../utils/constants';
 import { schemeAPI, api } from '../utils/apiService';
 import { getSarvamLangCode } from '../utils/languageConfig';
@@ -390,51 +385,39 @@ const SchemeDiscovery = () => {
   const menuCards = [
     {
       id: 'all',
-      LucideIcon: Sparkles,
+      glyph: ic.shield,
       title: t('schemes.discoverSchemes', 'Discover My Schemes'),
       description: t('home.schemesAllDesc', 'AI-powered matching across all government schemes'),
-      color: '#7c3aed',
-      bg: 'color-mix(in oklab, #7c3aed 12%, white)',
     },
     {
       id: 'agriculture',
-      LucideIcon: Leaf,
+      glyph: ic.leaf,
       title: t('home.schemesAgriculture', 'Agriculture Schemes'),
       description: t('home.schemesAgricultureDesc', 'Farming support, crop insurance, soil health'),
-      color: '#16a34a',
-      bg: 'color-mix(in oklab, #16a34a 12%, white)',
     },
     {
       id: 'housing',
-      LucideIcon: Home,
+      glyph: ic.building,
       title: t('home.schemesHousing', 'Housing & Urban'),
       description: t('home.schemesHousingDesc', 'Affordable housing, sanitation, urban development'),
-      color: '#ea580c',
-      bg: 'color-mix(in oklab, #ea580c 12%, white)',
     },
     {
       id: 'health',
-      LucideIcon: Heart,
+      glyph: ic.heart,
       title: t('home.schemesHealth', 'Health & Insurance'),
       description: t('home.schemesHealthDesc', 'Medical cover, life & accident insurance schemes'),
-      color: '#dc2626',
-      bg: 'color-mix(in oklab, #dc2626 12%, white)',
     },
     {
       id: 'education',
-      LucideIcon: BookOpen,
+      glyph: ic.doc,
       title: t('home.schemesEducation', 'Education & Skills'),
       description: t('home.schemesEducationDesc', 'Scholarships, digital literacy, skill training'),
-      color: '#0369a1',
-      bg: 'color-mix(in oklab, #0369a1 12%, white)',
     },
     {
       id: 'employment',
-      LucideIcon: Briefcase,
+      glyph: ic.rupee,
       title: t('home.schemesEmployment', 'Employment & Finance'),
       description: t('home.schemesEmploymentDesc', 'Jobs, loans, pensions, financial inclusion'),
-      color: '#ca8a04',
-      bg: 'color-mix(in oklab, #ca8a04 12%, white)',
     },
   ];
 
@@ -555,7 +538,7 @@ const SchemeDiscovery = () => {
 
   if (loading) {
     return (
-      <VK bg="color-mix(in oklab, #7c3aed 4%, white)">
+      <VK bg="color-mix(in oklab, var(--indigo-500) 5%, var(--surface-0))">
         <div className="flex items-center justify-center min-h-[60vh]">
           <LoadingSpinner size="large" message={t('schemes.analyzing', 'Analysing your profile…')} />
         </div>
@@ -564,63 +547,51 @@ const SchemeDiscovery = () => {
   }
 
   return (
-    <VK bg="color-mix(in oklab, #7c3aed 4%, white)">
+    <VK bg="color-mix(in oklab, var(--indigo-500) 5%, var(--surface-0))">
 
       {/* ── MENU LANDING ── */}
       {step === 'menu' && (
         <>
-          <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <div style={{
-              width: 120, height: 120, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: 20, boxShadow: '0 8px 32px rgba(124,58,237,0.3)',
-            }}>
-              <SchemesIcon size={60} color="#fff" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 40, marginBottom: 48 }}>
+            <DD color="var(--indigo-700)" glyph={ic.shield} size={168} isz={92} />
+            <div>
+              <div className="label-tag" style={{ color: 'var(--indigo-700)', marginBottom: 14 }}>
+                Schemes for you
+              </div>
+              <h1 className="h2">{t('schemes.title', 'Government Schemes')}</h1>
+              <p className="body-l" style={{ marginTop: 14, color: 'var(--ink-500)' }}>
+                {t('schemes.subtitle', 'AI-powered scheme discovery · Eligibility matching · Instant apply')}
+              </p>
             </div>
-            <h1 className="h2" style={{ marginBottom: 10 }}>
-              {t('schemes.title', 'Government Schemes')}
-            </h1>
-            <p className="body-l" style={{ color: 'var(--ink-500)' }}>
-              {t('schemes.subtitle', 'AI-powered scheme discovery · Eligibility matching · Instant apply')}
-            </p>
           </div>
 
           {/* Service grid — 3 cols for kiosk */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, marginBottom: 32 }}>
-            {menuCards.map((s) => {
-              const Icon = s.LucideIcon;
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => {
-                    setPreCategory(s.id);
-                    setStep('profile');
-                  }}
-                  className="tile"
-                  style={{
-                    minHeight: 260,
-                    padding: 32,
-                    alignItems: 'flex-start',
-                    textAlign: 'left',
-                    gap: 20,
-                    borderTop: `6px solid ${s.color}`,
-                    touchAction: 'manipulation',
-                  }}
-                  aria-label={s.title}
-                >
-                  <div style={{
-                    width: 72, height: 72, borderRadius: 20,
-                    background: s.bg, display: 'grid', placeItems: 'center', flexShrink: 0,
-                  }}>
-                    <Icon size={36} style={{ color: s.color }} strokeWidth={2} />
-                  </div>
-                  <div className="nm" style={{ fontSize: 26, lineHeight: 1.3 }}>{s.title}</div>
-                  <div className="sub" style={{ fontSize: 20, marginTop: 'auto' }}>{s.description}</div>
-                </button>
-              );
-            })}
+            {menuCards.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => {
+                  setPreCategory(s.id);
+                  setStep('profile');
+                }}
+                className="tile"
+                style={{
+                  minHeight: 260,
+                  padding: 32,
+                  alignItems: 'flex-start',
+                  textAlign: 'left',
+                  gap: 20,
+                  borderTop: '8px solid var(--indigo-700)',
+                  touchAction: 'manipulation',
+                }}
+                aria-label={s.title}
+              >
+                <DD color="var(--indigo-700)" glyph={s.glyph} size={120} isz={64} />
+                <div className="nm" style={{ fontSize: 26, lineHeight: 1.3 }}>{s.title}</div>
+                <div className="sub" style={{ fontSize: 20, marginTop: 'auto' }}>{s.description}</div>
+              </button>
+            ))}
           </div>
 
           <button
@@ -637,52 +608,67 @@ const SchemeDiscovery = () => {
       {/* ── PROFILE INPUT STEP ── */}
       {step === 'profile' && (
         <div>
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <div style={{
-              width: 80, height: 80, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: 12, boxShadow: '0 4px 16px rgba(124,58,237,0.25)',
-            }}>
-              <SchemesIcon size={40} color="#fff" />
-            </div>
-            <h1 className="h2" style={{ marginBottom: 6 }}>
-              {t('schemes.title', 'Government Schemes')}
-            </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 32, marginBottom: 40 }}>
+            <DD color="var(--indigo-700)" glyph={ic.shield} size={128} isz={72} />
+            <h1 className="h2">{t('schemes.title', 'Government Schemes')}</h1>
           </div>
 
-          <div className="bg-white rounded-kiosk-lg shadow-kiosk p-8">
-            <h2 className="text-kiosk-xl font-bold text-gray-800 mb-6">
+          <div className="card">
+            <h2 className="h3" style={{ marginBottom: 12 }}>
               {t('schemes.enterProfile', 'Enter Your Profile')}
             </h2>
-            <p className="text-kiosk-base text-gray-500 mb-8">
+            <p className="body-l" style={{ color: 'var(--ink-500)', marginBottom: 36 }}>
               {t('schemes.profileHint', 'We use this to match the best schemes for you')}
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Select label={t('schemes.ageGroup', 'Age Group')} value={profile.ageGroup} onChange={(e) => handleProfileChange('ageGroup', e.target.value)} options={ageGroups} />
-              <Select label={t('schemes.gender', 'Gender')} value={profile.gender} onChange={(e) => handleProfileChange('gender', e.target.value)} options={[
-                { value: '', label: t('schemes.selectGender', 'Select Gender') },
-                { value: 'male', label: t('schemes.male', 'Male') },
-                { value: 'female', label: t('schemes.female', 'Female') },
-                { value: 'other', label: t('schemes.otherGender', 'Other') },
-              ]} />
-              <Select label={t('form.state', 'State')} value={profile.state} onChange={(e) => handleProfileChange('state', e.target.value)} options={[
-                { value: '', label: t('form.selectState', 'Select State') },
-                ...states.map(s => ({ value: s.id, label: s.name }))
-              ]} />
-              <Select label={t('schemes.income', 'Annual Income')} value={profile.income} onChange={(e) => handleProfileChange('income', e.target.value)} options={incomeRanges} />
-              <Select label={t('schemes.category', 'Category')} value={profile.category} onChange={(e) => handleProfileChange('category', e.target.value)} options={categoryOptions} />
-              <Select label={t('schemes.occupation', 'Occupation')} value={profile.occupation} onChange={(e) => handleProfileChange('occupation', e.target.value)} options={occupations} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '36px 40px' }}>
+              <div>
+                <label className="flab">{t('schemes.ageGroup', 'Age Group')}</label>
+                <select className="field" value={profile.ageGroup} onChange={(e) => handleProfileChange('ageGroup', e.target.value)}>
+                  {ageGroups.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="flab">{t('schemes.gender', 'Gender')}</label>
+                <select className="field" value={profile.gender} onChange={(e) => handleProfileChange('gender', e.target.value)}>
+                  <option value="">{t('schemes.selectGender', 'Select Gender')}</option>
+                  <option value="male">{t('schemes.male', 'Male')}</option>
+                  <option value="female">{t('schemes.female', 'Female')}</option>
+                  <option value="other">{t('schemes.otherGender', 'Other')}</option>
+                </select>
+              </div>
+              <div>
+                <label className="flab">{t('form.state', 'State')}</label>
+                <select className="field" value={profile.state} onChange={(e) => handleProfileChange('state', e.target.value)}>
+                  <option value="">{t('form.selectState', 'Select State')}</option>
+                  {states.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="flab">{t('schemes.income', 'Annual Income')}</label>
+                <select className="field" value={profile.income} onChange={(e) => handleProfileChange('income', e.target.value)}>
+                  {incomeRanges.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="flab">{t('schemes.category', 'Category')}</label>
+                <select className="field" value={profile.category} onChange={(e) => handleProfileChange('category', e.target.value)}>
+                  {categoryOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="flab">{t('schemes.occupation', 'Occupation')}</label>
+                <select className="field" value={profile.occupation} onChange={(e) => handleProfileChange('occupation', e.target.value)}>
+                  {occupations.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
             </div>
 
-            <div className="mt-8">
-              <Button onClick={handleDiscover} disabled={!isProfileComplete} fullWidth size="xlarge" icon={Sparkles} iconPosition="right">
-                {t('schemes.discoverSchemes', 'Discover My Schemes')}
-              </Button>
-            </div>
+            <button className="btn btn-pri btn-xl" style={{ width: '100%', marginTop: 44 }} disabled={!isProfileComplete} onClick={handleDiscover}>
+              {t('schemes.discoverSchemes', 'Discover My Schemes')} <I d={ic.arrow} size={32} />
+            </button>
 
-            <div className="mt-4 text-center">
+            <div style={{ textAlign: 'center', marginTop: 20 }}>
               <button type="button" className="btn btn-quiet" style={{ fontSize: 20 }} onClick={() => setStep('menu')}>
                 <I d={ic.back} size={20} /> {t('app.back', 'Back')}
               </button>
@@ -694,127 +680,102 @@ const SchemeDiscovery = () => {
       {/* ── RESULTS STEP ── */}
       {step === 'results' && (
         <div>
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <div style={{
-              width: 80, height: 80, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: 12, boxShadow: '0 4px 16px rgba(124,58,237,0.25)',
-            }}>
-              <SchemesIcon size={40} color="#fff" />
-            </div>
-            <h1 className="h2" style={{ marginBottom: 6 }}>
-              {t('schemes.title', 'Government Schemes')}
-            </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 32, marginBottom: 40 }}>
+            <DD color="var(--indigo-700)" glyph={ic.shield} size={128} isz={72} />
+            <h1 className="h2">{t('schemes.title', 'Government Schemes')}</h1>
           </div>
 
           {/* Search bar */}
-          <div className="bg-white rounded-kiosk-lg shadow-kiosk p-4 mb-6 flex flex-col sm:flex-row gap-4 items-center">
-            <div className="flex-1 relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('schemes.searchSchemes', 'Search schemes…')}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-kiosk text-kiosk-base focus:ring-2 focus:ring-government-blue focus:border-government-blue"
-              />
-            </div>
-            <Button variant="outline" onClick={() => { setStep('profile'); setResults([]); setSearchQuery(''); }} icon={Filter}>
+          <div className="card" style={{ display: 'flex', gap: 24, alignItems: 'center', marginBottom: 28 }}>
+            <input
+              className="field"
+              style={{ flex: 1 }}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t('schemes.searchSchemes', 'Search schemes…')}
+            />
+            <button className="btn btn-ghost" onClick={() => { setStep('profile'); setResults([]); setSearchQuery(''); }}>
               {t('schemes.refineSearch', 'Refine')}
-            </Button>
+            </button>
           </div>
 
           {/* Match summary */}
-          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-kiosk-lg p-6 mb-6 border border-purple-100">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <h3 className="text-kiosk-xl font-bold text-purple-800">
-                  {t('schemes.matchFound', { count: filteredResults.length })}
-                </h3>
-                <p className="text-sm text-purple-600 mt-1">
-                  {t('schemes.rankedByEligibility', 'Ranked by eligibility score')}
-                </p>
-              </div>
-              <div className="flex items-center space-x-2 bg-white px-4 py-2 rounded-full shadow-sm">
-                <Sparkles className="w-4 h-4 text-purple-500" />
-                <span className="text-sm font-medium text-purple-700">
-                  {t('schemes.aiRecommended', 'AI Recommended')}
-                </span>
-              </div>
+          <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24, marginBottom: 28, background: 'color-mix(in oklab, var(--indigo-500) 8%, white)' }}>
+            <div>
+              <h3 className="h3" style={{ color: 'var(--indigo-700)' }}>
+                {t('schemes.matchFound', { count: filteredResults.length })}
+              </h3>
+              <p className="meta" style={{ marginTop: 6 }}>
+                {t('schemes.rankedByEligibility', 'Ranked by eligibility score')}
+              </p>
             </div>
+            <span className="badge b-info">{t('schemes.aiRecommended', 'AI Recommended')}</span>
           </div>
 
           {/* Scheme cards */}
-          <div className="space-y-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             {filteredResults.map((scheme, index) => (
-              <div key={scheme.id} className="bg-white rounded-kiosk-lg shadow-kiosk overflow-hidden border border-gray-100">
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <span className="text-sm font-bold text-white bg-government-blue px-3 py-1 rounded-full">
-                          #{index + 1}
-                        </span>
-                        <span className={`text-sm font-medium px-3 py-1 rounded-full ${scheme.match >= 90 ? 'bg-green-100 text-green-700' : scheme.match >= 75 ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'}`}>
-                          {scheme.match}% {t('schemes.matchLabel', 'match')}
-                        </span>
-                        <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                          {scheme.category}
-                        </span>
-                      </div>
-                      <h3 className="text-kiosk-xl font-bold text-gray-900">{getLocalName(scheme)}</h3>
-                      <p className="text-sm text-gray-500 mt-1">{scheme.ministry}</p>
+              <div key={scheme.id} className="tile" style={{ borderTop: `8px solid ${scheme.match >= 90 ? 'var(--ok)' : scheme.match >= 75 ? 'var(--warn)' : 'var(--indigo-500)'}`, alignItems: 'stretch' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+                      <span className="badge b-info">#{index + 1}</span>
+                      <span className={`badge ${scheme.match >= 90 ? 'b-ok' : scheme.match >= 75 ? 'b-warn' : 'b-info'}`}>
+                        {scheme.match}% {t('schemes.matchLabel', 'match')}
+                      </span>
+                      <span className="badge">{scheme.category}</span>
                     </div>
-                    {scheme.match >= 90 && (
-                      <div className="flex items-center space-x-1 bg-green-50 px-3 py-1 rounded-full">
-                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-400" />
-                        <span className="text-xs font-bold text-green-700">{t('schemes.topMatch', 'Top Match')}</span>
-                      </div>
-                    )}
+                    <div className="nm" style={{ fontSize: 26 }}>{getLocalName(scheme)}</div>
+                    <div className="meta" style={{ marginTop: 4 }}>{scheme.ministry}</div>
                   </div>
+                  {scheme.match >= 90 && (
+                    <span className="badge b-ok" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <I d={ic.star} size={20} /> {t('schemes.topMatch', 'Top Match')}
+                    </span>
+                  )}
+                </div>
 
-                  <p className="text-kiosk-base text-gray-600 mb-4">{getLocalDesc(scheme)}</p>
+                <div className="sub" style={{ fontSize: 20, marginTop: 16 }}>{getLocalDesc(scheme)}</div>
 
-                  <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-700 mb-2">{t('schemes.eligibilityCriteria', 'Eligibility')}:</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {scheme.eligibility.map((crit, i) => (
-                        <span key={i} className="inline-flex items-center text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                          {crit}
-                        </span>
-                      ))}
-                    </div>
+                <div style={{ marginTop: 20 }}>
+                  <div className="meta" style={{ marginBottom: 10 }}>{t('schemes.eligibilityCriteria', 'Eligibility')}:</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                    {scheme.eligibility.map((crit, i) => (
+                      <span key={i} className="badge b-info">
+                        <I d={ic.check} size={16} /> {crit}
+                      </span>
+                    ))}
                   </div>
+                </div>
 
-                  <div className="flex items-center text-sm text-gray-700 bg-green-50 px-4 py-2 rounded-kiosk mb-4">
-                    <IndianRupee className="w-4 h-4 mr-2 text-green-600" />
-                    <span className="font-medium">{t('schemes.benefit', 'Benefit')}: {scheme.benefit}</span>
+                <div className="meta" style={{ marginTop: 20, color: 'var(--ok)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <I d={ic.rupee} size={20} /> {t('schemes.benefit', 'Benefit')}: {scheme.benefit}
+                </div>
+
+                <div style={{ marginTop: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <span className="meta">{t('schemes.eligibilityScore', 'Eligibility Score')}</span>
+                    <span className="meta" style={{ fontWeight: 700 }}>{scheme.match}%</span>
                   </div>
-
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                      <span>{t('schemes.eligibilityScore', 'Eligibility Score')}</span>
-                      <span className="font-bold">{scheme.match}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full transition-all duration-1000 ${scheme.match >= 90 ? 'bg-green-500' : scheme.match >= 75 ? 'bg-yellow-500' : 'bg-blue-500'}`}
-                        style={{ width: `${scheme.match}%` }}
-                      />
-                    </div>
+                  <div style={{ width: '100%', background: 'var(--line)', borderRadius: 999, height: 10 }}>
+                    <div style={{
+                      height: 10, borderRadius: 999, width: `${scheme.match}%`,
+                      background: scheme.match >= 90 ? 'var(--ok)' : scheme.match >= 75 ? 'var(--warn)' : 'var(--indigo-500)',
+                    }} />
                   </div>
+                </div>
 
-                  <Button onClick={() => handleApply(scheme)} fullWidth size="large" icon={ArrowRight} iconPosition="right">
-                    {t('schemes.applyNow', 'Apply Now')}
-                  </Button>
+                <div style={{ display: 'flex', gap: 24, marginTop: 'auto', paddingTop: 20 }}>
+                  <button className="btn btn-pri" style={{ flex: 1 }} onClick={() => handleApply(scheme)}>
+                    {t('schemes.applyNow', 'Apply Now')} <I d={ic.arrow} size={24} />
+                  </button>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="flex justify-center py-6">
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
             <button
               type="button"
               className="btn btn-quiet"

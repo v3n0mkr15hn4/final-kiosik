@@ -371,7 +371,7 @@ const Water = () => {
                 </Button>
                 <Button
                   onClick={handleSubmit}
-                  size="xlarge"
+                  size="large"
                 >
                   {t('app.submit')}
                 </Button>

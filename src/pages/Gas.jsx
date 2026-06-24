@@ -1,18 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
-import {
-  Header,
-  Button,
-  Card,
-  Input,
-  Select,
-  TextArea,
-  Modal,
-  LoadingSpinner
-} from '../components';
-import { VK } from '../components/kiosk';
+import { Modal, LoadingSpinner } from '../components';
+import { VK, DD, I, ic } from '../components/kiosk';
 import QRUpload from '../components/QRUpload';
 import { states, cities, wards, serviceCategories } from '../utils/constants';
 import { generateRequestId, getCurrentTimestamp } from '../utils/helpers';
@@ -163,8 +153,7 @@ const Gas = () => {
 
   if (loading) {
     return (
-      <VK bg="var(--surface-1)">
-        
+      <VK bg="color-mix(in oklab, var(--dept-gas) 5%, var(--surface-0))">
         <div className="flex items-center justify-center min-h-[60vh]">
           <LoadingSpinner size="large" message={t('app.loading')} />
         </div>
@@ -173,250 +162,196 @@ const Gas = () => {
   }
 
   return (
-    <VK bg="var(--surface-1)">
-      
-
+    <VK bg="color-mix(in oklab, var(--dept-gas) 5%, var(--surface-0))">
       <div>
-        {/* Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-kiosk-2xl md:text-kiosk-3xl font-bold text-government-blue">
-            {t('gas.title')}
-          </h1>
-          <p className="text-kiosk-lg text-gray-600 mt-2">
-            {t('gas.subtitle')}
-          </p>
+        {/* Dept header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 40, marginBottom: 48 }}>
+          <DD color="var(--dept-gas)" glyph={ic.flame} size={168} isz={92} />
+          <div>
+            <div className="label-tag" style={{ color: 'var(--dept-gas)', marginBottom: 14 }}>
+              Assam Gas Company
+            </div>
+            <h1 className="h2">{t('gas.title')}</h1>
+            <p className="body-l" style={{ marginTop: 14, color: 'var(--ink-500)' }}>
+              {t('gas.subtitle')}
+            </p>
+          </div>
         </div>
 
         {/* Step Indicator */}
-        <div className="flex items-center justify-center mb-8">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${step >= 1 ? 'bg-government-blue text-white' : 'bg-gray-200 text-gray-500'}`}>
-            1
-          </div>
-          <div className={`w-20 h-1 ${step >= 2 ? 'bg-government-blue' : 'bg-gray-200'}`} />
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${step >= 2 ? 'bg-government-blue text-white' : 'bg-gray-200 text-gray-500'}`}>
-            2
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0, marginBottom: 36 }}>
+          <span className={`badge ${step >= 1 ? 'b-info' : ''}`} style={{ width: 48, height: 48, borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: 22, fontWeight: 800 }}>1</span>
+          <div style={{ width: 80, height: 4, background: step >= 2 ? 'var(--dept-gas)' : 'var(--line)' }} />
+          <span className={`badge ${step >= 2 ? 'b-info' : ''}`} style={{ width: 48, height: 48, borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: 22, fontWeight: 800 }}>2</span>
         </div>
 
         {step === 1 ? (
-          <div className="bg-white rounded-kiosk-lg shadow-kiosk p-6 md:p-8">
-            <h2 className="text-kiosk-xl font-bold text-gray-800 mb-6 text-center">
+          <div className="card">
+            <h2 className="h3" style={{ textAlign: 'center', marginBottom: 36 }}>
               {t('form.selectCategory')}
             </h2>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 8 }}>
               {categories.map((category) => (
-                <Card
+                <button
                   key={category.id}
-                  title={t(category.key)}
-                  selected={selectedCategory === category.id}
+                  type="button"
+                  className={`chip${selectedCategory === category.id ? ' act' : ''}`}
                   onClick={() => setSelectedCategory(category.id)}
-                  size="medium"
-                  className="text-center"
-                />
+                >
+                  {t(category.key)}
+                </button>
               ))}
             </div>
 
-            <div className="mt-8 flex justify-between gap-4">
-              <Button
-                variant="outline"
-                onClick={() => navigate('/home')}
-                size="large"
-                icon={ArrowLeft}
-              >
-                {t('home.backToOrgs', 'Back to Home')}
-              </Button>
-              <Button
-                onClick={() => setStep(2)}
-                disabled={!selectedCategory}
-                size="xlarge"
-                icon={ArrowRight}
-                iconPosition="right"
-              >
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 32, marginTop: 48, paddingTop: 40, borderTop: '1.5px solid var(--line)' }}>
+              <button className="btn btn-ghost" onClick={() => navigate('/home')}>
+                <I d={ic.back} size={40} /> {t('home.backToOrgs', 'Back to Home')}
+              </button>
+              <button className="btn btn-pri btn-xl" disabled={!selectedCategory} onClick={() => setStep(2)}>
                 {t('app.next')}
-              </Button>
+              </button>
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-kiosk-lg shadow-kiosk p-6 md:p-8">
-            <div className="mb-6 p-4 bg-red-50 rounded-kiosk border border-red-200">
-              <p className="text-kiosk-base font-semibold text-red-800">
-                Selected: {t(`gas.${selectedCategory}`)}
-              </p>
+          <div className="card">
+            <span className="badge b-info" style={{ marginBottom: 44 }}>
+              Selected · {t(`gas.${selectedCategory}`)}
+            </span>
+
+            {/* Gas New Connection — sub-type selector (SRS Module 11) */}
+            {selectedCategory === 'newConnection' && (
+              <div style={{ marginBottom: 36 }}>
+                <div className="label-tag" style={{ marginBottom: 20 }}>Request Type</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+                  {[
+                    { id: 'new_gas', label: 'New Gas Connection', sla: '30 days' },
+                    { id: 'reconnect', label: 'Reconnection', sla: '7 days' },
+                    { id: 'disconnect', label: 'Disconnection', sla: '3 days' },
+                    { id: 'prepaid', label: 'Postpaid → Prepaid', sla: '15 days' },
+                    { id: 'pipeline', label: 'Pipeline Inspection', sla: '5 days' },
+                    { id: 'maintenance', label: 'Maintenance Schedule', sla: '7 days' },
+                  ].map(sub => (
+                    <button
+                      key={sub.id}
+                      type="button"
+                      onClick={() => handleInputChange('gasSubType', sub.id)}
+                      className={`chip${formData.gasSubType === sub.id ? ' act' : ''}`}
+                      style={{ flexDirection: 'column', alignItems: 'flex-start', height: 'auto', padding: 16 }}
+                    >
+                      <div style={{ fontWeight: 700 }}>{sub.label}</div>
+                      <div className="meta" style={{ marginTop: 4 }}>SLA: {sub.sla}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Meter Damage — severity + type */}
+            {selectedCategory === 'meterDamage' && (
+              <div style={{ marginBottom: 36 }}>
+                <div className="label-tag" style={{ marginBottom: 20 }}>Meter Issue Details</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
+                  <div>
+                    <label className="flab">{t('gas.issueType')} *</label>
+                    <select className="field" value={formData.meterIssueType || ''} onChange={e => handleInputChange('meterIssueType', e.target.value)} required>
+                      <option value="">{t('gas.selectIssueType')}</option>
+                      <option value="damaged">Physically Damaged</option>
+                      <option value="malfunctioning">Showing Wrong Readings</option>
+                      <option value="leaking">Gas Leaking at Meter</option>
+                      <option value="installation">New Meter Installation</option>
+                      <option value="replacement">Replacement Required</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="flab">{t('gas.priority')}</label>
+                    <select className="field" value={formData.priority || ''} onChange={e => handleInputChange('priority', e.target.value)}>
+                      <option value="">{t('gas.selectPriority')}</option>
+                      <option value="emergency">Emergency — Gas Leak (24h)</option>
+                      <option value="urgent">Urgent (3 days)</option>
+                      <option value="normal">Normal (10 days)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '36px 40px' }}>
+              <div>
+                <label className="flab">{t('form.name')} *</label>
+                <input className="field" value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} placeholder={t('form.enterName')} required />
+                {errors.name && <div className="meta" style={{ color: 'var(--err)' }}>{errors.name}</div>}
+              </div>
+              <div>
+                <label className="flab">{t('form.mobile')} *</label>
+                <input className="field" type="tel" value={formData.mobile} onChange={(e) => handleInputChange('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))} placeholder={t('form.enterMobile')} required />
+                {errors.mobile && <div className="meta" style={{ color: 'var(--err)' }}>{errors.mobile}</div>}
+              </div>
             </div>
 
-            <div className="space-y-6">
-              {/* Gas New Connection — sub-type selector (SRS Module 11) */}
-              {selectedCategory === 'newConnection' && (
-                <div className="p-4 bg-red-50 rounded-kiosk border border-red-200">
-                  <h3 className="text-kiosk-base font-bold text-red-800 mb-4">Request Type</h3>
-                  <div className="grid grid-cols-3 gap-3">
-                    {[
-                      { id: 'new_gas', label: '🔥 New Gas Connection', sla: '30 days' },
-                      { id: 'reconnect', label: '🔄 Reconnection', sla: '7 days' },
-                      { id: 'disconnect', label: '⛔ Disconnection', sla: '3 days' },
-                      { id: 'prepaid', label: '💳 Postpaid → Prepaid', sla: '15 days' },
-                      { id: 'pipeline', label: '🔧 Pipeline Inspection', sla: '5 days' },
-                      { id: 'maintenance', label: '🛠️ Maintenance Schedule', sla: '7 days' },
-                    ].map(sub => (
-                      <button
-                        key={sub.id}
-                        type="button"
-                        onClick={() => handleInputChange('gasSubType', sub.id)}
-                        className={`p-3 rounded-xl border-2 text-left transition-all touch-manipulation ${formData.gasSubType === sub.id ? 'border-red-500 bg-red-50 ring-2 ring-red-200' : 'border-gray-200 hover:border-red-200'}`}
-                      >
-                        <div className="font-bold text-sm text-gray-800">{sub.label}</div>
-                        <div className="text-xs text-gray-500 mt-1">SLA: {sub.sla}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Meter Damage — severity + type */}
-              {selectedCategory === 'meterDamage' && (
-                <div className="p-4 bg-rose-50 rounded-kiosk border border-rose-200">
-                  <h3 className="text-kiosk-base font-bold text-rose-800 mb-4">Meter Issue Details</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Select
-                      label={t('gas.issueType')}
-                      value={formData.meterIssueType || ''}
-                      onChange={e => handleInputChange('meterIssueType', e.target.value)}
-                      options={[
-                        { value: 'damaged', label: 'Physically Damaged' },
-                        { value: 'malfunctioning', label: 'Showing Wrong Readings' },
-                        { value: 'leaking', label: 'Gas Leaking at Meter' },
-                        { value: 'installation', label: 'New Meter Installation' },
-                        { value: 'replacement', label: 'Replacement Required' },
-                      ]}
-                      placeholder={t('gas.selectIssueType')}
-                      required
-                    />
-                    <Select
-                      label={t('gas.priority')}
-                      value={formData.priority || ''}
-                      onChange={e => handleInputChange('priority', e.target.value)}
-                      options={[
-                        { value: 'emergency', label: '🔴 Emergency — Gas Leak (24h)' },
-                        { value: 'urgent', label: '🟡 Urgent (3 days)' },
-                        { value: 'normal', label: '🟢 Normal (10 days)' },
-                      ]}
-                      placeholder={t('gas.selectPriority')}
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                  label={t('form.name')}
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  placeholder={t('form.enterName')}
-                  error={errors.name}
-                  required
-                />
-                <Input
-                  label={t('form.mobile')}
-                  type="tel"
-                  value={formData.mobile}
-                  onChange={(e) => handleInputChange('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  placeholder={t('form.enterMobile')}
-                  error={errors.mobile}
-                  required
-                />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '36px 40px', marginTop: 36 }}>
+              <div>
+                <label className="flab">{t('form.email')}</label>
+                <input className="field" type="email" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} placeholder={t('form.enterEmail')} />
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                  label={t('form.email')}
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder={t('form.enterEmail')}
-                />
-                <Input
-                  label={t('gas.consumerNumber', 'CA Number / Legacy Number')}
-                  value={formData.consumerNumber}
-                  onChange={(e) => handleInputChange('consumerNumber', e.target.value)}
-                  placeholder={t('gas.enterConsumerNumber', 'Enter CA Number or Legacy Number')}
-                />
-                <p className="text-sm text-gray-500 mt-1">{t('gas.caNumberHint', 'Your Consumer Account (CA) number is printed on your gas bill')}</p>
+              <div>
+                <label className="flab">{t('gas.consumerNumber', 'CA Number / Legacy Number')}</label>
+                <input className="field" value={formData.consumerNumber} onChange={(e) => handleInputChange('consumerNumber', e.target.value)} placeholder={t('gas.enterConsumerNumber', 'Enter CA Number or Legacy Number')} />
+                <div className="meta" style={{ marginTop: 6 }}>{t('gas.caNumberHint', 'Your Consumer Account (CA) number is printed on your gas bill')}</div>
               </div>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Select
-                  label={t('form.state')}
-                  value={formData.state}
-                  onChange={(e) => handleInputChange('state', e.target.value)}
-                  placeholder={t('form.selectState')}
-                  options={states.map(s => ({ value: s.id, label: getLocalizedName(s) }))}
-                  error={errors.state}
-                  required
-                />
-                <Select
-                  label={t('form.city')}
-                  value={formData.city}
-                  onChange={(e) => handleInputChange('city', e.target.value)}
-                  placeholder={t('form.selectCity')}
-                  options={availableCities.map(c => ({ value: c.id, label: getLocalizedName(c) }))}
-                  error={errors.city}
-                  required
-                  disabled={!formData.state}
-                />
-                <Select
-                  label={t('form.ward')}
-                  value={formData.ward}
-                  onChange={(e) => handleInputChange('ward', e.target.value)}
-                  placeholder={t('form.selectWard')}
-                  options={availableWards.map(w => ({ value: w.id, label: w.name }))}
-                  error={errors.ward}
-                  required
-                  disabled={!formData.city}
-                />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 40, marginTop: 36 }}>
+              <div>
+                <label className="flab">{t('form.state')} *</label>
+                <select className="field" value={formData.state} onChange={(e) => handleInputChange('state', e.target.value)} required>
+                  <option value="">{t('form.selectState')}</option>
+                  {states.map(s => <option key={s.id} value={s.id}>{getLocalizedName(s)}</option>)}
+                </select>
+                {errors.state && <div className="meta" style={{ color: 'var(--err)' }}>{errors.state}</div>}
               </div>
-
-              <Input
-                label={t('form.address')}
-                value={formData.address}
-                onChange={(e) => handleInputChange('address', e.target.value)}
-                placeholder={t('form.enterAddress')}
-                error={errors.address}
-                required
-              />
-
-              <TextArea
-                label={t('form.description')}
-                value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder={t('form.enterDescription')}
-                error={errors.description}
-                required
-                rows={4}
-                maxLength={500}
-              />
-
-              <QRUpload
-                label={t('form.uploadDocuments')}
-                onUploadComplete={(uploadedFiles) => setFiles(uploadedFiles)}
-                maxFiles={5}
-              />
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-between pt-6 border-t">
-                <Button
-                  variant="secondary"
-                  onClick={handleFormBack}
-                  size="large"
-                >
-                  {t('app.back')}
-                </Button>
-                <Button
-                  onClick={handleSubmit}
-                  size="xlarge"
-                >
-                  {t('app.submit')}
-                </Button>
+              <div>
+                <label className="flab">{t('form.city')} *</label>
+                <select className="field" value={formData.city} onChange={(e) => handleInputChange('city', e.target.value)} disabled={!formData.state} required>
+                  <option value="">{t('form.selectCity')}</option>
+                  {availableCities.map(c => <option key={c.id} value={c.id}>{getLocalizedName(c)}</option>)}
+                </select>
+                {errors.city && <div className="meta" style={{ color: 'var(--err)' }}>{errors.city}</div>}
               </div>
+              <div>
+                <label className="flab">{t('form.ward')} *</label>
+                <select className="field" value={formData.ward} onChange={(e) => handleInputChange('ward', e.target.value)} disabled={!formData.city} required>
+                  <option value="">{t('form.selectWard')}</option>
+                  {availableWards.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                </select>
+                {errors.ward && <div className="meta" style={{ color: 'var(--err)' }}>{errors.ward}</div>}
+              </div>
+            </div>
+
+            <div style={{ marginTop: 36 }}>
+              <label className="flab">{t('form.address')} *</label>
+              <input className="field" value={formData.address} onChange={(e) => handleInputChange('address', e.target.value)} placeholder={t('form.enterAddress')} required />
+              {errors.address && <div className="meta" style={{ color: 'var(--err)' }}>{errors.address}</div>}
+            </div>
+
+            <div style={{ marginTop: 36 }}>
+              <label className="flab">{t('form.description')} *</label>
+              <textarea className="field" style={{ minHeight: 240 }} value={formData.description} onChange={(e) => handleInputChange('description', e.target.value)} placeholder={t('form.enterDescription')} required maxLength={500} />
+              {errors.description && <div className="meta" style={{ color: 'var(--err)' }}>{errors.description}</div>}
+            </div>
+
+            <div style={{ marginTop: 36 }}>
+              <label className="flab">{t('form.uploadDocuments')}</label>
+              <QRUpload label={t('form.uploadDocuments')} onUploadComplete={(uploadedFiles) => setFiles(uploadedFiles)} maxFiles={5} />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 32, marginTop: 52, paddingTop: 44, borderTop: '1.5px solid var(--line)' }}>
+              <button className="btn btn-ghost" onClick={handleFormBack}>
+                <I d={ic.back} size={40} /> {t('app.back')}
+              </button>
+              <button className="btn btn-pri" onClick={handleSubmit}>
+                {t('app.submit')}
+              </button>
             </div>
           </div>
         )}

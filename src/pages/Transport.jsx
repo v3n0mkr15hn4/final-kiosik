@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  Train, Bus, CreditCard, Ticket, MapPin, MessageSquare,
-  Search, FileText, UserCog, ArrowLeft,
-} from 'lucide-react';
-import { Button, Input, Select, TextArea, Modal, LoadingSpinner } from '../components';
-import { VK, I, ic } from '../components/kiosk';
-import { TransportIcon } from '../assets/icons';
+import { Modal, LoadingSpinner } from '../components';
+import { VK, DD, I, ic } from '../components/kiosk';
 import QRUpload from '../components/QRUpload';
 import { states, cities, wards } from '../utils/constants';
 import { generateRequestId, getCurrentTimestamp } from '../utils/helpers';
@@ -84,57 +79,45 @@ const Transport = () => {
   const mainServices = [
     {
       id: 'metroTicket',
-      LucideIcon: Train,
+      glyph: ic.bus,
       title: t('transport.metroTicket', 'Metro Ticket'),
       description: t('home.transportMetroDesc', 'Book metro rail tickets instantly'),
-      color: '#0e7490',
-      bg: 'color-mix(in oklab, #0e7490 12%, white)',
       booking: true,
     },
     {
       id: 'busTicket',
-      LucideIcon: Bus,
+      glyph: ic.bus,
       title: t('transport.busTicket', 'Bus Ticket'),
       description: t('home.transportBusDesc', 'Reserve city bus tickets for your route'),
-      color: '#0891b2',
-      bg: 'color-mix(in oklab, #0891b2 12%, white)',
       booking: true,
     },
     {
       id: 'busPass',
-      LucideIcon: CreditCard,
+      glyph: ic.card,
       title: t('transport.busPass', 'Bus Pass'),
       description: t('home.transportPassDesc', 'Purchase monthly or quarterly bus passes'),
-      color: '#1d4ed8',
-      bg: 'color-mix(in oklab, #1d4ed8 12%, white)',
       booking: true,
     },
     {
       id: 'vehicleComplaint',
-      LucideIcon: MessageSquare,
+      glyph: ic.chat,
       title: t('home.transportComplaint', 'Report an Issue'),
       description: t('home.transportComplaintDesc', 'Report road, vehicle or transport complaints'),
-      color: '#ea580c',
-      bg: 'color-mix(in oklab, #ea580c 12%, white)',
       booking: false,
     },
     {
       id: '_track',
-      LucideIcon: Search,
+      glyph: ic.track,
       title: t('home.transportTrack', 'Track Request'),
       description: t('home.transportTrackDesc', 'Check real-time status of your requests'),
       path: '/track-status',
-      color: '#475569',
-      bg: 'color-mix(in oklab, #475569 12%, white)',
     },
     {
       id: '_receipt',
-      LucideIcon: FileText,
+      glyph: ic.receipt,
       title: t('home.transportReceipt', 'View Receipts'),
       description: t('home.transportReceiptDesc', 'View and print transaction receipts'),
       path: '/receipt?org=transport',
-      color: '#059669',
-      bg: 'color-mix(in oklab, #059669 12%, white)',
     },
   ];
 
@@ -317,7 +300,7 @@ const Transport = () => {
 
   if (loading) {
     return (
-      <VK bg="color-mix(in oklab, #0891b2 4%, white)">
+      <VK bg="color-mix(in oklab, var(--dept-trans) 5%, var(--surface-0))">
         <div className="flex items-center justify-center min-h-[60vh]">
           <LoadingSpinner size="large" message={selectedCategory && mainServices.find(s => s.id === selectedCategory)?.booking ? t('transport.bookingInProgress') : t('app.loading')} />
         </div>
@@ -327,75 +310,45 @@ const Transport = () => {
 
   if (bookingResult) {
     return (
-      <VK bg="color-mix(in oklab, #0891b2 4%, white)">
+      <VK bg="color-mix(in oklab, var(--dept-trans) 5%, var(--surface-0))">
         <div>
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <div style={{
-              width: 80, height: 80, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #0891b2, #1d4ed8)',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: 12, boxShadow: '0 4px 16px rgba(8,145,178,0.25)',
-            }}>
-              <TransportIcon size={40} color="#fff" />
-            </div>
-            <h1 className="h2" style={{ marginBottom: 6 }}>
-              {t('transport.title', 'Transport Department')}
-            </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 32, marginBottom: 40 }}>
+            <DD color="var(--dept-trans)" glyph={ic.bus} size={128} isz={72} />
+            <h1 className="h2">{t('transport.title', 'Transport Department')}</h1>
           </div>
 
-          <div className="bg-white rounded-kiosk-lg shadow-kiosk p-8 text-center">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Ticket className="w-10 h-10 text-green-600" />
+          <div className="card" style={{ textAlign: 'center' }}>
+            <div style={{ width: 96, height: 96, borderRadius: '50%', margin: '0 auto 24px', background: 'color-mix(in oklab, var(--ok) 16%, white)', display: 'grid', placeItems: 'center' }}>
+              <I d={ic.check} size={48} style={{ color: 'var(--ok)' }} />
             </div>
-            <h2 className="text-kiosk-2xl font-bold text-green-700 mb-2">{t('transport.bookingConfirmed')}</h2>
-            <p className="text-kiosk-lg text-gray-600 mb-6">{t('transport.bookingSuccessMsg')}</p>
+            <h2 className="h3" style={{ color: 'var(--ok)', marginBottom: 8 }}>{t('transport.bookingConfirmed')}</h2>
+            <p className="body-l" style={{ color: 'var(--ink-500)', marginBottom: 32 }}>{t('transport.bookingSuccessMsg')}</p>
 
-            <div className="bg-gray-50 rounded-kiosk p-6 text-left space-y-3 mb-6">
-              <div className="flex justify-between">
-                <span className="font-semibold text-gray-600">{t('transport.ticketId')}:</span>
-                <span className="font-bold text-government-blue">{bookingResult.ticketId}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-semibold text-gray-600">{t('transport.passenger')}:</span>
-                <span>{bookingResult.passengerName}</span>
-              </div>
+            <div style={{ textAlign: 'left', marginBottom: 32 }}>
+              <div className="receipt-row"><span className="k">{t('transport.ticketId')}</span><span className="v">{bookingResult.ticketId}</span></div>
+              <div className="receipt-row"><span className="k">{t('transport.passenger')}</span><span className="v">{bookingResult.passengerName}</span></div>
               {bookingResult.from !== '-' && (
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-600">{t('transport.fromTo')}:</span>
-                  <span>{bookingResult.from} → {bookingResult.to}</span>
-                </div>
+                <div className="receipt-row"><span className="k">{t('transport.fromTo')}</span><span className="v">{bookingResult.from} → {bookingResult.to}</span></div>
               )}
               {bookingResult.route !== '-' && (
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-600">{t('transport.route')}:</span>
-                  <span className="text-right">{bookingResult.route}</span>
-                </div>
+                <div className="receipt-row"><span className="k">{t('transport.route')}</span><span className="v">{bookingResult.route}</span></div>
               )}
               {bookingResult.passType !== '-' && (
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-600">{t('transport.passType')}:</span>
-                  <span>{bookingResult.passType}</span>
-                </div>
+                <div className="receipt-row"><span className="k">{t('transport.passType')}</span><span className="v">{bookingResult.passType}</span></div>
               )}
-              <div className="flex justify-between">
-                <span className="font-semibold text-gray-600">{t('transport.date')}:</span>
-                <span>{bookingResult.date}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-semibold text-gray-600">{t('transport.passengers')}:</span>
-                <span>{bookingResult.passengers}</span>
-              </div>
-              <div className="flex justify-between border-t pt-3">
-                <span className="font-bold text-gray-800 text-kiosk-lg">{t('transport.totalFare')}:</span>
-                <span className="font-bold text-green-700 text-kiosk-lg">₹{bookingResult.fare}</span>
+              <div className="receipt-row"><span className="k">{t('transport.date')}</span><span className="v">{bookingResult.date}</span></div>
+              <div className="receipt-row"><span className="k">{t('transport.passengers')}</span><span className="v">{bookingResult.passengers}</span></div>
+              <div className="receipt-row" style={{ borderTop: '2px solid var(--line)', marginTop: 12, paddingTop: 20 }}>
+                <span className="k" style={{ fontWeight: 700 }}>{t('transport.totalFare')}</span>
+                <span className="v" style={{ color: 'var(--ok)', fontSize: 28 }}>₹{bookingResult.fare}</span>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button onClick={() => navigate(`/receipt?org=transport&id=${encodeURIComponent(bookingResult.ticketId)}`)} size="large">
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 24 }}>
+              <button className="btn btn-pri" onClick={() => navigate(`/receipt?org=transport&id=${encodeURIComponent(bookingResult.ticketId)}`)}>
                 {t('transport.viewReceipt')}
-              </Button>
-              <Button variant="secondary" onClick={() => navigate('/home')} size="large">{t('transport.goHome')}</Button>
+              </button>
+              <button className="btn btn-ghost" onClick={() => navigate('/home')}>{t('transport.goHome')}</button>
             </div>
           </div>
         </div>
@@ -404,72 +357,60 @@ const Transport = () => {
   }
 
   return (
-    <VK bg="color-mix(in oklab, #0891b2 4%, white)">
+    <VK bg="color-mix(in oklab, var(--dept-trans) 5%, var(--surface-0))">
       {/* CATEGORY SELECTION */}
       {view === 'categories' && (
         <>
           {/* Dept header */}
-          <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <div style={{
-              width: 120, height: 120, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #0891b2, #1d4ed8)',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: 20, boxShadow: '0 8px 32px rgba(8,145,178,0.3)',
-            }}>
-              <TransportIcon size={60} color="#fff" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 40, marginBottom: 48 }}>
+            <DD color="var(--dept-trans)" glyph={ic.bus} size={168} isz={92} />
+            <div>
+              <div className="label-tag" style={{ color: 'var(--dept-trans)', marginBottom: 14 }}>
+                ASTC · Transport
+              </div>
+              <h1 className="h2">{t('transport.title', 'Transport Department')}</h1>
+              <p className="body-l" style={{ marginTop: 14, color: 'var(--ink-500)' }}>
+                {t('transport.subtitle', 'Bus routes · Tickets · Passes · Road issues')}
+              </p>
             </div>
-            <h1 className="h2" style={{ marginBottom: 10 }}>
-              {t('transport.title', 'Transport Department')}
-            </h1>
-            <p className="body-l" style={{ color: 'var(--ink-500)' }}>
-              {t('transport.subtitle', 'Metro · Bus · Passes · Complaints · Tracking')}
-            </p>
           </div>
 
           {/* Service grid — 3 cols for kiosk */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, marginBottom: 32 }}>
-            {mainServices.map((s) => {
-              const Icon = s.LucideIcon;
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => {
-                    if (s.path) {
-                      navigate(s.path);
-                    } else if (s.booking) {
-                      setSelectedCategory(s.id);
-                      setView('booking');
-                      setStep(1);
-                    } else {
-                      setSelectedCategory(s.id);
-                      setView('complaint');
-                      setStep(2);
-                    }
-                  }}
-                  className="tile"
-                  style={{
-                    minHeight: 260,
-                    padding: 32,
-                    alignItems: 'flex-start',
-                    textAlign: 'left',
-                    gap: 20,
-                    borderTop: `6px solid ${s.color}`,
-                    touchAction: 'manipulation',
-                  }}
-                  aria-label={s.title}
-                >
-                  <div style={{
-                    width: 72, height: 72, borderRadius: 20,
-                    background: s.bg, display: 'grid', placeItems: 'center', flexShrink: 0,
-                  }}>
-                    <Icon size={36} style={{ color: s.color }} strokeWidth={2} />
-                  </div>
-                  <div className="nm" style={{ fontSize: 26, lineHeight: 1.3 }}>{s.title}</div>
-                  <div className="sub" style={{ fontSize: 20, marginTop: 'auto' }}>{s.description}</div>
-                </button>
-              );
-            })}
+            {mainServices.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => {
+                  if (s.path) {
+                    navigate(s.path);
+                  } else if (s.booking) {
+                    setSelectedCategory(s.id);
+                    setView('booking');
+                    setStep(1);
+                  } else {
+                    setSelectedCategory(s.id);
+                    setView('complaint');
+                    setStep(2);
+                  }
+                }}
+                className="tile"
+                style={{
+                  minHeight: 260,
+                  padding: 32,
+                  alignItems: 'flex-start',
+                  textAlign: 'left',
+                  gap: 20,
+                  borderTop: '8px solid var(--dept-trans)',
+                  touchAction: 'manipulation',
+                }}
+                aria-label={s.title}
+              >
+                <DD color="var(--dept-trans)" glyph={s.glyph} size={120} isz={64} />
+                <div className="nm" style={{ fontSize: 26, lineHeight: 1.3 }}>{s.title}</div>
+                <div className="sub" style={{ fontSize: 20, marginTop: 'auto' }}>{s.description}</div>
+              </button>
+            ))}
           </div>
 
           <button
@@ -486,114 +427,140 @@ const Transport = () => {
       {/* BOOKING FORM */}
       {view === 'booking' && (
         <div>
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <div style={{
-              width: 80, height: 80, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #0891b2, #1d4ed8)',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: 12, boxShadow: '0 4px 16px rgba(8,145,178,0.25)',
-            }}>
-              <TransportIcon size={40} color="#fff" />
-            </div>
-            <h1 className="h2" style={{ marginBottom: 6 }}>
-              {t('transport.title', 'Transport Department')}
-            </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 32, marginBottom: 40 }}>
+            <DD color="var(--dept-trans)" glyph={ic.bus} size={128} isz={72} />
+            <h1 className="h2">{t('transport.title', 'Transport Department')}</h1>
           </div>
 
-          <div className="bg-white rounded-kiosk-lg shadow-kiosk p-6 md:p-8">
-            <div className="mb-6 p-4 bg-teal-50 rounded-kiosk border border-teal-200 flex items-center gap-3">
-              <Ticket className="w-6 h-6 text-teal-700" />
-              <p className="text-kiosk-base font-semibold text-teal-800">
-                {t('transport.bookingLabel')}: {t(`transport.${selectedCategory}`)}
-              </p>
+          <div className="card">
+            <span className="badge b-info" style={{ marginBottom: 36 }}>
+              {t('transport.bookingLabel')} · {t(`transport.${selectedCategory}`)}
+            </span>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '36px 40px' }}>
+              <div>
+                <label className="flab">{t('transport.passengerName')} *</label>
+                <input className="field" value={bookingData.passengerName} onChange={(e) => handleBookingChange('passengerName', e.target.value)} required />
+                {errors.passengerName && <div className="meta" style={{ color: 'var(--err)' }}>{errors.passengerName}</div>}
+              </div>
+              <div>
+                <label className="flab">{t('form.mobile')} *</label>
+                <input className="field" value={bookingData.passengerMobile} onChange={(e) => handleBookingChange('passengerMobile', e.target.value)} required />
+                {errors.passengerMobile && <div className="meta" style={{ color: 'var(--err)' }}>{errors.passengerMobile}</div>}
+              </div>
             </div>
 
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input label={t('transport.passengerName')} value={bookingData.passengerName} onChange={(e) => handleBookingChange('passengerName', e.target.value)} error={errors.passengerName} required />
-                <Input label={t('form.mobile')} value={bookingData.passengerMobile} onChange={(e) => handleBookingChange('passengerMobile', e.target.value)} error={errors.passengerMobile} required />
-              </div>
-
-              {selectedCategory === 'metroTicket' && (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Select label={t('transport.fromStation')} value={bookingData.fromStation} onChange={(e) => handleBookingChange('fromStation', e.target.value)} error={errors.fromStation} required>
+            {selectedCategory === 'metroTicket' && (
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '36px 40px', marginTop: 36 }}>
+                  <div>
+                    <label className="flab">{t('transport.fromStation')} *</label>
+                    <select className="field" value={bookingData.fromStation} onChange={(e) => handleBookingChange('fromStation', e.target.value)} required>
                       <option value="">{t('transport.selectDeparture')}</option>
                       {metroStations.map(s => <option key={s} value={s}>{s}</option>)}
-                    </Select>
-                    <Select label={t('transport.toStation')} value={bookingData.toStation} onChange={(e) => handleBookingChange('toStation', e.target.value)} error={errors.toStation} required>
+                    </select>
+                    {errors.fromStation && <div className="meta" style={{ color: 'var(--err)' }}>{errors.fromStation}</div>}
+                  </div>
+                  <div>
+                    <label className="flab">{t('transport.toStation')} *</label>
+                    <select className="field" value={bookingData.toStation} onChange={(e) => handleBookingChange('toStation', e.target.value)} required>
                       <option value="">{t('transport.selectArrival')}</option>
                       {metroStations.filter(s => s !== bookingData.fromStation).map(s => <option key={s} value={s}>{s}</option>)}
-                    </Select>
+                    </select>
+                    {errors.toStation && <div className="meta" style={{ color: 'var(--err)' }}>{errors.toStation}</div>}
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Input label={t('transport.travelDate')} type="date" value={bookingData.travelDate} onChange={(e) => handleBookingChange('travelDate', e.target.value)} error={errors.travelDate} required />
-                    <Select label={t('transport.numberOfPassengers')} value={bookingData.passengers} onChange={(e) => handleBookingChange('passengers', e.target.value)}>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 40, marginTop: 36 }}>
+                  <div>
+                    <label className="flab">{t('transport.travelDate')} *</label>
+                    <input className="field" type="date" value={bookingData.travelDate} onChange={(e) => handleBookingChange('travelDate', e.target.value)} required />
+                    {errors.travelDate && <div className="meta" style={{ color: 'var(--err)' }}>{errors.travelDate}</div>}
+                  </div>
+                  <div>
+                    <label className="flab">{t('transport.numberOfPassengers')}</label>
+                    <select className="field" value={bookingData.passengers} onChange={(e) => handleBookingChange('passengers', e.target.value)}>
                       {[1, 2, 3, 4, 5, 6].map(n => <option key={n} value={n}>{t('transport.passengerCount', { count: n })}</option>)}
-                    </Select>
-                    <div className="flex items-end">
-                      <div className="w-full p-4 bg-green-50 rounded-kiosk border border-green-200 text-center">
-                        <p className="text-sm text-green-600 font-semibold">{t('transport.estimatedFare')}</p>
-                        <p className="text-kiosk-xl font-bold text-green-700">₹{calculateFare()}</p>
-                      </div>
+                    </select>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                    <div className="card" style={{ width: '100%', textAlign: 'center', padding: 16, background: 'color-mix(in oklab, var(--ok) 10%, white)' }}>
+                      <div className="meta" style={{ color: 'var(--ok)', fontWeight: 700 }}>{t('transport.estimatedFare')}</div>
+                      <div className="h3" style={{ color: 'var(--ok)' }}>₹{calculateFare()}</div>
                     </div>
                   </div>
-                </>
-              )}
+                </div>
+              </>
+            )}
 
-              {selectedCategory === 'busTicket' && (
-                <>
-                  <Select label={t('transport.selectBusRoute')} value={bookingData.busRoute} onChange={(e) => handleBookingChange('busRoute', e.target.value)} error={errors.busRoute} required>
+            {selectedCategory === 'busTicket' && (
+              <>
+                <div style={{ marginTop: 36 }}>
+                  <label className="flab">{t('transport.selectBusRoute')} *</label>
+                  <select className="field" value={bookingData.busRoute} onChange={(e) => handleBookingChange('busRoute', e.target.value)} required>
                     <option value="">{t('transport.chooseRoute')}</option>
                     {busRoutes.map(r => <option key={r.id} value={r.id}>{r.name} — ₹{r.fare}</option>)}
-                  </Select>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Input label={t('transport.travelDate')} type="date" value={bookingData.travelDate} onChange={(e) => handleBookingChange('travelDate', e.target.value)} error={errors.travelDate} required />
-                    <Select label={t('transport.passengers')} value={bookingData.passengers} onChange={(e) => handleBookingChange('passengers', e.target.value)}>
+                  </select>
+                  {errors.busRoute && <div className="meta" style={{ color: 'var(--err)' }}>{errors.busRoute}</div>}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 40, marginTop: 36 }}>
+                  <div>
+                    <label className="flab">{t('transport.travelDate')} *</label>
+                    <input className="field" type="date" value={bookingData.travelDate} onChange={(e) => handleBookingChange('travelDate', e.target.value)} required />
+                    {errors.travelDate && <div className="meta" style={{ color: 'var(--err)' }}>{errors.travelDate}</div>}
+                  </div>
+                  <div>
+                    <label className="flab">{t('transport.passengers')}</label>
+                    <select className="field" value={bookingData.passengers} onChange={(e) => handleBookingChange('passengers', e.target.value)}>
                       {[1, 2, 3, 4, 5, 6].map(n => <option key={n} value={n}>{t('transport.passengerCount', { count: n })}</option>)}
-                    </Select>
-                    <div className="flex items-end">
-                      <div className="w-full p-4 bg-green-50 rounded-kiosk border border-green-200 text-center">
-                        <p className="text-sm text-green-600 font-semibold">{t('transport.estimatedFare')}</p>
-                        <p className="text-kiosk-xl font-bold text-green-700">₹{calculateFare()}</p>
-                      </div>
+                    </select>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                    <div className="card" style={{ width: '100%', textAlign: 'center', padding: 16, background: 'color-mix(in oklab, var(--ok) 10%, white)' }}>
+                      <div className="meta" style={{ color: 'var(--ok)', fontWeight: 700 }}>{t('transport.estimatedFare')}</div>
+                      <div className="h3" style={{ color: 'var(--ok)' }}>₹{calculateFare()}</div>
                     </div>
                   </div>
-                </>
-              )}
+                </div>
+              </>
+            )}
 
-              {selectedCategory === 'busPass' && (
-                <>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {busPassTypes.map(pass => (
-                      <div
-                        key={pass.id}
-                        onClick={() => handleBookingChange('passType', pass.id)}
-                        className={`cursor-pointer rounded-kiosk p-4 border-2 text-center transition-all ${bookingData.passType === pass.id ? 'border-teal-600 bg-teal-50' : 'border-gray-200 bg-white hover:border-teal-300'}`}
-                      >
-                        <CreditCard className={`w-8 h-8 mx-auto mb-2 ${bookingData.passType === pass.id ? 'text-teal-600' : 'text-gray-400'}`} />
-                        <p className="font-semibold text-sm">{pass.name}</p>
-                        <p className="text-teal-700 font-bold mt-1">₹{pass.price}</p>
-                      </div>
-                    ))}
+            {selectedCategory === 'busPass' && (
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginTop: 36 }}>
+                  {busPassTypes.map(pass => (
+                    <button
+                      key={pass.id}
+                      type="button"
+                      onClick={() => handleBookingChange('passType', pass.id)}
+                      className={`chip${bookingData.passType === pass.id ? ' act' : ''}`}
+                      style={{ flexDirection: 'column', height: 'auto', padding: 16, gap: 8 }}
+                    >
+                      <I d={ic.card} size={32} />
+                      <div style={{ fontWeight: 700 }}>{pass.name}</div>
+                      <div className="meta">₹{pass.price}</div>
+                    </button>
+                  ))}
+                </div>
+                {errors.passType && <div className="meta" style={{ color: 'var(--err)' }}>{errors.passType}</div>}
+                <div style={{ marginTop: 36 }}>
+                  <label className="flab">{t('transport.startDate')} *</label>
+                  <input className="field" type="date" value={bookingData.travelDate} onChange={(e) => handleBookingChange('travelDate', e.target.value)} required />
+                  {errors.travelDate && <div className="meta" style={{ color: 'var(--err)' }}>{errors.travelDate}</div>}
+                </div>
+                {bookingData.passType && (
+                  <div className="card" style={{ textAlign: 'center', marginTop: 24, background: 'color-mix(in oklab, var(--ok) 10%, white)' }}>
+                    <div className="meta" style={{ color: 'var(--ok)', fontWeight: 700 }}>{t('transport.passCost')}</div>
+                    <div className="h3" style={{ color: 'var(--ok)' }}>₹{calculateFare()}</div>
                   </div>
-                  {errors.passType && <p className="text-red-500 text-sm">{errors.passType}</p>}
-                  <Input label={t('transport.startDate')} type="date" value={bookingData.travelDate} onChange={(e) => handleBookingChange('travelDate', e.target.value)} error={errors.travelDate} required />
-                  {bookingData.passType && (
-                    <div className="p-4 bg-green-50 rounded-kiosk border border-green-200 text-center">
-                      <p className="text-sm text-green-600 font-semibold">{t('transport.passCost')}</p>
-                      <p className="text-kiosk-xl font-bold text-green-700">₹{calculateFare()}</p>
-                    </div>
-                  )}
-                </>
-              )}
+                )}
+              </>
+            )}
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-between pt-6 border-t">
-                <Button variant="secondary" onClick={() => { setView('categories'); setErrors({}); }} size="large">{t('app.back')}</Button>
-                <Button onClick={handleBookTicket} size="xlarge">
-                  {selectedCategory === 'busPass' ? t('transport.purchasePass') : t('transport.bookTicket')} — ₹{calculateFare()}
-                </Button>
-              </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 32, marginTop: 52, paddingTop: 44, borderTop: '1.5px solid var(--line)' }}>
+              <button className="btn btn-ghost" onClick={() => { setView('categories'); setErrors({}); }}>{t('app.back')}</button>
+              <button className="btn btn-pri btn-xl" onClick={handleBookTicket}>
+                {selectedCategory === 'busPass' ? t('transport.purchasePass') : t('transport.bookTicket')} — ₹{calculateFare()}
+              </button>
             </div>
           </div>
         </div>
@@ -602,61 +569,92 @@ const Transport = () => {
       {/* COMPLAINT / REQUEST FORM */}
       {view === 'complaint' && (
         <div>
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <div style={{
-              width: 80, height: 80, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #0891b2, #1d4ed8)',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: 12, boxShadow: '0 4px 16px rgba(8,145,178,0.25)',
-            }}>
-              <TransportIcon size={40} color="#fff" />
-            </div>
-            <h1 className="h2" style={{ marginBottom: 6 }}>
-              {t('transport.title', 'Transport Department')}
-            </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 32, marginBottom: 40 }}>
+            <DD color="var(--dept-trans)" glyph={ic.bus} size={128} isz={72} />
+            <h1 className="h2">{t('transport.title', 'Transport Department')}</h1>
           </div>
 
-          <div className="bg-white rounded-kiosk-lg shadow-kiosk p-6 md:p-8">
-            <div className="mb-6 p-4 bg-orange-50 rounded-kiosk border border-orange-200">
-              <p className="text-kiosk-base font-semibold text-orange-800">
-                {t('transport.reportingLabel')}: {t(`transport.${selectedCategory}`)}
-              </p>
+          <div className="card">
+            <span className="badge b-warn" style={{ marginBottom: 36 }}>
+              {t('transport.reportingLabel')} · {t(`transport.${selectedCategory}`)}
+            </span>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '36px 40px' }}>
+              <div>
+                <label className="flab">{t('form.name')} *</label>
+                <input className="field" value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} placeholder={t('form.enterName')} required />
+                {errors.name && <div className="meta" style={{ color: 'var(--err)' }}>{errors.name}</div>}
+              </div>
+              <div>
+                <label className="flab">{t('form.mobile')} *</label>
+                <input className="field" type="tel" value={formData.mobile} onChange={(e) => handleInputChange('mobile', e.target.value)} placeholder={t('form.enterMobile')} required />
+                {errors.mobile && <div className="meta" style={{ color: 'var(--err)' }}>{errors.mobile}</div>}
+              </div>
             </div>
 
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input label={t('form.name')} value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} placeholder={t('form.enterName')} error={errors.name} required />
-                <Input label={t('form.mobile')} value={formData.mobile} onChange={(e) => handleInputChange('mobile', e.target.value)} placeholder={t('form.enterMobile')} error={errors.mobile} required type="tel" />
-              </div>
-              <Input label={t('form.email')} value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} placeholder={t('form.enterEmail')} type="email" />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input label={t('form.vehicleNumber')} value={formData.vehicleNumber} onChange={(e) => handleInputChange('vehicleNumber', e.target.value)} placeholder={t('form.enterVehicleNumber')} />
-                <Input label={t('form.licenseNumber')} value={formData.licenseNumber} onChange={(e) => handleInputChange('licenseNumber', e.target.value)} placeholder={t('form.enterLicenseNumber')} />
-              </div>
+            <div style={{ marginTop: 36 }}>
+              <label className="flab">{t('form.email')}</label>
+              <input className="field" type="email" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} placeholder={t('form.enterEmail')} />
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Select label={t('form.state')} value={formData.state} onChange={(e) => handleInputChange('state', e.target.value)} error={errors.state} required>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '36px 40px', marginTop: 36 }}>
+              <div>
+                <label className="flab">{t('form.vehicleNumber')}</label>
+                <input className="field" value={formData.vehicleNumber} onChange={(e) => handleInputChange('vehicleNumber', e.target.value)} placeholder={t('form.enterVehicleNumber')} />
+              </div>
+              <div>
+                <label className="flab">{t('form.licenseNumber')}</label>
+                <input className="field" value={formData.licenseNumber} onChange={(e) => handleInputChange('licenseNumber', e.target.value)} placeholder={t('form.enterLicenseNumber')} />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 40, marginTop: 36 }}>
+              <div>
+                <label className="flab">{t('form.state')} *</label>
+                <select className="field" value={formData.state} onChange={(e) => handleInputChange('state', e.target.value)} required>
                   <option value="">{t('form.selectState')}</option>
                   {states.map(s => <option key={s.id} value={s.id}>{getLocalizedName(s)}</option>)}
-                </Select>
-                <Select label={t('form.city')} value={formData.city} onChange={(e) => handleInputChange('city', e.target.value)} error={errors.city} required disabled={!formData.state}>
+                </select>
+                {errors.state && <div className="meta" style={{ color: 'var(--err)' }}>{errors.state}</div>}
+              </div>
+              <div>
+                <label className="flab">{t('form.city')} *</label>
+                <select className="field" value={formData.city} onChange={(e) => handleInputChange('city', e.target.value)} disabled={!formData.state} required>
                   <option value="">{t('form.selectCity')}</option>
                   {availableCities.map(c => <option key={c.id} value={c.id}>{getLocalizedName(c)}</option>)}
-                </Select>
-                <Select label={t('form.ward')} value={formData.ward} onChange={(e) => handleInputChange('ward', e.target.value)} error={errors.ward} required disabled={!formData.city}>
+                </select>
+                {errors.city && <div className="meta" style={{ color: 'var(--err)' }}>{errors.city}</div>}
+              </div>
+              <div>
+                <label className="flab">{t('form.ward')} *</label>
+                <select className="field" value={formData.ward} onChange={(e) => handleInputChange('ward', e.target.value)} disabled={!formData.city} required>
                   <option value="">{t('form.selectWard')}</option>
                   {availableWards.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
-                </Select>
+                </select>
+                {errors.ward && <div className="meta" style={{ color: 'var(--err)' }}>{errors.ward}</div>}
               </div>
+            </div>
 
-              <Input label={t('form.address')} value={formData.address} onChange={(e) => handleInputChange('address', e.target.value)} placeholder={t('form.enterAddress')} error={errors.address} required />
-              <TextArea label={t('form.description')} value={formData.description} onChange={(e) => handleInputChange('description', e.target.value)} placeholder={t('form.enterDescription')} error={errors.description} required rows={4} maxLength={500} />
+            <div style={{ marginTop: 36 }}>
+              <label className="flab">{t('form.address')} *</label>
+              <input className="field" value={formData.address} onChange={(e) => handleInputChange('address', e.target.value)} placeholder={t('form.enterAddress')} required />
+              {errors.address && <div className="meta" style={{ color: 'var(--err)' }}>{errors.address}</div>}
+            </div>
+
+            <div style={{ marginTop: 36 }}>
+              <label className="flab">{t('form.description')} *</label>
+              <textarea className="field" style={{ minHeight: 240 }} value={formData.description} onChange={(e) => handleInputChange('description', e.target.value)} placeholder={t('form.enterDescription')} required maxLength={500} />
+              {errors.description && <div className="meta" style={{ color: 'var(--err)' }}>{errors.description}</div>}
+            </div>
+
+            <div style={{ marginTop: 36 }}>
+              <label className="flab">{t('form.uploadDocuments')}</label>
               <QRUpload label={t('form.uploadDocuments')} onUploadComplete={(uploadedFiles) => setFiles(uploadedFiles)} maxFiles={5} />
+            </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-between pt-6 border-t">
-                <Button variant="secondary" onClick={() => { setView('categories'); setErrors({}); }} size="large">{t('app.back')}</Button>
-                <Button onClick={handleComplaintSubmit} size="xlarge">{t('app.submit')}</Button>
-              </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 32, marginTop: 52, paddingTop: 44, borderTop: '1.5px solid var(--line)' }}>
+              <button className="btn btn-ghost" onClick={() => { setView('categories'); setErrors({}); }}>{t('app.back')}</button>
+              <button className="btn btn-pri" onClick={handleComplaintSubmit}>{t('app.submit')}</button>
             </div>
           </div>
         </div>
@@ -667,16 +665,16 @@ const Transport = () => {
         onClose={() => setShowConfirmModal(false)}
         title={t('form.confirmSubmission')}
       >
-        <div className="space-y-4">
-          <p className="text-kiosk-base text-gray-600">{t('form.confirmMessage')}</p>
-          <div className="bg-gray-50 rounded-kiosk p-4 space-y-2">
-            <p><strong>{t('form.name')}:</strong> {formData.name}</p>
-            <p><strong>{t('form.mobile')}:</strong> {formData.mobile}</p>
-            <p><strong>{t('transport.categoryLabel')}:</strong> {t(`transport.${selectedCategory}`)}</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <p className="body">{t('form.confirmMessage')}</p>
+          <div className="card" style={{ padding: 24 }}>
+            <div className="receipt-row"><span className="k">{t('form.name')}</span><span className="v">{formData.name}</span></div>
+            <div className="receipt-row"><span className="k">{t('form.mobile')}</span><span className="v">{formData.mobile}</span></div>
+            <div className="receipt-row"><span className="k">{t('transport.categoryLabel')}</span><span className="v">{t(`transport.${selectedCategory}`)}</span></div>
           </div>
-          <div className="flex gap-4 justify-end pt-4">
-            <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>{t('app.cancel')}</Button>
-            <Button onClick={handleConfirmSubmit}>{t('app.confirm')}</Button>
+          <div style={{ display: 'flex', gap: 24, justifyContent: 'flex-end' }}>
+            <button className="btn btn-ghost" onClick={() => setShowConfirmModal(false)}>{t('app.cancel')}</button>
+            <button className="btn btn-pri" onClick={handleConfirmSubmit}>{t('app.confirm')}</button>
           </div>
         </div>
       </Modal>

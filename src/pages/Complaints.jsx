@@ -450,7 +450,7 @@ const Complaints = () => {
                 </Button>
                 <Button
                   onClick={handleSubmit}
-                  size="xlarge"
+                  size="large"
                 >
                   {t('app.submit')}
                 </Button>
