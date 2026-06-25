@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Timeline, LoadingSpinner } from '../components';
+import { Timeline } from '../components';
 import { VK, I, ic } from '../components/kiosk';
+import { RadiantLoader, SkeletonRow } from '../components/loading';
 import { mockTrackingData } from '../utils/constants';
 import { formatDate } from '../utils/helpers';
 import { trackAPI } from '../utils/apiService';
+import { mockDelayRange } from '../utils/mockDelay';
 
 // Parse SLA string like "15 working days" → number of working days
 function parseSLADays(slaStr) {
@@ -66,24 +68,27 @@ const TrackStatus = () => {
 
     try {
       let foundResult = null;
-      try {
-        if (searchType === 'requestId' || searchType === 'ticketId') {
-          const data = await trackAPI.byRequestId(searchQuery.toUpperCase());
-          if (data?.requestId) foundResult = data;
-        } else {
-          const data = await trackAPI.byMobile(searchQuery);
-          if (data?.requestId) foundResult = data;
+      const lookup = async () => {
+        try {
+          if (searchType === 'requestId' || searchType === 'ticketId') {
+            const data = await trackAPI.byRequestId(searchQuery.toUpperCase());
+            if (data?.requestId) foundResult = data;
+          } else {
+            const data = await trackAPI.byMobile(searchQuery);
+            if (data?.requestId) foundResult = data;
+          }
+        } catch {
+          // Fallback to mock data — ticket ID maps to same mock set
+          if (searchType === 'requestId' || searchType === 'ticketId') {
+            foundResult = mockTrackingData[searchQuery.toUpperCase()] || null;
+          } else {
+            foundResult = Object.values(mockTrackingData).find(
+              item => item.mobile === searchQuery
+            ) || null;
+          }
         }
-      } catch {
-        // Fallback to mock data — ticket ID maps to same mock set
-        if (searchType === 'requestId' || searchType === 'ticketId') {
-          foundResult = mockTrackingData[searchQuery.toUpperCase()] || null;
-        } else {
-          foundResult = Object.values(mockTrackingData).find(
-            item => item.mobile === searchQuery
-          ) || null;
-        }
-      }
+      };
+      await Promise.all([lookup(), mockDelayRange(2200, 2800)]);
       setResult(foundResult || null);
     } catch {
       setError(t('errors.networkError', 'Network error. Please try again.'));
@@ -176,8 +181,19 @@ const TrackStatus = () => {
         </div>
 
         {loading && (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
-            <LoadingSpinner size="large" message={t('app.loading', 'Searching...')} />
+          <div style={{ padding: '24px 0 0' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18, marginBottom: 28 }}>
+              <RadiantLoader variant="sweep" size={80} />
+              <h3 className="h3">{t('loading.lookingUpRequest', 'Looking up your request')}</h3>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--ink-500)', letterSpacing: '0.06em' }}>
+                {searchQuery}
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <SkeletonRow />
+              <SkeletonRow delayMs={150} />
+              <SkeletonRow delayMs={300} />
+            </div>
           </div>
         )}
 

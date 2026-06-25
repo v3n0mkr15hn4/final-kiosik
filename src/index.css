@@ -35,6 +35,16 @@ body,
   40%           { transform: scale(1);   opacity: 1; }
 }
 
+/* ── Loading & waiting states (Radiant Arch system) ──────────── */
+@keyframes archGlow   { 0%, 100% { opacity: 0.18; } 50% { opacity: 1; } }
+@keyframes dotPulse   { 0%, 100% { opacity: 0.4;  } 50% { opacity: 1; } }
+@keyframes drawLoop   { 0% { stroke-dashoffset: 100; } 45% { stroke-dashoffset: 0; } 72% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -100; } }
+@keyframes shimmer    { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+@keyframes typingDot  { 0%, 70%, 100% { opacity: 0.3; transform: translateY(0); } 35% { opacity: 1; transform: translateY(-5px); } }
+@keyframes scanY      { 0% { transform: translateY(-42px); } 50% { transform: translateY(42px); } 100% { transform: translateY(-42px); } }
+@keyframes loaderPing { 0% { transform: scale(0.5); opacity: 0.5; } 100% { transform: scale(2.2); opacity: 0; } }
+@keyframes barPulse   { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
 body {
   font-family: 'Inter', 'Noto Sans', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;

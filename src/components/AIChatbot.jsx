@@ -6,6 +6,8 @@ import { stopTTS } from '../utils/ttsService';
 import { startSTT, stopSTT } from '../ai/voice/speechRecognition';
 import SYSTEM_PROMPT from '../ai/prompts/systemPrompt';
 import { I, ic } from './kiosk';
+import { AiTypingBubble } from './loading';
+import { mockDelayRange } from '../utils/mockDelay';
 
 const extractContext = (pathname) => {
   if (pathname.includes('electric')) return 'electricity';
@@ -169,16 +171,19 @@ const AIChatbot = () => {
 
     try {
       setLastProvider('sarvam-105b');
-      const resp = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: userMessage,
-          language: userLang,
-          context: pageContext || '',
+      const [resp] = await Promise.all([
+        fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: userMessage,
+            language: userLang,
+            context: pageContext || '',
+          }),
+          signal: AbortSignal.timeout(20000),
         }),
-        signal: AbortSignal.timeout(20000),
-      });
+        mockDelayRange(2200, 2800),
+      ]);
 
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const data = await resp.json();
@@ -434,12 +439,10 @@ const AIChatbot = () => {
               </div>
             )}
 
-            {/* Typing dots */}
+            {/* Typing bubble */}
             {isTyping && !messages.some(m => m.streaming) && (
-              <div style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 32, padding: '28px 36px', display: 'flex', alignItems: 'center', gap: 14, boxShadow: 'var(--shadow-1)', alignSelf: 'flex-start' }}>
-                {[0, 180, 360].map(delay => (
-                  <span key={delay} style={{ width: 20, height: 20, borderRadius: '50%', background: 'var(--ok)', display: 'inline-block', animation: `dot 1.2s ${delay}ms infinite` }} />
-                ))}
+              <div style={{ alignSelf: 'flex-start' }}>
+                <AiTypingBubble />
               </div>
             )}
             <div ref={chatEndRef} />

@@ -13,6 +13,8 @@ import { useSession } from '../context/SessionContext';
 import { speak } from '../utils/ttsService';
 import { startSTT, stopSTT } from '../ai/voice/speechRecognition';
 import { VK, I, ic, DD } from '../components/kiosk';
+import { SkeletonTile } from '../components/loading';
+import { mockDelayRange } from '../utils/mockDelay';
 
 export default function Home() {
   const { t } = useTranslation();
@@ -21,6 +23,13 @@ export default function Home() {
   const { isAuthenticated, isAdminSession } = useAuth();
   const { voiceEnabled } = useSession();
   const hasSpokenRef = useRef(false);
+  const [tilesReady, setTilesReady] = React.useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    mockDelayRange(2200, 2800).then(() => { if (!cancelled) setTilesReady(true); });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -133,7 +142,8 @@ export default function Home() {
         {t('home.selectOrg', 'SELECT AN ORGANIZATION')}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginBottom: 36 }}>
-        {orgs.map((o) => (
+        {!tilesReady && orgs.map((o, i) => <SkeletonTile key={o.id} height={180} delayMs={i * 100} />)}
+        {tilesReady && orgs.map((o) => (
           <button
             key={o.id}
             type="button"
@@ -164,7 +174,8 @@ export default function Home() {
         {t('home.exploreMore', 'EXPLORE OTHER SERVICES')}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-        {extras.map((e) => (
+        {!tilesReady && extras.map((e, i) => <SkeletonTile key={e.name} height={200} delayMs={i * 100} />)}
+        {tilesReady && extras.map((e) => (
           <button
             key={e.name}
             type="button"

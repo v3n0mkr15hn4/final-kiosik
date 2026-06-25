@@ -9,13 +9,14 @@ import {
   Select,
   TextArea,
   Modal,
-  LoadingSpinner
 } from '../components';
 import { VK } from '../components/kiosk';
+import { LoadingScreen, SubmissionSteps } from '../components/loading';
 import { states, cities, wards, complaintTypes } from '../utils/constants';
 import { generateComplaintId, getCurrentTimestamp } from '../utils/helpers';
 import { complaintAPI } from '../utils/apiService';
 import { addReceipt } from '../utils/receipts';
+import { sleep } from '../utils/mockDelay';
 
 /**
  * Complaints Registration page
@@ -41,6 +42,8 @@ const Complaints = () => {
   const [photos, setPhotos] = useState([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [submissionStep, setSubmissionStep] = useState(0);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [useCurrentLocation, setUseCurrentLocation] = useState(false);
 
@@ -100,7 +103,7 @@ const Complaints = () => {
 
   const handleGetLocation = () => {
     if (navigator.geolocation) {
-      setLoading(true);
+      setGeoLoading(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
@@ -109,11 +112,11 @@ const Complaints = () => {
             location: `Lat: ${latitude.toFixed(6)}, Long: ${longitude.toFixed(6)}`
           }));
           setUseCurrentLocation(true);
-          setLoading(false);
+          setGeoLoading(false);
         },
         (error) => {
           console.error('Location error:', error);
-          setLoading(false);
+          setGeoLoading(false);
           alert('Unable to get location. Please enter manually.');
         }
       );
@@ -144,8 +147,14 @@ const Complaints = () => {
   const handleConfirmSubmit = async () => {
     setShowConfirmModal(false);
     setLoading(true);
+    setSubmissionStep(0);
 
     try {
+      await sleep(900);
+      setSubmissionStep(1);
+      await sleep(800);
+      setSubmissionStep(2);
+
       let complaintId;
       try {
         const result = await complaintAPI.submit({
@@ -164,6 +173,10 @@ const Complaints = () => {
       } catch {
         complaintId = generateComplaintId();
       }
+
+      await sleep(700);
+      setSubmissionStep(3);
+
       const receiptData = {
         requestId: complaintId,
         citizenName: formData.name,
@@ -183,12 +196,24 @@ const Complaints = () => {
     }
   };
 
-  if (loading && !useCurrentLocation) {
+  if (loading) {
     return (
       <VK bg="var(--surface-1)">
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <LoadingSpinner size="large" message={t('app.loading')} />
-        </div>
+        <LoadingScreen
+          heading={t('loading.submittingRequest', 'Submitting your request')}
+          variant="signal"
+          size={62}
+          extra={(
+            <SubmissionSteps
+              step={submissionStep}
+              labels={[
+                t('loading.stepSaving', 'Saving your details'),
+                t('loading.stepReference', 'Generating reference number'),
+                t('loading.stepConfirmation', 'Sending confirmation'),
+              ]}
+            />
+          )}
+        />
       </VK>
     );
   }
@@ -356,9 +381,9 @@ const Complaints = () => {
                       onClick={handleGetLocation}
                       size="large"
                       icon={MapPin}
-                      disabled={loading}
+                      disabled={geoLoading}
                     >
-                      {t('complaints.currentLocation')}
+                      {geoLoading ? '…' : t('complaints.currentLocation')}
                     </Button>
                   </div>
                 </div>

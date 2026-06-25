@@ -6,11 +6,12 @@ import {
   Button,
   Input,
   Modal,
-  LoadingSpinner,
 } from '../components';
 import { VK } from '../components/kiosk';
+import { LoadingScreen, SubmissionSteps } from '../components/loading';
 import { generateRequestId, getCurrentTimestamp } from '../utils/helpers';
 import { addReceipt } from '../utils/receipts';
+import { sleep } from '../utils/mockDelay';
 
 /**
  * Consumer Profile / Credential Management — shared across all departments
@@ -47,6 +48,7 @@ const ConsumerProfile = () => {
   const [otp, setOtp] = useState('');
   const [otpVerified, setOtpVerified] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [submissionStep, setSubmissionStep] = useState(0);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Audit trail — fetched from backend API
@@ -117,26 +119,34 @@ const ConsumerProfile = () => {
     setShowConfirmModal(true);
   };
 
-  const handleConfirmSave = () => {
+  const handleConfirmSave = async () => {
     setShowConfirmModal(false);
     setLoading(true);
-    setTimeout(() => {
-      setProfileData({ ...editData });
-      setIsEditing(false);
-      setLoading(false);
+    setSubmissionStep(0);
 
-      const receiptData = {
-        requestId: generateRequestId(),
-        citizenName: editData.name,
-        mobile: editData.mobile,
-        serviceType: org,
-        serviceCategory: 'Profile Update',
-        timestamp: getCurrentTimestamp(),
-        status: 'submitted',
-      };
-      addReceipt(receiptData);
-      navigate(`/receipt?org=${encodeURIComponent(receiptData.serviceType)}&id=${encodeURIComponent(receiptData.requestId)}`);
-    }, 1000);
+    await sleep(900);
+    setSubmissionStep(1);
+    await sleep(800);
+    setSubmissionStep(2);
+
+    setProfileData({ ...editData });
+    setIsEditing(false);
+
+    const receiptData = {
+      requestId: generateRequestId(),
+      citizenName: editData.name,
+      mobile: editData.mobile,
+      serviceType: org,
+      serviceCategory: 'Profile Update',
+      timestamp: getCurrentTimestamp(),
+      status: 'submitted',
+    };
+    addReceipt(receiptData);
+
+    await sleep(700);
+    setSubmissionStep(3);
+    setLoading(false);
+    navigate(`/receipt?org=${encodeURIComponent(receiptData.serviceType)}&id=${encodeURIComponent(receiptData.requestId)}`);
   };
 
   const backPath =
@@ -151,9 +161,21 @@ const ConsumerProfile = () => {
   if (loading) {
     return (
       <VK bg="var(--surface-1)">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-          <LoadingSpinner size="large" message={t('app.loading')} />
-        </div>
+        <LoadingScreen
+          heading={t('loading.submittingRequest', 'Submitting your request')}
+          variant="signal"
+          size={62}
+          extra={(
+            <SubmissionSteps
+              step={submissionStep}
+              labels={[
+                t('loading.stepSaving', 'Saving your details'),
+                t('loading.stepReference', 'Generating reference number'),
+                t('loading.stepConfirmation', 'Sending confirmation'),
+              ]}
+            />
+          )}
+        />
       </VK>
     );
   }

@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Modal, LoadingSpinner } from '../components';
+import { Modal } from '../components';
 import { VK, DD, I, ic } from '../components/kiosk';
+import { LoadingScreen, SubmissionSteps } from '../components/loading';
 import QRUpload from '../components/QRUpload';
 import { states, cities, wards } from '../utils/constants';
 import { generateRequestId, getCurrentTimestamp } from '../utils/helpers';
 import { serviceAPI, transportAPI } from '../utils/apiService';
 import { addReceipt } from '../utils/receipts';
+import { sleep } from '../utils/mockDelay';
 
 // Mock station/route data
 const metroStations = [
@@ -73,6 +75,7 @@ const Transport = () => {
   const [files, setFiles] = useState([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [submissionStep, setSubmissionStep] = useState(0);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [bookingResult, setBookingResult] = useState(null);
 
@@ -198,7 +201,13 @@ const Transport = () => {
   const handleBookTicket = async () => {
     if (!validateBooking()) return;
     setLoading(true);
+    setSubmissionStep(0);
     try {
+      await sleep(900);
+      setSubmissionStep(1);
+      await sleep(800);
+      setSubmissionStep(2);
+
       const fare = calculateFare();
       let ticketId;
       try {
@@ -219,6 +228,10 @@ const Transport = () => {
       } catch {
         ticketId = `TKT-${generateRequestId()}`;
       }
+
+      await sleep(700);
+      setSubmissionStep(3);
+
       const result = {
         ticketId,
         type: selectedCategory,
@@ -258,7 +271,13 @@ const Transport = () => {
   const handleConfirmSubmit = async () => {
     setShowConfirmModal(false);
     setLoading(true);
+    setSubmissionStep(0);
     try {
+      await sleep(900);
+      setSubmissionStep(1);
+      await sleep(800);
+      setSubmissionStep(2);
+
       let requestId;
       try {
         const result = await serviceAPI.submit({
@@ -280,6 +299,10 @@ const Transport = () => {
       } catch {
         requestId = generateRequestId();
       }
+
+      await sleep(700);
+      setSubmissionStep(3);
+
       const receiptData = {
         requestId,
         citizenName: formData.name,
@@ -299,11 +322,28 @@ const Transport = () => {
   };
 
   if (loading) {
+    const isBooking = selectedCategory && mainServices.find(s => s.id === selectedCategory)?.booking;
     return (
       <VK bg="color-mix(in oklab, var(--dept-trans) 5%, var(--surface-0))">
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <LoadingSpinner size="large" message={selectedCategory && mainServices.find(s => s.id === selectedCategory)?.booking ? t('transport.bookingInProgress') : t('app.loading')} />
-        </div>
+        <LoadingScreen
+          heading={isBooking ? t('transport.bookingInProgress', 'Booking your ticket') : t('loading.submittingRequest', 'Submitting your request')}
+          variant="signal"
+          size={62}
+          extra={(
+            <SubmissionSteps
+              step={submissionStep}
+              labels={isBooking ? [
+                t('loading.stepSaving', 'Saving your details'),
+                t('transport.stepTicket', 'Generating ticket'),
+                t('loading.stepConfirmation', 'Sending confirmation'),
+              ] : [
+                t('loading.stepSaving', 'Saving your details'),
+                t('loading.stepReference', 'Generating reference number'),
+                t('loading.stepConfirmation', 'Sending confirmation'),
+              ]}
+            />
+          )}
+        />
       </VK>
     );
   }

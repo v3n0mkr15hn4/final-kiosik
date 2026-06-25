@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LoadingSpinner, Modal } from '../components';
+import { Modal } from '../components';
 import { VK, DD, I, ic } from '../components/kiosk';
+import { LoadingScreen } from '../components/loading';
 import { states } from '../utils/constants';
 import { schemeAPI, api } from '../utils/apiService';
 import { getSarvamLangCode } from '../utils/languageConfig';
+import { mockDelayRange } from '../utils/mockDelay';
 
 const mockSchemes = [
   {
@@ -427,10 +429,12 @@ const SchemeDiscovery = () => {
 
   const handleDiscover = async () => {
     setLoading(true);
+    const minWait = mockDelayRange(2200, 2800);
     try {
       const data = await schemeAPI.discover(profile);
       if (data && data.schemes && data.schemes.length > 0) {
         const filtered = applyPreCategoryFilter(data.schemes);
+        await minWait;
         setResults(filtered);
         setStep('results');
         setLoading(false);
@@ -455,6 +459,7 @@ const SchemeDiscovery = () => {
 
     matched.sort((a, b) => b.match - a.match);
     const filtered = applyPreCategoryFilter(matched);
+    await minWait;
     setResults(filtered);
     setStep('results');
     setLoading(false);
@@ -539,9 +544,11 @@ const SchemeDiscovery = () => {
   if (loading) {
     return (
       <VK bg="color-mix(in oklab, var(--indigo-500) 5%, var(--surface-0))">
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <LoadingSpinner size="large" message={t('schemes.analyzing', 'Analysing your profile…')} />
-        </div>
+        <LoadingScreen
+          heading={t('schemes.analyzing', 'Analysing your profile…')}
+          variant="signal"
+          size={76}
+        />
       </VK>
     );
   }

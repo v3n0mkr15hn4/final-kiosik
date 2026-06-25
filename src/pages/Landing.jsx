@@ -16,6 +16,7 @@ import useKioskScale from '../hooks/useKioskScale';
 
 import { I, ic, Logo } from '../components/kiosk';
 import AadhaarCameraScanner from '../components/AadhaarCameraScanner';
+import { BootSplash } from '../components/loading';
 
 export default function Landing() {
   useKioskScale();
@@ -65,6 +66,7 @@ export default function Landing() {
 
   return (
     <div className="vk kiosk-bg">
+      <BootSplash />
       <div className="vk-strip" />
       <div className="vk-top">
         <div className="vk-brand">

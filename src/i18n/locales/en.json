@@ -21,7 +21,28 @@
       "selected": "Selected",
       "brandSubtitle": "Smart Urban Helpdesk",
       "help": "Help",
-      "loadingSplash": "Loading SUVIDHA…"
+      "loadingSplash": "Loading SUVIDHA…",
+      "retry": "Try again"
+    },
+    "loading": {
+      "verifyingDetails": "Verifying your details",
+      "dontRemoveCard": "This will only take a few seconds. Please don't remove your card.",
+      "scanningFingerprint": "Scanning your fingerprint",
+      "keepFingerOnReader": "Keep your finger resting on the reader until it turns green.",
+      "submittingRequest": "Submitting your request",
+      "submittingElderly": "Your request is being submitted",
+      "dontCloseScreen": "Please don't close this screen.",
+      "uploadingDocument": "Uploading document",
+      "lookingUpRequest": "Looking up your request",
+      "findingOffices": "Finding offices near you",
+      "locatingPosition": "Locating your position…",
+      "aiThinking": "Suvidha is thinking…",
+      "stillWorking": "Still working — thanks for your patience.",
+      "timeout": "This is taking longer than expected.",
+      "startingUp": "STARTING UP",
+      "stepSaving": "Saving your details",
+      "stepReference": "Generating reference number",
+      "stepConfirmation": "Sending confirmation"
     },
     "language": {
       "select": "Select Language",

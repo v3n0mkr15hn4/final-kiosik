@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { startSTT, stopSTT } from '../ai/voice/speechRecognition';
 import { useVoiceFormSubmit } from '../hooks/useVoiceFormSubmit';
-import { Modal, LoadingSpinner } from '../components';
+import { Modal } from '../components';
 import { VK, DD, I, ic } from '../components/kiosk';
+import { LoadingScreen, SubmissionSteps } from '../components/loading';
 import QRUpload from '../components/QRUpload';
 import { states, cities, wards } from '../utils/constants';
 import { generateComplaintId, getCurrentTimestamp } from '../utils/helpers';
 import { addReceipt } from '../utils/receipts';
 import { serviceAPI } from '../utils/apiService';
+import { sleep } from '../utils/mockDelay';
 
 /**
  * Gas Complaint Registration — with voice input support (SRS requirement)
@@ -45,6 +47,7 @@ const GasComplaint = () => {
   const [files, setFiles] = useState([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [submissionStep, setSubmissionStep] = useState(0);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
 
@@ -108,7 +111,13 @@ const GasComplaint = () => {
   const handleConfirmSubmit = async () => {
     setShowConfirmModal(false);
     setLoading(true);
+    setSubmissionStep(0);
     try {
+      await sleep(900);
+      setSubmissionStep(1);
+      await sleep(800);
+      setSubmissionStep(2);
+
       let ticketId;
       try {
         const result = await serviceAPI.submit({
@@ -129,6 +138,9 @@ const GasComplaint = () => {
       } catch {
         ticketId = generateComplaintId();
       }
+
+      await sleep(700);
+      setSubmissionStep(3);
 
       const receiptData = {
         requestId: ticketId,
@@ -153,9 +165,21 @@ const GasComplaint = () => {
   if (loading) {
     return (
       <VK bg="color-mix(in oklab, var(--dept-gas) 5%, var(--surface-0))">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-          <LoadingSpinner size="large" message={t('app.loading')} />
-        </div>
+        <LoadingScreen
+          heading={t('loading.submittingRequest', 'Submitting your request')}
+          variant="signal"
+          size={62}
+          extra={(
+            <SubmissionSteps
+              step={submissionStep}
+              labels={[
+                t('loading.stepSaving', 'Saving your details'),
+                t('loading.stepReference', 'Generating reference number'),
+                t('loading.stepConfirmation', 'Sending confirmation'),
+              ]}
+            />
+          )}
+        />
       </VK>
     );
   }

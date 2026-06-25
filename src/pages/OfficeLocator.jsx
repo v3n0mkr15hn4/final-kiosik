@@ -2,6 +2,8 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { VK } from '../components/kiosk';
 import RealtimeNavigationMap from '../components/RealtimeNavigationMap';
+import { MapLocatingOverlay } from '../components/loading';
+import { mockDelayRange } from '../utils/mockDelay';
 import { STATES, DISTRICTS, ALL_OFFICES } from '../data/officeData';
 
 const getCategories = (t) => [
@@ -43,6 +45,7 @@ export default function OfficeLocator() {
   const [isMobile,         setIsMobile]          = useState(false);
   const [nearbyMode,       setNearbyMode]        = useState(false);
   const [userCoords,       setUserCoords]        = useState(null);
+  const [locating,         setLocating]          = useState(true);
   const mapCommandRef = useRef(null);
 
   useEffect(() => {
@@ -50,6 +53,12 @@ export default function OfficeLocator() {
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    mockDelayRange(2200, 2800).then(() => { if (!cancelled) setLocating(false); });
+    return () => { cancelled = true; };
   }, []);
 
   const kioskOrigin = STATES.find(s => s.code === selectedState) || STATES[0];
@@ -237,6 +246,7 @@ export default function OfficeLocator() {
             style={{ position:'absolute', inset:0, zIndex:30, background:'rgba(0,0,0,0.35)' }} />
         )}
         <RealtimeNavigationMap externalCommandRef={mapCommandRef} />
+        {locating && <MapLocatingOverlay />}
         {sidebarOpen && !isMobile && (
           <button onClick={() => setSidebarOpen(false)}
             style={{

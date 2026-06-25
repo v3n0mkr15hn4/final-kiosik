@@ -22,14 +22,15 @@ import {
   Select,
   TextArea,
   Modal,
-  LoadingSpinner,
 } from '../components';
 import { VK } from '../components/kiosk';
+import { LoadingScreen, SubmissionSteps } from '../components/loading';
 import QRUpload from '../components/QRUpload';
 import { states, cities, wards } from '../utils/constants';
 import { generateComplaintId, getCurrentTimestamp } from '../utils/helpers';
 import { addReceipt } from '../utils/receipts';
 import { serviceAPI } from '../utils/apiService';
+import { sleep } from '../utils/mockDelay';
 
 /**
  * Electricity Complaint Registration — dedicated page with SRS-defined categories
@@ -58,6 +59,7 @@ const ElectricityComplaint = () => {
   const [files, setFiles] = useState([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [submissionStep, setSubmissionStep] = useState(0);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
 
@@ -153,8 +155,14 @@ const ElectricityComplaint = () => {
   const handleConfirmSubmit = async () => {
     setShowConfirmModal(false);
     setLoading(true);
+    setSubmissionStep(0);
 
     try {
+      await sleep(900);
+      setSubmissionStep(1);
+      await sleep(800);
+      setSubmissionStep(2);
+
       let ticketId;
       try {
         const result = await serviceAPI.submit({
@@ -175,6 +183,9 @@ const ElectricityComplaint = () => {
       } catch {
         ticketId = generateComplaintId();
       }
+
+      await sleep(700);
+      setSubmissionStep(3);
 
       const receiptData = {
         requestId: ticketId,
@@ -199,9 +210,21 @@ const ElectricityComplaint = () => {
   if (loading) {
     return (
       <VK bg="color-mix(in oklab, #d97706 4%, white)">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-          <LoadingSpinner size="large" message={t('app.loading')} />
-        </div>
+        <LoadingScreen
+          heading={t('loading.submittingRequest', 'Submitting your request')}
+          variant="signal"
+          size={62}
+          extra={(
+            <SubmissionSteps
+              step={submissionStep}
+              labels={[
+                t('loading.stepSaving', 'Saving your details'),
+                t('loading.stepReference', 'Generating reference number'),
+                t('loading.stepConfirmation', 'Sending confirmation'),
+              ]}
+            />
+          )}
+        />
       </VK>
     );
   }

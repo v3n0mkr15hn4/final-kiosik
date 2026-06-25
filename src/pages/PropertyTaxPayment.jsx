@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Modal, LoadingSpinner } from '../components';
+import { Modal } from '../components';
 import { VK, DD, I, ic } from '../components/kiosk';
+import { LoadingScreen, SubmissionSteps } from '../components/loading';
 import { generateRequestId, getCurrentTimestamp } from '../utils/helpers';
 import { addReceipt } from '../utils/receipts';
+import { sleep, mockDelayRange } from '../utils/mockDelay';
 
 /**
  * Property Tax Payment — Municipal Module
@@ -19,6 +21,7 @@ const PropertyTaxPayment = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [paymentStep, setPaymentStep] = useState(0);
 
   // Mock property data (would come from backend in production)
   const [propertyData, setPropertyData] = useState(null);
@@ -61,7 +64,7 @@ const PropertyTaxPayment = () => {
     setLoading(true);
 
     // Simulate API lookup
-    setTimeout(() => {
+    mockDelayRange(2200, 2800).then(() => {
       const found = mockProperties[propertyId.toUpperCase()];
       if (found) {
         setPropertyData(found);
@@ -70,44 +73,62 @@ const PropertyTaxPayment = () => {
         setError('Property not found. Try PROP-2024-001 or PROP-2024-002 for demo.');
       }
       setLoading(false);
-    }, 800);
+    });
   };
 
   const handlePay = () => {
     setShowConfirmModal(true);
   };
 
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
     setShowConfirmModal(false);
     setLoading(true);
+    setPaymentStep(0);
 
-    setTimeout(() => {
-      const receiptData = {
-        requestId: generateRequestId(),
-        citizenName: propertyData.ownerName,
-        mobile: sessionStorage.getItem('userMobile') || '9876543210',
-        serviceType: 'municipal',
-        serviceCategory: 'Property Tax Payment',
-        timestamp: getCurrentTimestamp(),
-        status: 'submitted',
-        sla: 'Instant (Payment Processed)',
-        amount: `₹${propertyData.totalPayable.toLocaleString('en-IN')}`,
-        propertyId: propertyData.propertyId,
-        financialYear: propertyData.financialYear,
-      };
+    await sleep(900);
+    setPaymentStep(1);
+    await sleep(800);
+    setPaymentStep(2);
 
-      addReceipt(receiptData);
-      setLoading(false);
-      navigate(`/receipt?org=${encodeURIComponent(receiptData.serviceType)}&id=${encodeURIComponent(receiptData.requestId)}`);
-    }, 1500);
+    const receiptData = {
+      requestId: generateRequestId(),
+      citizenName: propertyData.ownerName,
+      mobile: sessionStorage.getItem('userMobile') || '9876543210',
+      serviceType: 'municipal',
+      serviceCategory: 'Property Tax Payment',
+      timestamp: getCurrentTimestamp(),
+      status: 'submitted',
+      sla: 'Instant (Payment Processed)',
+      amount: `₹${propertyData.totalPayable.toLocaleString('en-IN')}`,
+      propertyId: propertyData.propertyId,
+      financialYear: propertyData.financialYear,
+    };
+
+    addReceipt(receiptData);
+    await sleep(700);
+    setPaymentStep(3);
+    setLoading(false);
+    navigate(`/receipt?org=${encodeURIComponent(receiptData.serviceType)}&id=${encodeURIComponent(receiptData.requestId)}`);
   };
 
   if (loading) {
     return (
       <VK bg="color-mix(in oklab, var(--dept-water) 5%, var(--surface-0))">
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <LoadingSpinner size="large" message={step === 1 ? 'Looking up property...' : 'Processing payment...'} />
-        </div>
+        {step === 1 ? (
+          <LoadingScreen heading="Looking up property…" variant="sweep" size={76} />
+        ) : (
+          <LoadingScreen
+            heading="Processing your payment"
+            variant="signal"
+            size={62}
+            extra={(
+              <SubmissionSteps
+                step={paymentStep}
+                labels={['Saving payment details', 'Generating transaction reference', 'Confirming payment']}
+              />
+            )}
+          />
+        )}
       </VK>
     );
   }

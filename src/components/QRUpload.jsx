@@ -3,6 +3,8 @@ import { QrCode, CheckCircle, Smartphone, Copy, X, RefreshCw } from 'lucide-reac
 import { QRCodeCanvas } from 'qrcode.react';
 import { uploadAPI, uploadPublicAPI } from '../utils/apiService';
 import FilePreviewModal from './FilePreviewModal';
+import { RadiantLoader, UploadRing } from './loading';
+import { sleep } from '../utils/mockDelay';
 
 /**
  * QR Code based document upload — replaces traditional file upload on kiosk.
@@ -25,6 +27,7 @@ const QRUpload = ({
   const [errorMessage, setErrorMessage] = useState('');
   const urlInputRef = useRef(null);
   const [previewFile, setPreviewFile] = useState(null);
+  const [finalizeProgress, setFinalizeProgress] = useState(0);
 
   const sessionId = sessionInfo?.sessionId;
   const uploadUrl = sessionInfo?.uploadUrl;
@@ -110,6 +113,17 @@ const QRUpload = ({
         if (!isActive) return;
         if (status?.status === 'complete') {
           const files = status.files || [];
+          setUploadStatus('finalizing');
+          // Brief mock-fill flourish — not real byte progress (the kiosk only
+          // polls a remote session, it never receives bytes directly), but
+          // gives the upload moment a satisfying completion beat.
+          const steps = 12;
+          for (let i = 1; i <= steps; i++) {
+            // eslint-disable-next-line no-await-in-loop
+            await sleep(60);
+            if (!isActive) return;
+            setFinalizeProgress(i / steps);
+          }
           setUploadedFiles(files);
           setUploadStatus('complete');
           if (onUploadComplete) {
@@ -248,8 +262,8 @@ const QRUpload = ({
                 </div>
               )}
 
-              <div className="flex items-center justify-center space-x-2">
-                <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
+              <div className="flex items-center justify-center gap-3">
+                <RadiantLoader variant="sweep" size={32} />
                 <span className="text-sm text-blue-600 font-medium">Waiting for upload from phone...</span>
               </div>
 
@@ -272,6 +286,10 @@ const QRUpload = ({
                   Cancel
                 </button>
               </div>
+            </div>
+          ) : uploadStatus === 'finalizing' ? (
+            <div className="flex flex-col items-center py-2">
+              <UploadRing progress={finalizeProgress} filename={null} loadedLabel="Finalizing upload…" />
             </div>
           ) : uploadStatus === 'error' ? (
             <div className="space-y-3">

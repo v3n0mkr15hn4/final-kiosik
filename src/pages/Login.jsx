@@ -16,6 +16,8 @@ import { isValidIndianMobile, maskMobile, normalizeIndianMobile } from '../utils
 import { speak } from '../utils/ttsService';
 import { useSession } from '../context/SessionContext';
 import { VK, I, ic, Keypad, OTPInput, AadhaarCells } from '../components/kiosk';
+import { LoadingScreen, BiometricScanner, AadhaarChip } from '../components/loading';
+import { mockDelayRange } from '../utils/mockDelay';
 
 // Mock CA/Consumer lookup DB
 const ALT_AUTH_DB = {
@@ -35,7 +37,7 @@ const ALT_AUTH_DB = {
 };
 
 export default function Login() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { sendOtp, verifyOtp, otpLoading, completeCitizenSession } = useAuth();
   const toast = useToast();
@@ -112,6 +114,7 @@ export default function Login() {
   const [authMethod, setAuthMethod] = useState('otp'); // 'otp' | 'qr' | 'biometric'
   const [otpSent, setOtpSent] = useState(false);
   const [methodLoading, setMethodLoading] = useState('');
+  const [otpVerifying, setOtpVerifying] = useState(false);
 
   // Resend countdown
   useEffect(() => {
@@ -259,11 +262,16 @@ export default function Login() {
       return;
     }
 
-    const response = await verifyOtp({
-      otp,
-      aadhaarUid: aadhaarRecord?.uid,
-      mobile: normalizeIndianMobile(mobile),
-    });
+    setOtpVerifying(true);
+    const [response] = await Promise.all([
+      verifyOtp({
+        otp,
+        aadhaarUid: aadhaarRecord?.uid,
+        mobile: normalizeIndianMobile(mobile),
+      }),
+      mockDelayRange(2200, 2800),
+    ]);
+    setOtpVerifying(false);
 
     if (!response.success || !response.data) {
       const msg = response.error || 'OTP verification failed.';
@@ -318,7 +326,10 @@ export default function Login() {
     if (!aadhaarRecord?.uid) return;
     setMethodLoading('biometric');
     try {
-      const response = await authAPI.verifyBiometric(aadhaarRecord.uid, 'fingerprint');
+      const [response] = await Promise.all([
+        authAPI.verifyBiometric(aadhaarRecord.uid, 'fingerprint'),
+        mockDelayRange(2200, 2800),
+      ]);
       if (!response?.success || !response?.data) {
         toast.error(response?.error || 'Biometric verification failed.');
         return;
@@ -527,6 +538,32 @@ export default function Login() {
   const ageStr = aadhaarRecord?.dob ? `Age ${calculateAge(aadhaarRecord.dob)}` : '';
   const cityStr = aadhaarRecord?.address?.city || aadhaarRecord?.city || '';
   const maskedAadhaar = `XXXX-XXXX-${(aadhaarRecord?.uid || '').slice(-4)}`;
+
+  if (otpVerifying) {
+    return (
+      <VK showBottom={false}>
+        <LoadingScreen
+          heading={t('loading.verifyingDetails', 'Verifying your details')}
+          body={t('loading.dontRemoveCard', "This will only take a few seconds. Please don't remove your card.")}
+          variant="signal"
+          size={76}
+          extra={<AadhaarChip last4={(mobile || '').slice(-4)} />}
+        />
+      </VK>
+    );
+  }
+
+  if (methodLoading === 'biometric') {
+    return (
+      <VK showBottom={false}>
+        <LoadingScreen
+          heading={t('loading.scanningFingerprint', 'Scanning your fingerprint')}
+          body={t('loading.keepFingerOnReader', 'Keep your finger resting on the reader until it turns green.')}
+          extra={<BiometricScanner />}
+        />
+      </VK>
+    );
+  }
 
   return (
     <VK helpBack onBack={() => setStep('aadhaar')}>
