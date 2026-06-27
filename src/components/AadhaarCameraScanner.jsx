@@ -19,6 +19,7 @@
  */
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { callVisionModel } from '../ai/api/nvidiaApi';
 import { authAPI } from '../utils/apiService';
 import { speak } from '../utils/ttsService';
@@ -31,6 +32,7 @@ function generateSessionId() {
 }
 
 export default function AadhaarCameraScanner({ onSuccess, onClose }) {
+  const { t } = useTranslation();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
@@ -259,22 +261,22 @@ If any field is not visible, use empty string.`;
       }} role="dialog" aria-modal="true" aria-label="Aadhaar consent dialog">
 
         <div style={{
-          background: '#1e293b', borderRadius: 24, padding: 40,
+          background: 'var(--slate-800)', borderRadius: 24, padding: 40,
           maxWidth: 560, width: '100%', textAlign: 'center',
-          border: '2px solid #334155',
+          border: '2px solid var(--slate-700)',
         }}>
           <div style={{ fontSize: 56, marginBottom: 16 }}>🔒</div>
           <h2 style={{ color: 'white', fontSize: 28, fontWeight: 800, marginBottom: 12 }}>
             Aadhaar Verification Consent
           </h2>
-          <p style={{ color: '#94a3b8', fontSize: 18, lineHeight: 1.7, marginBottom: 24 }}>
+          <p style={{ color: 'var(--slate-400)', fontSize: 18, lineHeight: 1.7, marginBottom: 24 }}>
             SUVIDHA will read your <strong style={{ color: 'white' }}>name, gender, date of birth,
             and masked Aadhaar number (last 4 digits only)</strong> from your Offline e-KYC QR code.
           </p>
 
           <div style={{
-            background: '#0f172a', borderRadius: 16, padding: 20, marginBottom: 28,
-            textAlign: 'left', fontSize: 16, color: '#94a3b8', lineHeight: 1.8,
+            background: 'var(--slate-900)', borderRadius: 16, padding: 20, marginBottom: 28,
+            textAlign: 'left', fontSize: 16, color: 'var(--slate-400)', lineHeight: 1.8,
           }}>
             <div>✅ &nbsp;Data is <strong style={{ color: 'white' }}>not stored</strong> — processed in memory only</div>
             <div>✅ &nbsp;Session token expires in <strong style={{ color: 'white' }}>2 hours</strong></div>
@@ -283,7 +285,7 @@ If any field is not visible, use empty string.`;
           </div>
 
           {errorMsg && (
-            <div style={{ color: '#fca5a5', marginBottom: 16, fontSize: 16 }}>{errorMsg}</div>
+            <div style={{ color: 'var(--accent-red-300)', marginBottom: 16, fontSize: 16 }}>{errorMsg}</div>
           )}
 
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -292,7 +294,7 @@ If any field is not visible, use empty string.`;
               disabled={consentLoading}
               style={{
                 padding: '16px 36px',
-                background: consentLoading ? '#374151' : '#1d4ed8',
+                background: consentLoading ? 'var(--gray-700)' : 'var(--accent-blue)',
                 color: 'white', border: 'none', borderRadius: 14,
                 fontSize: 20, fontWeight: 700, cursor: consentLoading ? 'wait' : 'pointer',
               }}
@@ -304,7 +306,7 @@ If any field is not visible, use empty string.`;
               onClick={handleClose}
               style={{
                 padding: '16px 36px',
-                background: 'rgba(255,255,255,0.08)', color: '#94a3b8',
+                background: 'rgba(255,255,255,0.08)', color: 'var(--slate-400)',
                 border: '1.5px solid rgba(255,255,255,0.15)', borderRadius: 14,
                 fontSize: 20, fontWeight: 600, cursor: 'pointer',
               }}
@@ -314,7 +316,7 @@ If any field is not visible, use empty string.`;
             </button>
           </div>
 
-          <p style={{ color: '#475569', fontSize: 14, marginTop: 20 }}>
+          <p style={{ color: 'var(--slate-600)', fontSize: 14, marginTop: 20 }}>
             By clicking "I Agree" you consent to reading your Aadhaar Offline e-KYC QR for
             identity verification at this SUVIDHA kiosk.
           </p>
@@ -337,7 +339,7 @@ If any field is not visible, use empty string.`;
         <div style={{ fontSize: 32, fontWeight: 800, marginBottom: 8 }}>
           ♿ Aadhaar Card Scanner
         </div>
-        <div style={{ fontSize: 20, color: '#94a3b8' }}>
+        <div style={{ fontSize: 20, color: 'var(--slate-400)' }}>
           {status === 'starting' && 'Starting camera…'}
           {status === 'scanning' && 'Hold your Aadhaar card steady in front of camera'}
           {status === 'ocr' && '🔍 Analysing card with NVIDIA Vision AI…'}
@@ -350,8 +352,8 @@ If any field is not visible, use empty string.`;
       <div style={{
         position: 'relative', width: '100%', maxWidth: 640,
         borderRadius: 20, overflow: 'hidden',
-        border: status === 'found' ? '4px solid #22c55e' : '3px solid #6366f1',
-        background: '#0f172a',
+        border: status === 'found' ? '4px solid var(--accent-green)' : '3px solid var(--accent-indigo)',
+        background: 'var(--slate-900)',
         aspectRatio: '4/3',
       }}>
         <video
@@ -370,7 +372,7 @@ If any field is not visible, use empty string.`;
           }}>
             <div style={{
               width: '60%', height: '55%',
-              border: '3px solid #a5f3fc',
+              border: '3px solid var(--accent-cyan-200)',
               borderRadius: 12,
               boxShadow: '0 0 0 9999px rgba(0,0,0,0.45)',
             }} />
@@ -379,7 +381,7 @@ If any field is not visible, use empty string.`;
               position: 'absolute',
               left: '20%', right: '20%',
               height: 3,
-              background: '#22d3ee',
+              background: 'var(--accent-cyan-400)',
               animation: 'scanLine 2s ease-in-out infinite',
               borderRadius: 2,
             }} />
@@ -394,7 +396,7 @@ If any field is not visible, use empty string.`;
           }}>
             <div style={{ fontSize: 80 }}>✅</div>
             <div style={{ color: 'white', fontSize: 28, fontWeight: 700 }}>{detected?.name}</div>
-            <div style={{ color: '#86efac', fontSize: 20 }}>Logging in…</div>
+            <div style={{ color: 'var(--accent-green-300)', fontSize: 20 }}>Logging in…</div>
           </div>
         )}
       </div>
@@ -406,7 +408,7 @@ If any field is not visible, use empty string.`;
       <div style={{
         marginTop: 20, padding: 20, borderRadius: 16,
         background: 'rgba(255,255,255,0.08)',
-        color: '#cbd5e1', fontSize: 18, textAlign: 'center', maxWidth: 580,
+        color: 'var(--slate-300)', fontSize: 18, textAlign: 'center', maxWidth: 580,
         lineHeight: 1.6,
       }} aria-live="polite">
         {status === 'scanning' && (
@@ -418,7 +420,7 @@ If any field is not visible, use empty string.`;
         )}
         {status === 'error' && (
           <>
-            <strong style={{ color: '#fca5a5' }}>Camera not available.</strong><br />
+            <strong style={{ color: 'var(--accent-red-300)' }}>Camera not available.</strong><br />
             Please use the Aadhaar number keypad on the previous screen.
           </>
         )}
@@ -434,7 +436,7 @@ If any field is not visible, use empty string.`;
             border: '1.5px solid rgba(255,255,255,0.2)',
             borderRadius: 16, fontSize: 20, fontWeight: 600, cursor: 'pointer',
           }}
-          aria-label="Close camera scanner and go back"
+          aria-label={t('aadhaar.closeScanner')}
         >
           ✕ Cancel / Use Keypad Instead
         </button>

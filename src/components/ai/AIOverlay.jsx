@@ -17,6 +17,7 @@
  */
 
 import React, { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useVoiceAssistant } from '../../ai/provider/VoiceAssistantProvider';
 import VoiceOrb from './VoiceOrb';
 import WaveformVisualizer from './WaveformVisualizer';
@@ -40,6 +41,7 @@ export default function AIOverlay() {
     confirmPendingAction, cancelPendingAction,
     currentLanguage, micPermission,
   } = useVoiceAssistant();
+  const { t } = useTranslation();
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [textInput, setTextInput] = useState('');
@@ -86,7 +88,7 @@ export default function AIOverlay() {
               <button
                 onClick={() => setMicBannerDismissed(true)}
                 className="text-red-300 hover:text-white text-lg font-bold leading-none flex-shrink-0"
-                aria-label="Dismiss microphone warning"
+                aria-label={t('ai.dismissMicWarning')}
               >✕</button>
             </div>
           </div>
@@ -192,7 +194,7 @@ export default function AIOverlay() {
             <button
               onClick={handleDeactivate}
               className="p-1.5 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
-              aria-label="Close AI assistant"
+              aria-label={t('ai.closeAssistant')}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                 <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>

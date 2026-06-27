@@ -21,7 +21,9 @@
       "selected": "निवडलेले",
       "brandSubtitle": "स्मार्ट शहरी मदत केंद्र",
       "help": "मदत",
-      "loadingSplash": "सुविधा लोड होत आहे…"
+      "loadingSplash": "सुविधा लोड होत आहे…",
+      "close": "बंद करा",
+      "delete": "काढा"
     },
     "language": {
       "select": "भाषा निवडा",
@@ -191,7 +193,11 @@
       "chooseFile": "फाइल निवडा",
       "location": "स्थान",
       "currentLocation": "सध्याचे स्थान वापरा",
-      "enterLocation": "स्थान स्वतः प्रविष्ट करा"
+      "enterLocation": "स्थान स्वतः प्रविष्ट करा",
+      "maxPhotos": "जास्तीत जास्त 3 फोटोंना परवानगी आहे",
+      "locationFailed": "स्थान मिळवता आले नाही. कृपया स्वतः प्रविष्ट करा.",
+      "geoUnsupported": "हा ब्राउझर जिओलोकेशनला समर्थन देत नाही.",
+      "noticeTitle": "सूचना"
     },
     "tracking": {
       "title": "विनंती स्थिती ट्रॅक करा",
@@ -708,7 +714,8 @@
       "enterAadhaarNumber": "12-अंकी आधार क्रमांक",
       "ownershipTransferWarning": "⚠️ मालकी हस्तांतरणासाठी सहाय्यक दस्तऐवज (विक्री करार / NOC) आवश्यक. सबमिशननंतर अपलोडची मागणी केली जाईल.",
       "enterNewOwnerName": "नवीन मालकाचे पूर्ण नाव",
-      "confirmUpdateMsg": "सर्व बदल जतन करायचे आणि पुष्टीकरण पावती तयार करायची का?"
+      "confirmUpdateMsg": "सर्व बदल जतन करायचे आणि पुष्टीकरण पावती तयार करायची का?",
+      "verifyOtpFirst": "मोबाइल नंबर बदलण्यासाठी कृपया OTP पडताळा"
     },
     "chatbot": {
       "elec1": "नवीन जोडणीसाठी अर्ज कसा करावा?",
@@ -846,6 +853,36 @@
       "indicatorLabel": "हे सुविधा",
       "activatedTitle": "सुविधा सक्रिय",
       "switchingToVoice": "व्हॉइस मोडवर स्विच होत आहे..."
+    },
+    "admin": {
+      "title": "सुविधा अ‍ॅडमिन पोर्टल",
+      "credentialsHint": "कर्मचारी ID किंवा अधिकृत ईमेल लॉगिन",
+      "mfaHint": "{{target}} साठी MFA पडताळणी",
+      "identifier": "कर्मचारी ID / अधिकृत ईमेल",
+      "password": "पासवर्ड",
+      "continueMfa": "MFA कडे सुरू ठेवा",
+      "validating": "पडताळणी सुरू आहे…",
+      "mfaCode": "MFA कोड",
+      "devMfaCode": "Dev MFA कोड:",
+      "signIn": "साइन इन",
+      "verifying": "पडताळणी सुरू आहे…",
+      "backToCreds": "क्रेडेन्शियलकडे परत",
+      "backToLanding": "मुख्यपृष्ठावर परत",
+      "loginFailed": "अ‍ॅडमिन लॉगिन अयशस्वी झाले.",
+      "mfaFailed": "MFA पडताळणी अयशस्वी झाली."
+    },
+    "keypad": {
+      "digit": "अंक {{n}}"
+    },
+    "aadhaar": {
+      "closeScanner": "कॅमेरा स्कॅनर बंद करा आणि मागे जा"
+    },
+    "ai": {
+      "dismissMicWarning": "मायक्रोफोन इशारा रद्द करा",
+      "closeAssistant": "AI सहाय्यक बंद करा"
+    },
+    "filePreview": {
+      "close": "पूर्वावलोकन बंद करा"
     }
   }
 }

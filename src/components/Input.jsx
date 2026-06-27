@@ -32,8 +32,8 @@ const Input = ({
       )}
       <div className="relative">
         {Icon && (
-          <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" aria-hidden="true">
-            <Icon className="w-6 h-6" />
+          <div className="absolute left-[calc(28px*var(--ui-scale))] top-1/2 transform -translate-y-1/2 text-gray-400" aria-hidden="true">
+            <Icon className="w-[calc(28px*var(--ui-scale))] h-[calc(28px*var(--ui-scale))]" />
           </div>
         )}
         <input
@@ -48,9 +48,9 @@ const Input = ({
           aria-describedby={errorId}
           data-voice-field={voiceField || undefined}
           className={`
-            w-full px-4 py-4 text-kiosk-lg rounded-kiosk border-2
+            w-full px-[calc(42px*var(--ui-scale))] py-[calc(34px*var(--ui-scale))] text-kiosk-3xl rounded-[calc(28px*var(--ui-scale))] border-2 min-h-[calc(120px*var(--ui-scale))]
             transition-all duration-200 touch-manipulation
-            ${Icon ? 'pl-14' : ''}
+            ${Icon ? 'pl-[calc(72px*var(--ui-scale))]' : ''}
             ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-300 focus:border-government-blue focus:ring-blue-200'}
             ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}
             focus:outline-none focus:ring-4

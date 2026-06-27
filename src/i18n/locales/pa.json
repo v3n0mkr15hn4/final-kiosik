@@ -21,7 +21,9 @@
       "selected": "ਚੁਣਿਆ ਗਿਆ",
       "brandSubtitle": "ਸਮਾਰਟ ਅਰਬਨ ਹੈਲਪਡੈਸਕ",
       "help": "ਮਦਦ",
-      "loadingSplash": "ਸੁਵਿਧਾ ਲੋਡ ਹੋ ਰਹੀ ਹੈ…"
+      "loadingSplash": "ਸੁਵਿਧਾ ਲੋਡ ਹੋ ਰਹੀ ਹੈ…",
+      "close": "ਬੰਦ ਕਰੋ",
+      "delete": "ਮਿਟਾਓ"
     },
     "language": {
       "select": "ਭਾਸ਼ਾ ਚੁਣੋ",
@@ -191,7 +193,11 @@
       "chooseFile": "ਫਾਈਲ ਚੁਣੋ",
       "location": "ਟਿਕਾਣਾ",
       "currentLocation": "ਮੌਜੂਦਾ ਟਿਕਾਣਾ ਵਰਤੋ",
-      "enterLocation": "ਟਿਕਾਣਾ ਖੁਦ ਦਰਜ ਕਰੋ"
+      "enterLocation": "ਟਿਕਾਣਾ ਖੁਦ ਦਰਜ ਕਰੋ",
+      "maxPhotos": "ਵੱਧ ਤੋਂ ਵੱਧ 3 ਫੋਟੋਆਂ ਦੀ ਆਗਿਆ ਹੈ",
+      "locationFailed": "ਟਿਕਾਣਾ ਪ੍ਰਾਪਤ ਨਹੀਂ ਹੋ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਹੱਥੀਂ ਦਰਜ ਕਰੋ।",
+      "geoUnsupported": "ਇਹ ਬ੍ਰਾਊਜ਼ਰ ਜੀਓਲੋਕੇਸ਼ਨ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦਾ।",
+      "noticeTitle": "ਸੂਚਨਾ"
     },
     "tracking": {
       "title": "ਬੇਨਤੀ ਸਥਿਤੀ ਟ੍ਰੈਕ ਕਰੋ",
@@ -708,7 +714,8 @@
       "enterAadhaarNumber": "12-ਅੰਕਾਂ ਵਾਲਾ ਆਧਾਰ ਨੰਬਰ",
       "ownershipTransferWarning": "⚠️ ਮਾਲਕੀ ਤਬਾਦਲੇ ਲਈ ਸਹਾਇਕ ਦਸਤਾਵੇਜ਼ (ਵਿਕਰੀ ਡੀਡ / NOC) ਜ਼ਰੂਰੀ। ਜਮ੍ਹਾਂ ਕਰਨ ਤੋਂ ਬਾਅਦ ਅੱਪਲੋਡ ਦੀ ਬੇਨਤੀ ਕੀਤੀ ਜਾਵੇਗੀ।",
       "enterNewOwnerName": "ਨਵੇਂ ਮਾਲਕ ਦਾ ਪੂਰਾ ਨਾਮ",
-      "confirmUpdateMsg": "ਸਾਰੀਆਂ ਤਬਦੀਲੀਆਂ ਸੇਵ ਕਰੋ ਅਤੇ ਪੁਸ਼ਟੀਕਰਨ ਰਸੀਦ ਬਣਾਓ?"
+      "confirmUpdateMsg": "ਸਾਰੀਆਂ ਤਬਦੀਲੀਆਂ ਸੇਵ ਕਰੋ ਅਤੇ ਪੁਸ਼ਟੀਕਰਨ ਰਸੀਦ ਬਣਾਓ?",
+      "verifyOtpFirst": "ਮੋਬਾਈਲ ਨੰਬਰ ਬਦਲਣ ਲਈ ਕਿਰਪਾ ਕਰਕੇ OTP ਤਸਦੀਕ ਕਰੋ"
     },
     "chatbot": {
       "elec1": "ਨਵੇਂ ਕਨੈਕਸ਼ਨ ਲਈ ਕਿਵੇਂ ਅਪਲਾਈ ਕਰੀਏ?",
@@ -846,6 +853,36 @@
       "indicatorLabel": "ਹੇ ਸੁਵਿਧਾ",
       "activatedTitle": "ਸੁਵਿਧਾ ਚਾਲੂ",
       "switchingToVoice": "ਵੌਇਸ ਮੋਡ ਵਿੱਚ ਬਦਲਿਆ ਜਾ ਰਿਹਾ ਹੈ..."
+    },
+    "admin": {
+      "title": "ਸੁਵਿਧਾ ਐਡਮਿਨ ਪੋਰਟਲ",
+      "credentialsHint": "ਕਰਮਚਾਰੀ ID ਜਾਂ ਅਧਿਕਾਰਤ ਈਮੇਲ ਲੌਗਇਨ",
+      "mfaHint": "{{target}} ਲਈ MFA ਤਸਦੀਕ",
+      "identifier": "ਕਰਮਚਾਰੀ ID / ਅਧਿਕਾਰਤ ਈਮੇਲ",
+      "password": "ਪਾਸਵਰਡ",
+      "continueMfa": "MFA ਤੇ ਜਾਰੀ ਰੱਖੋ",
+      "validating": "ਪੁਸ਼ਟੀ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…",
+      "mfaCode": "MFA ਕੋਡ",
+      "devMfaCode": "Dev MFA ਕੋਡ:",
+      "signIn": "ਸਾਈਨ ਇਨ",
+      "verifying": "ਤਸਦੀਕ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…",
+      "backToCreds": "ਪ੍ਰਮਾਣ ਪੱਤਰਾਂ ਤੇ ਵਾਪਸ",
+      "backToLanding": "ਮੁੱਖ ਪੰਨੇ ਤੇ ਵਾਪਸ",
+      "loginFailed": "ਐਡਮਿਨ ਲੌਗਇਨ ਅਸਫਲ ਰਿਹਾ।",
+      "mfaFailed": "MFA ਤਸਦੀਕ ਅਸਫਲ ਰਹੀ।"
+    },
+    "keypad": {
+      "digit": "ਅੰਕ {{n}}"
+    },
+    "aadhaar": {
+      "closeScanner": "ਕੈਮਰਾ ਸਕੈਨਰ ਬੰਦ ਕਰੋ ਅਤੇ ਵਾਪਸ ਜਾਓ"
+    },
+    "ai": {
+      "dismissMicWarning": "ਮਾਈਕ੍ਰੋਫੋਨ ਚੇਤਾਵਨੀ ਖਾਰਜ ਕਰੋ",
+      "closeAssistant": "AI ਸਹਾਇਕ ਬੰਦ ਕਰੋ"
+    },
+    "filePreview": {
+      "close": "ਝਲਕ ਬੰਦ ਕਰੋ"
     }
   }
 }

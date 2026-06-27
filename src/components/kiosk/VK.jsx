@@ -76,7 +76,7 @@ function Sheet({ open, onClose, title, width = 640, children }) {
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t('app.close')}
             style={{
               width: 'calc(44px * var(--ui-scale))', height: 'calc(44px * var(--ui-scale))', borderRadius: '50%', border: 'none',
               background: 'var(--surface-2, #f1f5f9)', cursor: 'pointer',

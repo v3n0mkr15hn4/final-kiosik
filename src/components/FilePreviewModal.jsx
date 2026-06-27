@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp'];
@@ -22,6 +23,7 @@ function isDoc(file) {
 }
 
 const FilePreviewModal = ({ file, isOpen, onClose }) => {
+  const { t } = useTranslation();
   const [hasPreviewError, setHasPreviewError] = useState(false);
 
   const canImagePreview = useMemo(() => isImage(file), [file]);
@@ -39,7 +41,7 @@ const FilePreviewModal = ({ file, isOpen, onClose }) => {
             type="button"
             onClick={onClose}
             className="inline-flex items-center justify-center w-9 h-9 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-800"
-            aria-label="Close preview"
+            aria-label={t('filePreview.close')}
           >
             <X className="w-5 h-5" />
           </button>

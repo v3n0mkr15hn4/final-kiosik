@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react';
 import Button from './Button';
 
@@ -18,6 +19,7 @@ const Modal = ({
   showCloseButton = true,
   closeOnOverlay = true,
 }) => {
+  const { t } = useTranslation();
   const panelRef = useRef(null);
   const triggerRef = useRef(null);
 
@@ -134,7 +136,7 @@ const Modal = ({
             <button
               onClick={onClose}
               className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
-              aria-label="Close dialog"
+              aria-label={t('app.close')}
             >
               <X className="w-6 h-6" />
             </button>

@@ -2,7 +2,7 @@ import React from 'react';
 import { Phone, ShieldCheck } from 'lucide-react';
 import Button from '../Button';
 import Input from '../Input';
-import LoadingSpinner from '../LoadingSpinner';
+import RadiantLoader from '../loading/RadiantLoader';
 
 const PhoneOtpRequestCard = ({
   mobile,
@@ -68,7 +68,7 @@ const PhoneOtpRequestCard = ({
     >
       {loading ? (
         <span className="inline-flex items-center gap-2">
-          <LoadingSpinner size="small" />
+          <RadiantLoader variant="sweep" size={32} dark />
           Sending OTP...
         </span>
       ) : (

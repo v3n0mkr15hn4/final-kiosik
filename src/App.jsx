@@ -106,9 +106,10 @@ function AIShell({ children }) {
 
   // Idle re-arm: any citizen-facing, non-attract, non-admin page returns to
   // the attract loop after IDLE_REARM_MS of no touch/keyboard activity.
+  // Disabled for now — attract page switched off.
   useIdleRearm({
     timeoutMs: IDLE_REARM_MS,
-    enabled: path !== '/attract' && !isAdminPath,
+    enabled: false,
     onIdle: () => navigate('/attract'),
   });
 

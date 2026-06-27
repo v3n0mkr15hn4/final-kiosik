@@ -1,10 +1,12 @@
 ﻿import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ShieldCheck, KeyRound, UserCog } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { initiateAdminLogin, verifyAdminMfa } = useAuth();
 
   const [identifier, setIdentifier] = useState('EMP-KIOSK-001');
@@ -20,10 +22,10 @@ const AdminLogin = () => {
 
   const headerText = useMemo(() => {
     if (isMfaStep) {
-      return `MFA verification for ${deliveryHint || 'your official email'}`;
+      return t('admin.mfaHint', { target: deliveryHint || t('admin.identifier') });
     }
-    return 'Employee ID or official email login';
-  }, [deliveryHint, isMfaStep]);
+    return t('admin.credentialsHint');
+  }, [deliveryHint, isMfaStep, t]);
 
   const handlePrimaryLogin = async (event) => {
     event.preventDefault();
@@ -34,7 +36,7 @@ const AdminLogin = () => {
     setLoading(false);
 
     if (!result.success) {
-      setError(result.error || 'Admin login failed.');
+      setError(result.error || t('admin.loginFailed'));
       return;
     }
 
@@ -55,7 +57,7 @@ const AdminLogin = () => {
     setLoading(false);
 
     if (!result.success) {
-      setError(result.error || 'MFA verification failed.');
+      setError(result.error || t('admin.mfaFailed'));
       return;
     }
 
@@ -79,14 +81,14 @@ const AdminLogin = () => {
           <div className="w-16 h-16 rounded-full bg-slate-900 text-white mx-auto flex items-center justify-center mb-3">
             <ShieldCheck className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">SUVIDHA Admin Portal</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{t('admin.title')}</h1>
           <p className="text-sm text-slate-600 mt-1">{headerText}</p>
         </div>
 
         {!isMfaStep ? (
           <form onSubmit={handlePrimaryLogin} className="space-y-4">
             <label className="block">
-              <span className="block text-sm font-medium text-slate-700 mb-1">Employee ID / Official Email</span>
+              <span className="block text-sm font-medium text-slate-700 mb-1">{t('admin.identifier')}</span>
               <div className="relative">
                 <UserCog className="w-4 h-4 absolute left-3 top-3.5 text-slate-400" />
                 <input
@@ -101,7 +103,7 @@ const AdminLogin = () => {
             </label>
 
             <label className="block">
-              <span className="block text-sm font-medium text-slate-700 mb-1">Password</span>
+              <span className="block text-sm font-medium text-slate-700 mb-1">{t('admin.password')}</span>
               <div className="relative">
                 <KeyRound className="w-4 h-4 absolute left-3 top-3.5 text-slate-400" />
                 <input
@@ -122,13 +124,13 @@ const AdminLogin = () => {
               disabled={loading}
               className="w-full bg-slate-900 text-white rounded-xl py-3 font-semibold hover:bg-slate-800 disabled:opacity-60"
             >
-              {loading ? 'Validating...' : 'Continue to MFA'}
+              {loading ? t('admin.validating') : t('admin.continueMfa')}
             </button>
           </form>
         ) : (
           <form onSubmit={handleMfaSubmit} className="space-y-4">
             <label className="block">
-              <span className="block text-sm font-medium text-slate-700 mb-1">MFA Code</span>
+              <span className="block text-sm font-medium text-slate-700 mb-1">{t('admin.mfaCode')}</span>
               <input
                 type="text"
                 value={mfaCode}
@@ -142,7 +144,7 @@ const AdminLogin = () => {
 
             {devMfaCode ? (
               <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg p-2">
-                Dev MFA code: <strong>{devMfaCode}</strong>
+                {t('admin.devMfaCode')} <strong>{devMfaCode}</strong>
               </p>
             ) : null}
 
@@ -153,13 +155,13 @@ const AdminLogin = () => {
               disabled={loading || mfaCode.length !== 6}
               className="w-full bg-slate-900 text-white rounded-xl py-3 font-semibold hover:bg-slate-800 disabled:opacity-60"
             >
-              {loading ? 'Verifying...' : 'Sign In'}
+              {loading ? t('admin.verifying') : t('admin.signIn')}
             </button>
           </form>
         )}
 
         <button onClick={goBack} className="w-full mt-4 text-sm text-slate-600 hover:text-slate-900">
-          {isMfaStep ? 'Back to credentials' : 'Back to landing'}
+          {isMfaStep ? t('admin.backToCreds') : t('admin.backToLanding')}
         </button>
       </div>
     </div>

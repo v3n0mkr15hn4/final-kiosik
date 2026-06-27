@@ -21,7 +21,9 @@
       "selected": "चुनेआ गेआ",
       "brandSubtitle": "स्मार्ट शहरी सहायता केंद्र",
       "help": "मदद",
-      "loadingSplash": "सुविधा लोड होआ करदी ऐ…"
+      "loadingSplash": "सुविधा लोड होआ करदी ऐ…",
+      "close": "बंद करो",
+      "delete": "मटाओ"
     },
     "language": {
       "select": "भाशा चुनो",
@@ -191,7 +193,11 @@
       "chooseFile": "फाइल चुनो",
       "location": "थां",
       "currentLocation": "मौजूदा थां इस्तेमाल करो",
-      "enterLocation": "थां हत्थें ही लिखो"
+      "enterLocation": "थां हत्थें ही लिखो",
+      "maxPhotos": "मता-मती 3 फोटो दी इजाजत ऐ",
+      "locationFailed": "थाह् नेईं लब्भी सकेआ। किरपा करियै हत्थें-नें भरो।",
+      "geoUnsupported": "एह् ब्राउजर जियोलोकेशन गी सपोर्ट नेईं करदा।",
+      "noticeTitle": "सूचना"
     },
     "tracking": {
       "title": "बेनती दी स्थिति दिक्खो",
@@ -708,7 +714,8 @@
       "enterAadhaarNumber": "12-अंकें दा आधार नंबर",
       "ownershipTransferWarning": "⚠️ मालिकाना हस्तांतरण आस्तै सहायक दस्तावेज (बिक्री विलेख / NOC) जरूरी। जमा करने तों बाद अपलोड दी बेनती कीती जाह्गी।",
       "enterNewOwnerName": "नमें मालिक दा पूरा नांऽ",
-      "confirmUpdateMsg": "सब्भै बदलाव सेव करियै पुष्टिकरण रसीद बनाना ऐ?"
+      "confirmUpdateMsg": "सब्भै बदलाव सेव करियै पुष्टिकरण रसीद बनाना ऐ?",
+      "verifyOtpFirst": "मोबाइल नंबर बदलने आस्तै किरपा करियै OTP सत्यापत करो"
     },
     "chatbot": {
       "elec1": "नमें कनेक्शन आस्तै केह् अर्जी देनी ऐ?",
@@ -846,6 +853,36 @@
       "indicatorLabel": "हे सुविधा",
       "activatedTitle": "सुविधा सक्रिय",
       "switchingToVoice": "वॉइस मोड पर स्विच कीता जा करदा ऐ..."
+    },
+    "admin": {
+      "title": "सुविधा एडमिन पोर्टल",
+      "credentialsHint": "कर्मचारी ID जां सरकारी ईमेल लॉगिन",
+      "mfaHint": "{{target}} आस्तै MFA सत्यापन",
+      "identifier": "कर्मचारी ID / सरकारी ईमेल",
+      "password": "पासवर्ड",
+      "continueMfa": "MFA उप्पर जारी रक्खो",
+      "validating": "सत्यापन होआ करदा ऐ…",
+      "mfaCode": "MFA कोड",
+      "devMfaCode": "Dev MFA कोड:",
+      "signIn": "साइन इन",
+      "verifying": "सत्यापन होआ करदा ऐ…",
+      "backToCreds": "क्रेडेंशियल उप्पर बापस",
+      "backToLanding": "मुक्ख पन्ने उप्पर बापस",
+      "loginFailed": "एडमिन लॉगिन फेल होई गेआ।",
+      "mfaFailed": "MFA सत्यापन फेल होई गेआ।"
+    },
+    "keypad": {
+      "digit": "अंक {{n}}"
+    },
+    "aadhaar": {
+      "closeScanner": "कैमरा स्कैनर बंद करो ते बापस जाओ"
+    },
+    "ai": {
+      "dismissMicWarning": "माइक्रोफोन चिताबनी हटाओ",
+      "closeAssistant": "AI सहायक बंद करो"
+    },
+    "filePreview": {
+      "close": "झलक बंद करो"
     }
   }
 }

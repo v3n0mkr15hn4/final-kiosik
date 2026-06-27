@@ -21,7 +21,9 @@
       "selected": "कुरुमुटिया होयेना",
       "brandSubtitle": "स्मार्ट अर्बन हेल्पडेस्क",
       "help": "मदत",
-      "loadingSplash": "सुविधा लोड होवोक् कना…"
+      "loadingSplash": "सुविधा लोड होवोक् कना…",
+      "close": "बन्द मे",
+      "delete": "मेटाव मे"
     },
     "language": {
       "select": "Select Language",
@@ -191,7 +193,11 @@
       "chooseFile": "फाइल कुरुमुटिया",
       "location": "जायगा",
       "currentLocation": "नितोक् जायगा बेबहार मे",
-      "enterLocation": "जायगा आपे ओल मे"
+      "enterLocation": "जायगा आपे ओल मे",
+      "maxPhotos": "पुरा ३ फोटो आदेर मेनाक्",
+      "locationFailed": "जायगा ञाम बाङ् होयेना। दया कातेत् तिञ्जुतेत् ओल मे।",
+      "geoUnsupported": "नोवा ब्राउजर जियोलोकेसन बाङ् देवोक् काना।",
+      "noticeTitle": "उचावना"
     },
     "tracking": {
       "title": "बिनती हाल देख मे",
@@ -708,7 +714,8 @@
       "enterAadhaarNumber": "12-ᱟᱝᱠ ᱟᱫᱷᱟᱨ ᱱᱚᱢᱵᱚᱨ",
       "ownershipTransferWarning": "⚠️ ᱢᱟᱞᱤᱠᱭ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱜᱳᱰᱟᱝ ᱫᱚᱞᱤᱞ (ᱵᱤᱠᱨᱭ ᱰᱤᱰ / NOC) ᱫᱚᱨᱠᱟᱨ᱾ ᱡᱚᱢᱟ ᱛᱟᱦᱮᱸᱱ ᱛᱟᱭᱚᱢ ᱱᱟᱸᱜᱟ ᱵᱮᱱᱛᱤ ᱦᱩᱭᱩᱜᱼᱟ᱾",
       "enterNewOwnerName": "ᱱᱟᱶᱟ ᱢᱟᱞᱤᱠ ᱯᱩᱨᱟᱹᱣ ᱧᱩᱛᱩᱢ",
-      "confirmUpdateMsg": "ᱡᱷᱚᱛᱚ ᱵᱚᱫᱚᱞ ᱥᱟᱝᱜᱮᱞ ᱠᱟᱛᱮ ᱴᱷᱤᱠ ᱨᱚᱥᱤᱫ ᱵᱮᱱᱟᱣ ᱞᱟᱹᱜᱤᱫ?"
+      "confirmUpdateMsg": "ᱡᱷᱚᱛᱚ ᱵᱚᱫᱚᱞ ᱥᱟᱝᱜᱮᱞ ᱠᱟᱛᱮ ᱴᱷᱤᱠ ᱨᱚᱥᱤᱫ ᱵᱮᱱᱟᱣ ᱞᱟᱹᱜᱤᱫ?",
+      "verifyOtpFirst": "मोबाइल नामबार बोदोल लागित् दया कातेत् OTP जाँच मे"
     },
     "chatbot": {
       "elec1": "ᱱᱟᱶᱟ ᱠᱚᱱᱮᱠᱥᱚᱱ ᱞᱟᱹᱜᱤᱫ ᱚᱠᱟᱛᱮ ᱵᱮᱱᱛᱤ ᱢᱮ?",
@@ -846,6 +853,36 @@
       "indicatorLabel": "ᱦᱮᱭ ᱥᱩᱵᱤᱫᱷᱟ",
       "activatedTitle": "ᱥᱩᱵᱤᱫᱷᱟ ᱪᱟᱞᱩ",
       "switchingToVoice": "ᱨᱚᱲ ᱢᱳᱰ ᱛᱮ ᱵᱟᱫᱚᱞ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ..."
+    },
+    "admin": {
+      "title": "सुविधा एडमिन पोर्टाल",
+      "credentialsHint": "खामानी ID चेतान् सरकारी ईमेल लगिन",
+      "mfaHint": "{{target}} लागित् MFA जाँच",
+      "identifier": "खामानी ID / सरकारी ईमेल",
+      "password": "पासवार्ड",
+      "continueMfa": "MFA रे आगु मे",
+      "validating": "जाँच होवोक् कना…",
+      "mfaCode": "MFA कोड",
+      "devMfaCode": "Dev MFA कोड:",
+      "signIn": "साइन इन",
+      "verifying": "जाँच होवोक् कना…",
+      "backToCreds": "प्रमाण रे रुवाड़",
+      "backToLanding": "मुल साहटा रे रुवाड़",
+      "loginFailed": "एडमिन लगिन बानुक् होयेना।",
+      "mfaFailed": "MFA जाँच बानुक् होयेना।"
+    },
+    "keypad": {
+      "digit": "अंक {{n}}"
+    },
+    "aadhaar": {
+      "closeScanner": "कैमेरा स्कैनार बन्द मे आर रुवाड़"
+    },
+    "ai": {
+      "dismissMicWarning": "माइक्रोफोन हुशियार ओचोः मे",
+      "closeAssistant": "AI गोड़ोः बन्द मे"
+    },
+    "filePreview": {
+      "close": "पुर्बा ञेल बन्द मे"
     }
   }
 }

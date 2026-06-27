@@ -50,6 +50,7 @@ const ConsumerProfile = () => {
   const [loading, setLoading] = useState(false);
   const [submissionStep, setSubmissionStep] = useState(0);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [notice, setNotice] = useState('');
 
   // Audit trail — fetched from backend API
   const [auditTrail, setAuditTrail] = useState([]);
@@ -113,7 +114,7 @@ const ConsumerProfile = () => {
 
   const handleSave = () => {
     if (mobileChanged && !otpVerified) {
-      alert('Please verify OTP for mobile number change');
+      setNotice(t('profile.verifyOtpFirst'));
       return;
     }
     setShowConfirmModal(true);
@@ -400,6 +401,7 @@ const ConsumerProfile = () => {
       </div>
 
       <Modal isOpen={showConfirmModal} onClose={() => setShowConfirmModal(false)} type="confirm" title={t('profile.confirmUpdateTitle')} message={t('profile.confirmUpdateMsg')} confirmText={t('app.confirm')} cancelText={t('app.cancel')} onConfirm={handleConfirmSave} onCancel={() => setShowConfirmModal(false)} />
+      <Modal isOpen={!!notice} onClose={() => setNotice('')} type="warning" title={t('complaints.noticeTitle')} message={notice} confirmText={t('app.confirm')} onConfirm={() => setNotice('')} />
     </VK>
   );
 };

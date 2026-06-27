@@ -379,6 +379,8 @@ const SchemeDiscovery = () => {
   const [results, setResults] = useState([]);
   const [selectedScheme, setSelectedScheme] = useState(null);
   const [showApplyModal, setShowApplyModal] = useState(false);
+  const [detailScheme, setDetailScheme] = useState(null);
+  const [visibleCount, setVisibleCount] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
   const [translatedSchemes, setTranslatedSchemes] = useState({});
 
@@ -436,6 +438,7 @@ const SchemeDiscovery = () => {
         const filtered = applyPreCategoryFilter(data.schemes);
         await minWait;
         setResults(filtered);
+        setVisibleCount(10);
         setStep('results');
         setLoading(false);
         return;
@@ -461,6 +464,7 @@ const SchemeDiscovery = () => {
     const filtered = applyPreCategoryFilter(matched);
     await minWait;
     setResults(filtered);
+    setVisibleCount(10);
     setStep('results');
     setLoading(false);
   };
@@ -468,7 +472,7 @@ const SchemeDiscovery = () => {
   const applyPreCategoryFilter = (schemes) => {
     if (!preCategory || preCategory === 'all') return schemes;
     const allowedCategories = categoryFilterMap[preCategory] || [];
-    return schemes.filter(s => allowedCategories.includes(s.category));
+    return schemes.filter(s => s.category && allowedCategories.some(c => s.category.includes(c)));
   };
 
   const handleApply = (scheme) => {
@@ -720,10 +724,22 @@ const SchemeDiscovery = () => {
             <span className="badge b-info">{t('schemes.aiRecommended', 'AI Recommended')}</span>
           </div>
 
-          {/* Scheme cards */}
+          {/* Scheme cards — tap to view full details */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            {filteredResults.map((scheme, index) => (
-              <div key={scheme.id} className="tile" style={{ borderTop: `8px solid ${scheme.match >= 90 ? 'var(--ok)' : scheme.match >= 75 ? 'var(--warn)' : 'var(--indigo-500)'}`, alignItems: 'stretch' }}>
+            {filteredResults.slice(0, visibleCount).map((scheme, index) => (
+              <button
+                key={scheme.id}
+                type="button"
+                onClick={() => setDetailScheme(scheme)}
+                className="tile"
+                style={{
+                  borderTop: `8px solid ${scheme.match >= 90 ? 'var(--ok)' : scheme.match >= 75 ? 'var(--warn)' : 'var(--indigo-500)'}`,
+                  alignItems: 'stretch',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  touchAction: 'manipulation',
+                }}
+              >
                 <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
@@ -743,54 +759,149 @@ const SchemeDiscovery = () => {
                   )}
                 </div>
 
-                <div className="sub" style={{ fontSize: 20, marginTop: 16 }}>{getLocalDesc(scheme)}</div>
-
-                <div style={{ marginTop: 20 }}>
-                  <div className="meta" style={{ marginBottom: 10 }}>{t('schemes.eligibilityCriteria', 'Eligibility')}:</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-                    {scheme.eligibility.map((crit, i) => (
-                      <span key={i} className="badge b-info">
-                        <I d={ic.check} size={16} /> {crit}
-                      </span>
-                    ))}
-                  </div>
+                <div
+                  className="sub"
+                  style={{
+                    fontSize: 20, marginTop: 16, display: '-webkit-box',
+                    WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                  }}
+                >
+                  {getLocalDesc(scheme)}
                 </div>
 
-                <div className="meta" style={{ marginTop: 20, color: 'var(--ok)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <I d={ic.rupee} size={20} /> {t('schemes.benefit', 'Benefit')}: {scheme.benefit}
+                <div className="meta" style={{ marginTop: 16, color: 'var(--indigo-700)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  {t('schemes.tapForDetails', 'Tap for eligibility, benefits & how to apply')} <I d={ic.arrow} size={18} />
                 </div>
-
-                <div style={{ marginTop: 20 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                    <span className="meta">{t('schemes.eligibilityScore', 'Eligibility Score')}</span>
-                    <span className="meta" style={{ fontWeight: 700 }}>{scheme.match}%</span>
-                  </div>
-                  <div style={{ width: '100%', background: 'var(--line)', borderRadius: 999, height: 10 }}>
-                    <div style={{
-                      height: 10, borderRadius: 999, width: `${scheme.match}%`,
-                      background: scheme.match >= 90 ? 'var(--ok)' : scheme.match >= 75 ? 'var(--warn)' : 'var(--indigo-500)',
-                    }} />
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: 24, marginTop: 'auto', paddingTop: 20 }}>
-                  <button className="btn btn-pri" style={{ flex: 1 }} onClick={() => handleApply(scheme)}>
-                    {t('schemes.applyNow', 'Apply Now')} <I d={ic.arrow} size={24} />
-                  </button>
-                </div>
-              </div>
+              </button>
             ))}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
+          {(() => {
+            const nextScheme = filteredResults[visibleCount];
+            const hasMoreGoodMatches = nextScheme && nextScheme.match >= 70;
+            return (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
+                {hasMoreGoodMatches ? (
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    style={{ fontSize: 22, padding: '18px 48px' }}
+                    onClick={() => setVisibleCount(c => c + 10)}
+                  >
+                    {t('schemes.showMore', 'Show More')} <I d={ic.arrow} size={24} />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-quiet"
+                    style={{ fontSize: 22, padding: '18px 48px' }}
+                    onClick={() => navigate('/home')}
+                  >
+                    <I d={ic.back} size={24} /> {t('home.backToOrgs', 'Back to Organizations')}
+                  </button>
+                )}
+              </div>
+            );
+          })()}
+        </div>
+      )}
+
+      {/* ── SCHEME DETAIL OVERLAY ── */}
+      {detailScheme && (
+        <div
+          role="presentation"
+          onClick={(e) => { if (e.target === e.currentTarget) setDetailScheme(null); }}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 500,
+            background: 'rgba(15,23,42,0.6)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 24,
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={getLocalName(detailScheme)}
+            style={{
+              position: 'relative',
+              background: 'white', borderRadius: 24,
+              width: '100%', maxWidth: 760, maxHeight: '85vh',
+              display: 'flex', flexDirection: 'column',
+              boxShadow: '0 24px 64px rgba(0,0,0,0.3)',
+              overflow: 'hidden',
+            }}
+          >
             <button
               type="button"
-              className="btn btn-quiet"
-              style={{ fontSize: 22, padding: '18px 48px' }}
-              onClick={() => navigate('/home')}
+              onClick={() => setDetailScheme(null)}
+              aria-label={t('app.close', 'Close')}
+              style={{
+                position: 'absolute', top: 20, right: 20, zIndex: 1,
+                width: 48, height: 48, borderRadius: '50%', border: 'none',
+                background: 'var(--surface-2, #f1f5f9)', cursor: 'pointer',
+                display: 'grid', placeItems: 'center',
+              }}
             >
-              <I d={ic.back} size={24} /> {t('home.backToOrgs', 'Back to Organizations')}
+              <I d={ic.x} size={22} />
             </button>
+
+            {/* Scrollable body — header scrolls with content so it never fights the close button for space */}
+            <div style={{ padding: '36px 80px 28px 36px', overflowY: 'auto', flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
+                <span className={`badge ${detailScheme.match >= 90 ? 'b-ok' : detailScheme.match >= 75 ? 'b-warn' : 'b-info'}`}>
+                  {detailScheme.match}% {t('schemes.matchLabel', 'match')}
+                </span>
+                <span className="badge">{detailScheme.category}</span>
+                {detailScheme.match >= 90 && (
+                  <span className="badge b-ok" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <I d={ic.star} size={18} /> {t('schemes.topMatch', 'Top Match')}
+                  </span>
+                )}
+              </div>
+
+              <div className="nm" style={{ fontSize: 28, lineHeight: 1.3 }}>{getLocalName(detailScheme)}</div>
+              <div className="meta" style={{ marginTop: 6, marginBottom: 22 }}>{detailScheme.ministry}</div>
+
+              <div className="sub" style={{ fontSize: 20 }}>{getLocalDesc(detailScheme)}</div>
+
+              <div style={{ marginTop: 26 }}>
+                <div className="meta" style={{ marginBottom: 12, fontWeight: 700 }}>{t('schemes.eligibilityCriteria', 'Eligibility')}:</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {detailScheme.eligibility.map((crit, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 18, color: 'var(--ink-700)' }}>
+                      <I d={ic.check} size={18} style={{ flexShrink: 0, marginTop: 2, color: 'var(--ok)' }} /> <span>{crit}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="meta" style={{ marginTop: 24, color: 'var(--ok)', display: 'flex', alignItems: 'center', gap: 8, fontSize: 19 }}>
+                <I d={ic.rupee} size={20} /> {t('schemes.benefit', 'Benefit')}: {detailScheme.benefit}
+              </div>
+
+              <div style={{ marginTop: 24 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span className="meta">{t('schemes.eligibilityScore', 'Eligibility Score')}</span>
+                  <span className="meta" style={{ fontWeight: 700 }}>{detailScheme.match}%</span>
+                </div>
+                <div style={{ width: '100%', background: 'var(--line)', borderRadius: 999, height: 10 }}>
+                  <div style={{
+                    height: 10, borderRadius: 999, width: `${detailScheme.match}%`,
+                    background: detailScheme.match >= 90 ? 'var(--ok)' : detailScheme.match >= 75 ? 'var(--warn)' : 'var(--indigo-500)',
+                  }} />
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 24, padding: '20px 36px 28px', borderTop: '1px solid var(--line)', flexShrink: 0 }}>
+              <button
+                className="btn btn-pri"
+                style={{ flex: 1 }}
+                onClick={() => { handleApply(detailScheme); setDetailScheme(null); }}
+              >
+                {t('schemes.applyNow', 'Apply Now')} <I d={ic.arrow} size={24} />
+              </button>
+            </div>
           </div>
         </div>
       )}

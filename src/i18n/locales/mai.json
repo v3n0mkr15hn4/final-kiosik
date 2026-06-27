@@ -21,7 +21,9 @@
       "selected": "चयनित",
       "brandSubtitle": "स्मार्ट अर्बन हेल्पडेस्क",
       "help": "सहायता",
-      "loadingSplash": "सुविधा लोड भऽ रहल अछि…"
+      "loadingSplash": "सुविधा लोड भऽ रहल अछि…",
+      "close": "बन्न करू",
+      "delete": "मेटाउ"
     },
     "language": {
       "select": "भाषा चुनू",
@@ -191,7 +193,11 @@
       "chooseFile": "फाइल चुनू",
       "location": "स्थान",
       "currentLocation": "वर्तमान स्थान उपयोग करू",
-      "enterLocation": "स्थान मैनुअल रूपे लिखू"
+      "enterLocation": "स्थान मैनुअल रूपे लिखू",
+      "maxPhotos": "अधिकतम 3 फोटोक अनुमति अछि",
+      "locationFailed": "स्थान भेटब’मे असमर्थ। कृपया स्वयं दर्ज करू।",
+      "geoUnsupported": "ई ब्राउजर जियोलोकेशनकेँ समर्थन नहि करैत अछि।",
+      "noticeTitle": "सूचना"
     },
     "tracking": {
       "title": "निवेदन स्थिति देखू",
@@ -708,7 +714,8 @@
       "enterAadhaarNumber": "12-अंकीय आधार संख्या",
       "ownershipTransferWarning": "⚠️ स्वामित्व स्थानांतरण लेल सहायक दस्तावेज (बिक्री विलेख / NOC) आवश्यक अछि। जमा कएला क बाद अपलोडक निवेदन कएल जाएत।",
       "enterNewOwnerName": "नव मालिकक पूरा नाम",
-      "confirmUpdateMsg": "सभ परिवर्तन सेव करू आ पुष्टिकरण रसीद बनाऊ?"
+      "confirmUpdateMsg": "सभ परिवर्तन सेव करू आ पुष्टिकरण रसीद बनाऊ?",
+      "verifyOtpFirst": "मोबाइल नंबर बदलबाक लेल कृपया OTP सत्यापित करू"
     },
     "chatbot": {
       "elec1": "नव कनेक्शन लेल कोना आवेदन करू?",
@@ -846,6 +853,36 @@
       "indicatorLabel": "हे सुविधा",
       "activatedTitle": "सुविधा सक्रिय",
       "switchingToVoice": "वॉयस मोड पर स्विच भऽ रहल अछि..."
+    },
+    "admin": {
+      "title": "सुविधा एडमिन पोर्टल",
+      "credentialsHint": "कर्मचारी ID अथवा आधिकारिक ईमेल लॉगिन",
+      "mfaHint": "{{target}} लेल MFA सत्यापन",
+      "identifier": "कर्मचारी ID / आधिकारिक ईमेल",
+      "password": "पासवर्ड",
+      "continueMfa": "MFA पर आगू बढ़ू",
+      "validating": "सत्यापन भ’ रहल अछि…",
+      "mfaCode": "MFA कोड",
+      "devMfaCode": "Dev MFA कोड:",
+      "signIn": "साइन इन",
+      "verifying": "सत्यापन भ’ रहल अछि…",
+      "backToCreds": "क्रेडेंशियल पर घुरू",
+      "backToLanding": "मुख्य पृष्ठ पर घुरू",
+      "loginFailed": "एडमिन लॉगिन विफल भेल।",
+      "mfaFailed": "MFA सत्यापन विफल भेल।"
+    },
+    "keypad": {
+      "digit": "अंक {{n}}"
+    },
+    "aadhaar": {
+      "closeScanner": "कैमरा स्कैनर बन्न करू आ घुरू"
+    },
+    "ai": {
+      "dismissMicWarning": "माइक्रोफोन चेतावनी हटाउ",
+      "closeAssistant": "AI सहायक बन्न करू"
+    },
+    "filePreview": {
+      "close": "पूर्वावलोकन बन्न करू"
     }
   }
 }

@@ -2,6 +2,7 @@
 // Layout from docs/kiosk-design/designs/vertical-pages-v1.jsx:198 + primitives.css `.keypad`
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const KEYS = [1, 2, 3, 4, 5, 6, 7, 8, 9, '⌫', 0, '✓'];
 
@@ -12,6 +13,7 @@ export default function Keypad({
   maxWidth = 560,
   disabled = false,
 }) {
+  const { t } = useTranslation();
   const press = (k) => {
     if (disabled) return;
     if (k === '⌫') return onBackspace?.();
@@ -26,7 +28,7 @@ export default function Keypad({
           key={i}
           type="button"
           aria-label={
-            k === '⌫' ? 'Delete' : k === '✓' ? 'Submit' : `Digit ${k}`
+            k === '⌫' ? t('app.delete') : k === '✓' ? t('app.submit') : t('keypad.digit', { n: k })
           }
           disabled={disabled}
           onClick={() => press(k)}

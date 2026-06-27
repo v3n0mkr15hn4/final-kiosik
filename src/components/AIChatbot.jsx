@@ -373,7 +373,7 @@ const AIChatbot = () => {
             <button
               style={{ width: 'calc(80px * var(--ui-scale))', height: 'calc(80px * var(--ui-scale))', borderRadius: 'calc(22px * var(--ui-scale))', background: 'rgba(255,255,255,.14)', border: 'none', color: 'var(--cream)', cursor: 'pointer', display: 'grid', placeItems: 'center' }}
               onClick={() => { setIsOpen(false); stopListening(); stopTTS(); }}
-              aria-label="Close"
+              aria-label={t('app.close')}
             >
               <I d={ic.x} size={44} />
             </button>

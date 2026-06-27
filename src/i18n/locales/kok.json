@@ -21,7 +21,9 @@
       "selected": "वंचलें",
       "brandSubtitle": "स्मार्ट शहरी मदत केंद्र",
       "help": "मदत",
-      "loadingSplash": "सुविधा लोड जाता…"
+      "loadingSplash": "सुविधा लोड जाता…",
+      "close": "बंद करात",
+      "delete": "काडात"
     },
     "language": {
       "select": "भाषा निवडात",
@@ -191,7 +193,11 @@
       "chooseFile": "फायल निवडात",
       "location": "थळ",
       "currentLocation": "सद्याचें थळ वापरात",
-      "enterLocation": "थळ मॅन्युअली बरयात"
+      "enterLocation": "थळ मॅन्युअली बरयात",
+      "maxPhotos": "चड्डांत चड्ड 3 फोटोंक परवानगी आसा",
+      "locationFailed": "सुवात मेळोवंक शकलें ना. उपकार करून हातांनी भरात.",
+      "geoUnsupported": "हो ब्राउझर जिओलोकेशनाक फाटबळ दिना.",
+      "noticeTitle": "सूचोवणी"
     },
     "tracking": {
       "title": "विनंतीची स्थिती पळयात",
@@ -708,7 +714,8 @@
       "enterAadhaarNumber": "12-आंकड्याचो आधार नंबर",
       "ownershipTransferWarning": "⚠️ मालकी हस्तांतराखातीर आदार दस्तावेज (विक्री करार / NOC) गरजेचे. सबमिशनाउपरांत अपलोडाची मागणी जातली.",
       "enterNewOwnerName": "नव्या मालकाचें पुराय नाव",
-      "confirmUpdateMsg": "सगळे बदल जतन करून पुष्टीकरण रसीद तयार करपाची?"
+      "confirmUpdateMsg": "सगळे बदल जतन करून पुष्टीकरण रसीद तयार करपाची?",
+      "verifyOtpFirst": "मोबायल क्रमांक बदलपाक उपकार करून OTP पडताळात"
     },
     "chatbot": {
       "elec1": "नव्या जोडणीखातीर अर्ज कसो करचो?",
@@ -846,6 +853,36 @@
       "indicatorLabel": "हे सुविधा",
       "activatedTitle": "सुविधा सक्रिय",
       "switchingToVoice": "व्हॉइस मोडाक स्विच जातां..."
+    },
+    "admin": {
+      "title": "सुविधा ऍडमिन पोर्टल",
+      "credentialsHint": "कर्मचारी ID वा अधिकृत ईमेल लॉगिन",
+      "mfaHint": "{{target}} खातीर MFA पडताळणी",
+      "identifier": "कर्मचारी ID / अधिकृत ईमेल",
+      "password": "पासवर्ड",
+      "continueMfa": "MFA चालू दवरात",
+      "validating": "पडताळणी जाता…",
+      "mfaCode": "MFA कोड",
+      "devMfaCode": "Dev MFA कोड:",
+      "signIn": "साइन इन",
+      "verifying": "पडताळणी जाता…",
+      "backToCreds": "क्रेडेन्शियलाक परत",
+      "backToLanding": "मुखेल पानार परत",
+      "loginFailed": "ऍडमिन लॉगिन असफळ जालें.",
+      "mfaFailed": "MFA पडताळणी असफळ जाली."
+    },
+    "keypad": {
+      "digit": "आंकडो {{n}}"
+    },
+    "aadhaar": {
+      "closeScanner": "कॅमेरा स्कॅनर बंद करात आनी फाटीं वचात"
+    },
+    "ai": {
+      "dismissMicWarning": "मायक्रोफोन शिटकावणी काडात",
+      "closeAssistant": "AI सहाय्यक बंद करात"
+    },
+    "filePreview": {
+      "close": "पयलें पळोवप बंद करात"
     }
   }
 }

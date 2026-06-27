@@ -9,11 +9,19 @@ import { useVoiceAssistant } from '../../ai/provider/VoiceAssistantProvider';
 
 const BAR_COUNT = 20;
 
+// Resolve a CSS custom property to its hex value (the canvas alpha-suffix trick
+// below needs a hex string). Falls back to the literal hex if unavailable.
+function cssHex(name, fallback) {
+  if (typeof window === 'undefined') return fallback;
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v || fallback;
+}
+
 function getBarColor(state) {
-  if (state === 'listening')  return '#34d399'; // emerald
-  if (state === 'speaking')   return '#60a5fa'; // blue
-  if (state === 'processing') return '#fbbf24'; // amber
-  return '#818cf8'; // indigo for idle/executing
+  if (state === 'listening')  return cssHex('--wave-listening', '#34d399');
+  if (state === 'speaking')   return cssHex('--wave-speaking', '#60a5fa');
+  if (state === 'processing') return cssHex('--wave-processing', '#fbbf24');
+  return cssHex('--wave-idle', '#818cf8'); // idle / executing
 }
 
 export default function WaveformVisualizer({ className = '', height = 48 }) {

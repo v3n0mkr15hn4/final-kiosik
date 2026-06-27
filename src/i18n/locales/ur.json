@@ -21,7 +21,9 @@
       "selected": "منتخب شدہ",
       "brandSubtitle": "اسمارٹ اربن ہیلپ ڈیسک",
       "help": "مدد",
-      "loadingSplash": "سہولیہ لوڈ ہو رہا ہے…"
+      "loadingSplash": "سہولیہ لوڈ ہو رہا ہے…",
+      "close": "بند کریں",
+      "delete": "حذف کریں"
     },
     "language": {
       "select": "زبان منتخب کریں",
@@ -191,7 +193,11 @@
       "chooseFile": "فائل منتخب کریں",
       "location": "مقام",
       "currentLocation": "موجودہ مقام استعمال کریں",
-      "enterLocation": "مقام دستی طور پر درج کریں"
+      "enterLocation": "مقام دستی طور پر درج کریں",
+      "maxPhotos": "زیادہ سے زیادہ 3 تصاویر کی اجازت ہے",
+      "locationFailed": "مقام حاصل کرنے سے قاصر۔ براہ کرم دستی طور پر درج کریں۔",
+      "geoUnsupported": "یہ براؤزر جیو لوکیشن کی حمایت نہیں کرتا۔",
+      "noticeTitle": "اطلاع"
     },
     "tracking": {
       "title": "درخواست کی حیثیت دیکھیں",
@@ -708,7 +714,8 @@
       "enterAadhaarNumber": "12 ہندسوں کا آدھار نمبر",
       "ownershipTransferWarning": "⚠️ ملکیت کی منتقلی کے لیے معاون دستاویزات (سیل ڈیڈ / NOC) درکار ہیں۔ جمع کرنے کے بعد اپ لوڈ کی درخواست کی جائے گی۔",
       "enterNewOwnerName": "نئے مالک کا مکمل نام",
-      "confirmUpdateMsg": "تمام تبدیلیاں محفوظ کریں اور تصدیقی رسید تیار کریں؟"
+      "confirmUpdateMsg": "تمام تبدیلیاں محفوظ کریں اور تصدیقی رسید تیار کریں؟",
+      "verifyOtpFirst": "موبائل نمبر تبدیل کرنے کے لیے براہ کرم OTP کی تصدیق کریں"
     },
     "chatbot": {
       "elec1": "نئے کنکشن کے لیے درخواست کیسے دیں؟",
@@ -846,6 +853,36 @@
       "indicatorLabel": "ہے سہولیہ",
       "activatedTitle": "سہولیہ فعال ہو گیا",
       "switchingToVoice": "صوتی موڈ میں تبدیل ہو رہا ہے..."
+    },
+    "admin": {
+      "title": "سُودھا ایڈمن پورٹل",
+      "credentialsHint": "ملازم ID یا سرکاری ای میل لاگ ان",
+      "mfaHint": "{{target}} کے لیے MFA تصدیق",
+      "identifier": "ملازم ID / سرکاری ای میل",
+      "password": "پاس ورڈ",
+      "continueMfa": "MFA پر جاری رکھیں",
+      "validating": "تصدیق ہو رہی ہے…",
+      "mfaCode": "MFA کوڈ",
+      "devMfaCode": "Dev MFA کوڈ:",
+      "signIn": "سائن ان",
+      "verifying": "تصدیق ہو رہی ہے…",
+      "backToCreds": "اسناد پر واپس",
+      "backToLanding": "مرکزی صفحے پر واپس",
+      "loginFailed": "ایڈمن لاگ ان ناکام ہوا۔",
+      "mfaFailed": "MFA تصدیق ناکام ہوئی۔"
+    },
+    "keypad": {
+      "digit": "ہندسہ {{n}}"
+    },
+    "aadhaar": {
+      "closeScanner": "کیمرہ اسکینر بند کریں اور واپس جائیں"
+    },
+    "ai": {
+      "dismissMicWarning": "مائیکروفون انتباہ مسترد کریں",
+      "closeAssistant": "AI اسسٹنٹ بند کریں"
+    },
+    "filePreview": {
+      "close": "پیش منظر بند کریں"
     }
   }
 }

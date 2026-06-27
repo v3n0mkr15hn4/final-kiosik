@@ -8,94 +8,56 @@
 
 import { Router } from 'express';
 import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { extractFeatures, violatesHardFilter, predict } from '../lib/schemeMatch.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = Router();
 
+// Trained relevance model + TF-IDF idf weights (see scripts/trainRelevanceModel.js)
+const dataDir = path.join(__dirname, '..', 'data');
+const { idf } = JSON.parse(fs.readFileSync(path.join(dataDir, 'tfidf.json'), 'utf8'));
+const relevanceModel = JSON.parse(fs.readFileSync(path.join(dataDir, 'relevanceModel.json'), 'utf8'));
+
+function toApiScheme(scheme, match) {
+  return {
+    id: scheme.id,
+    name: scheme.name,
+    ministry: scheme.level,
+    description: scheme.description,
+    eligibility: JSON.parse(scheme.eligibility || '[]'),
+    benefit: scheme.benefit,
+    match,
+    category: scheme.category,
+    status: scheme.status,
+  };
+}
+
 // POST /api/schemes/discover
 router.post('/discover', (req, res) => {
-  const { ageGroup, gender, state, income, category, occupation } = req.body;
+  const profile = req.body; // { ageGroup, gender, state, income, category, occupation }
 
   const db = req.app.locals.db;
   const allSchemes = db.prepare('SELECT * FROM schemes WHERE status = ?').all('Active');
 
-  const results = allSchemes.map(scheme => {
-    let matchScore = scheme.base_match;
+  const results = allSchemes
+    .filter(scheme => !violatesHardFilter(profile, scheme))
+    .map(scheme => {
+      // Scheme already passed the hard eligibility filter, so it's a baseline 50%+ fit;
+      // the trained model's probability scales the rest based on occupation/category text fit.
+      const features = extractFeatures(profile, scheme, idf);
+      const probability = predict(features, relevanceModel);
+      const match = Math.max(50, Math.min(99, Math.round(50 + probability * 49)));
+      return toApiScheme(scheme, match);
+    });
 
-    // Age group matching
-    if (ageGroup && scheme.target_age_groups) {
-      const targetAges = JSON.parse(scheme.target_age_groups);
-      if (targetAges.includes('all') || targetAges.includes(ageGroup)) {
-        matchScore += 3;
-      } else {
-        matchScore -= 15;
-      }
-    }
-
-    // Gender matching
-    if (gender && scheme.target_genders) {
-      const targetGenders = JSON.parse(scheme.target_genders);
-      if (!targetGenders.includes('all') && !targetGenders.includes(gender)) {
-        matchScore -= 30; // Strong mismatch
-      }
-    }
-
-    // Income matching
-    if (income && scheme.target_income) {
-      const targetIncome = JSON.parse(scheme.target_income);
-      if (targetIncome.includes('all') || targetIncome.includes(income)) {
-        matchScore += 5;
-      } else {
-        matchScore -= 10;
-      }
-    }
-
-    // Category matching
-    if (category && scheme.target_categories) {
-      const targetCats = JSON.parse(scheme.target_categories);
-      if (targetCats.includes('all') || targetCats.includes(category)) {
-        matchScore += 3;
-      } else {
-        matchScore -= 5;
-      }
-    }
-
-    // Occupation matching
-    if (occupation && scheme.target_occupations) {
-      const targetOcc = JSON.parse(scheme.target_occupations);
-      if (targetOcc.includes('all') || targetOcc.includes(occupation)) {
-        matchScore += 5;
-      } else {
-        matchScore -= 10;
-      }
-    }
-
-    // Clamp score
-    matchScore = Math.max(10, Math.min(99, matchScore));
-
-    return {
-      id: scheme.id,
-      name: scheme.name,
-      nameHi: scheme.name_hi,
-      nameTa: scheme.name_ta,
-      ministry: scheme.ministry,
-      description: scheme.description,
-      descHi: scheme.desc_hi,
-      descTa: scheme.desc_ta,
-      eligibility: JSON.parse(scheme.eligibility || '[]'),
-      benefit: scheme.benefit,
-      match: matchScore,
-      category: scheme.category,
-      status: scheme.status,
-    };
-  });
-
-  // Sort by match score descending
   results.sort((a, b) => b.match - a.match);
 
-  // Filter out very low matches
-  const filtered = results.filter(s => s.match >= 30);
-
-  return res.json({ success: true, schemes: filtered });
+  return res.json({ success: true, schemes: results.slice(0, 30) });
 });
 
 // GET /api/schemes — list all schemes
@@ -105,20 +67,7 @@ router.get('/', (req, res) => {
 
   return res.json({
     success: true,
-    schemes: schemes.map(s => ({
-      id: s.id,
-      name: s.name,
-      nameHi: s.name_hi,
-      nameTa: s.name_ta,
-      ministry: s.ministry,
-      description: s.description,
-      descHi: s.desc_hi,
-      descTa: s.desc_ta,
-      eligibility: JSON.parse(s.eligibility || '[]'),
-      benefit: s.benefit,
-      category: s.category,
-      status: s.status,
-    })),
+    schemes: schemes.map(s => toApiScheme(s, null)),
   });
 });
 
@@ -404,21 +353,7 @@ router.get('/gov/search-all', async (req, res) => {
   const [dataGovRes, mySchemeRes] = await Promise.all(govPromises);
   
   // Combine local DB schemes with live data
-  const localSchemes = dbSchemes.map(s => ({
-    id: s.id,
-    name: s.name,
-    nameHi: s.name_hi,
-    nameTa: s.name_ta,
-    ministry: s.ministry,
-    description: s.description,
-    descHi: s.desc_hi,
-    descTa: s.desc_ta,
-    eligibility: JSON.parse(s.eligibility || '[]'),
-    benefit: s.benefit,
-    category: s.category,
-    status: s.status,
-    source: 'local',
-  }));
+  const localSchemes = dbSchemes.map(s => ({ ...toApiScheme(s, null), source: 'local' }));
 
   const liveSchemes = [
     ...(dataGovRes.data?.resources || []).map(r => ({

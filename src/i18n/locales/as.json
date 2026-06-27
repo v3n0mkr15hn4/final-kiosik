@@ -21,7 +21,9 @@
       "brandSubtitle": "স্মার্ট নগর সহায়তা কেন্দ্র",
       "help": "সহায়",
       "loadingSplash": "সুবিধা লোড হৈ আছে…",
-      "selected": "বাছনি কৰা হ'ল"
+      "selected": "বাছনি কৰা হ'ল",
+      "close": "বন্ধ কৰক",
+      "delete": "বিলোপ কৰক"
     },
     "language": {
       "select": "ভাষা নিৰ্বাচন কৰক",
@@ -191,7 +193,11 @@
       "enterLocation": "স্থান মেনুৱেলি দিয়ক",
       "location": "স্থান",
       "takePhoto": "ফটো লওক",
-      "uploadPhoto": "ফটো আপলোড কৰক (বিকল্প)"
+      "uploadPhoto": "ফটো আপলোড কৰক (বিকল্প)",
+      "maxPhotos": "সৰ্বাধিক 3 খন ফটোৰ অনুমতি আছে",
+      "locationFailed": "অৱস্থান লাভ কৰিব পৰা নগ’ল। অনুগ্ৰহ কৰি হাতেৰে দিয়ক।",
+      "geoUnsupported": "এই ব্ৰাউজাৰে জিঅ’লোকেশ্বন সমৰ্থন নকৰে।",
+      "noticeTitle": "জাননী"
     },
     "tracking": {
       "title": "অনুৰোধৰ স্থিতি অনুসৰণ কৰক",
@@ -452,7 +458,8 @@
       "ownershipTransfer": "মালিকানা স্থানান্তৰ",
       "ownershipTransferDesc": "এই গ্ৰাহক একাউণ্ট নতুন গৰাকীলে স্থানান্তৰ কৰাৰ অনুরোধ। ডকুমেন্ট সত্যাপন প্রয়োজন।",
       "ownershipTransferWarning": "⚠️ মালিকানা স্থানান্তৰৰ বাবে সহায়ক ডকুমেন্ট (বিক্রয় দলিল / NOC) প্রয়োজন। জমা দিয়াৰ পিছত আপলোডৰ অনুরোধ কৰা হ'ব।",
-      "verify": "সত্যাপন কৰক"
+      "verify": "সত্যাপন কৰক",
+      "verifyOtpFirst": "মোবাইল নম্বৰ সলনিৰ বাবে অনুগ্ৰহ কৰি OTP সত্যাপন কৰক"
     },
     "accessibility": {
       "title": "সুলভতা",
@@ -846,6 +853,36 @@
       "activationMessage": "নমস্কাৰ! সুবিধা ভয়েছ মোড সক্রিয় হ'ল। মই আপোনাক কেনেদৰে সহায় কৰিব পাৰোঁ?",
       "indicatorLabel": "হে সুবিধা",
       "switchingToVoice": "ভয়েছ মোডলে সলনি কৰা হৈ আছে..."
+    },
+    "admin": {
+      "title": "সুবিধা এডমিন প’ৰ্টেল",
+      "credentialsHint": "কৰ্মচাৰী ID বা চৰকাৰী ইমেইল লগইন",
+      "mfaHint": "{{target}} ৰ বাবে MFA সত্যাপন",
+      "identifier": "কৰ্মচাৰী ID / চৰকাৰী ইমেইল",
+      "password": "পাছৱৰ্ড",
+      "continueMfa": "MFA লৈ আগবাঢ়ক",
+      "validating": "সত্যাপন কৰা হৈছে…",
+      "mfaCode": "MFA ক’ড",
+      "devMfaCode": "Dev MFA ক’ড:",
+      "signIn": "ছাইন ইন",
+      "verifying": "সত্যাপন কৰা হৈছে…",
+      "backToCreds": "প্ৰমাণপত্ৰলৈ উভতি যাওক",
+      "backToLanding": "মূল পৃষ্ঠালৈ উভতি যাওক",
+      "loginFailed": "এডমিন লগইন বিফল হ’ল।",
+      "mfaFailed": "MFA সত্যাপন বিফল হ’ল।"
+    },
+    "keypad": {
+      "digit": "অংক {{n}}"
+    },
+    "aadhaar": {
+      "closeScanner": "কেমেৰা স্কেনাৰ বন্ধ কৰি উভতি যাওক"
+    },
+    "ai": {
+      "dismissMicWarning": "মাইক্ৰʼফʼন সতৰ্কবাণী বাতিল কৰক",
+      "closeAssistant": "AI সহায়ক বন্ধ কৰক"
+    },
+    "filePreview": {
+      "close": "পূৰ্বদৰ্শন বন্ধ কৰক"
     }
   }
 }

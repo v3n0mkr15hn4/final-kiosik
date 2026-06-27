@@ -122,12 +122,12 @@ export default function OfficeLocator() {
         <div style={{ padding: '14px 14px 0', flexShrink: 0 }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
             <div>
-              <h2 style={{ margin:0, fontSize:16, fontWeight:700, color:'#0f172a' }}>🏛️ {t('officeLocator.title')}</h2>
-              <p style={{ margin:0, fontSize:11, color:'#64748b', marginTop:1 }}>{t('officeLocator.subtitle')}</p>
+              <h2 style={{ margin:0, fontSize:16, fontWeight:700, color:'var(--slate-900)' }}>🏛️ {t('officeLocator.title')}</h2>
+              <p style={{ margin:0, fontSize:11, color:'var(--slate-500)', marginTop:1 }}>{t('officeLocator.subtitle')}</p>
             </div>
             {isMobile && (
               <button onClick={() => setSidebarOpen(false)}
-                style={{ background:'none', border:'none', fontSize:18, cursor:'pointer', color:'#64748b' }}>✕</button>
+                style={{ background:'none', border:'none', fontSize:18, cursor:'pointer', color:'var(--slate-500)' }}>✕</button>
             )}
           </div>
 
@@ -136,9 +136,9 @@ export default function OfficeLocator() {
             onClick={handleNearby}
             style={{
               width:'100%', marginBottom:10, padding:'8px 12px',
-              background: nearbyMode ? '#1d4ed8' : '#f0f7ff',
-              color: nearbyMode ? '#fff' : '#1d4ed8',
-              border:`1.5px solid ${nearbyMode ? '#1d4ed8' : '#bfdbfe'}`,
+              background: nearbyMode ? 'var(--accent-blue)' : 'var(--accent-blue-50)',
+              color: nearbyMode ? '#fff' : 'var(--accent-blue)',
+              border:`1.5px solid ${nearbyMode ? 'var(--accent-blue)' : 'var(--accent-blue-200)'}`,
               borderRadius:10, fontWeight:600, fontSize:13,
               cursor:'pointer', display:'flex', alignItems:'center',
               justifyContent:'center', gap:6,
@@ -162,14 +162,14 @@ export default function OfficeLocator() {
             <>
               {/* State */}
               <div style={{ marginBottom:6 }}>
-                <label style={{ fontSize:10, fontWeight:600, color:'#64748b', textTransform:'uppercase', letterSpacing:'0.05em', display:'block', marginBottom:3 }}>{t('officeLocator.state')}</label>
+                <label style={{ fontSize:10, fontWeight:600, color:'var(--slate-500)', textTransform:'uppercase', letterSpacing:'0.05em', display:'block', marginBottom:3 }}>{t('officeLocator.state')}</label>
                 <select className="sidebar-select" value={selectedState} onChange={e => handleStateChange(e.target.value)}>
                   {STATES.map(s => <option key={s.code} value={s.code}>{s.name}</option>)}
                 </select>
               </div>
               {/* District */}
               <div style={{ marginBottom:8 }}>
-                <label style={{ fontSize:10, fontWeight:600, color:'#64748b', textTransform:'uppercase', letterSpacing:'0.05em', display:'block', marginBottom:3 }}>{t('officeLocator.district')}</label>
+                <label style={{ fontSize:10, fontWeight:600, color:'var(--slate-500)', textTransform:'uppercase', letterSpacing:'0.05em', display:'block', marginBottom:3 }}>{t('officeLocator.district')}</label>
                 <select className="sidebar-select" value={selectedDistrict} onChange={e => setSelectedDistrict(e.target.value)}>
                   <option value="">{t('officeLocator.allDistricts')}</option>
                   {(DISTRICTS[selectedState] || []).map(d => <option key={d} value={d}>{d}</option>)}
@@ -177,7 +177,7 @@ export default function OfficeLocator() {
               </div>
               {/* Categories */}
               <div style={{ marginBottom:10 }}>
-                <label style={{ fontSize:10, fontWeight:600, color:'#64748b', textTransform:'uppercase', letterSpacing:'0.05em', display:'block', marginBottom:5 }}>{t('officeLocator.category')}</label>
+                <label style={{ fontSize:10, fontWeight:600, color:'var(--slate-500)', textTransform:'uppercase', letterSpacing:'0.05em', display:'block', marginBottom:5 }}>{t('officeLocator.category')}</label>
                 <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
                   {CATEGORIES.map(cat => (
                     <button key={cat.id}
@@ -192,11 +192,11 @@ export default function OfficeLocator() {
           )}
 
           {/* Count row */}
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', paddingBottom:8, borderBottom:'1px solid #f1f5f9' }}>
-            <span style={{ fontSize:12, color:'#64748b' }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', paddingBottom:8, borderBottom:'1px solid var(--slate-100)' }}>
+            <span style={{ fontSize:12, color:'var(--slate-500)' }}>
               {t('officeLocator.officesFound', { count: filteredOffices?.length ?? 0 })}
             </span>
-            <span style={{ fontSize:11, color:'#94a3b8' }}>
+            <span style={{ fontSize:11, color:'var(--slate-400)' }}>
               {nearbyMode ? t('officeLocator.nearYou') : t('officeLocator.nearState', { state: STATES.find(s => s.code === selectedState)?.name })}
             </span>
           </div>
@@ -205,11 +205,11 @@ export default function OfficeLocator() {
         {/* Cards list — extra bottom padding so last card is never hidden */}
         <div style={{ flex:1, overflowY:'auto', overflowX:'hidden', padding:'8px 10px 80px' }}>
           {!filteredOffices || filteredOffices.length === 0 ? (
-            <div style={{ textAlign:'center', padding:'28px 16px', color:'#94a3b8' }}>
+            <div style={{ textAlign:'center', padding:'28px 16px', color:'var(--slate-400)' }}>
               <div style={{ fontSize:28, marginBottom:6 }}>🗺️</div>
               <p style={{ fontSize:13, margin:0 }}>{t('officeLocator.noOfficesFound')}</p>
               <button onClick={() => { setActiveCategory('all'); setSearchQuery(''); setNearbyMode(false); }}
-                style={{ marginTop:8, fontSize:12, color:'#3b82f6', background:'none', border:'none', cursor:'pointer', textDecoration:'underline' }}>
+                style={{ marginTop:8, fontSize:12, color:'var(--accent-blue-400)', background:'none', border:'none', cursor:'pointer', textDecoration:'underline' }}>
                 {t('officeLocator.clearFilters')}
               </button>
             </div>
@@ -223,14 +223,14 @@ export default function OfficeLocator() {
         </div>
 
         {/* Footer */}
-        <div style={{ padding:'8px 14px', borderTop:'1px solid #f1f5f9', flexShrink:0, background:'#fafafa' }}>
+        <div style={{ padding:'8px 14px', borderTop:'1px solid var(--slate-100)', flexShrink:0, background:'var(--gray-50)' }}>
           <div style={{ display:'flex', alignItems:'center', gap:5 }}>
             <span className="status-dot-open" />
-            <span style={{ fontSize:11, color:'#64748b' }}>
+            <span style={{ fontSize:11, color:'var(--slate-500)' }}>
               {nearbyMode ? t('officeLocator.showingNearest') : t('officeLocator.kioskState', { state: STATES.find(s => s.code === selectedState)?.name })}
             </span>
           </div>
-          <p style={{ margin:'3px 0 0', fontSize:10, color:'#94a3b8' }}>{t('officeLocator.voiceAutoOn')}</p>
+          <p style={{ margin:'3px 0 0', fontSize:10, color:'var(--slate-400)' }}>{t('officeLocator.voiceAutoOn')}</p>
         </div>
       </aside>
 
@@ -251,9 +251,9 @@ export default function OfficeLocator() {
           <button onClick={() => setSidebarOpen(false)}
             style={{
               position:'absolute', top:14, left:14, zIndex:20,
-              background:'rgba(255,255,255,0.92)', border:'1px solid #e5e7eb',
+              background:'rgba(255,255,255,0.92)', border:'1px solid var(--gray-200)',
               borderRadius:8, padding:'5px 10px', fontSize:12, fontWeight:600,
-              color:'#374151', cursor:'pointer', boxShadow:'0 2px 8px rgba(0,0,0,0.10)',
+              color:'var(--gray-700)', cursor:'pointer', boxShadow:'0 2px 8px rgba(0,0,0,0.10)',
               display:'flex', alignItems:'center', gap:4,
             }}>◀ {t('officeLocator.hide')}</button>
         )}
@@ -275,32 +275,32 @@ function OfficeCard({ office, isActive, onNavigate }) {
             <span style={{ fontSize:13 }}>{cat.icon}</span>
             <span style={{
               fontSize:9, fontWeight:600, padding:'2px 6px', borderRadius:999,
-              background: isActive ? '#dbeafe' : '#f1f5f9',
-              color: isActive ? '#1d4ed8' : '#475569',
+              background: isActive ? 'var(--accent-blue-100)' : 'var(--slate-100)',
+              color: isActive ? 'var(--accent-blue)' : 'var(--slate-600)',
               textTransform:'uppercase', letterSpacing:'0.04em',
             }}>{cat.label}</span>
           </div>
-          <h4 style={{ margin:0, fontSize:13, fontWeight:700, color:'#0f172a', lineHeight:1.3 }}>{office.name}</h4>
-          <p style={{ margin:'2px 0 0', fontSize:11, color:'#64748b', lineHeight:1.4 }}>{office.address}</p>
+          <h4 style={{ margin:0, fontSize:13, fontWeight:700, color:'var(--slate-900)', lineHeight:1.3 }}>{office.name}</h4>
+          <p style={{ margin:'2px 0 0', fontSize:11, color:'var(--slate-500)', lineHeight:1.4 }}>{office.address}</p>
         </div>
         <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:2, flexShrink:0 }}>
           <div style={{ display:'flex', alignItems:'center', gap:3 }}>
             <span className={office.open ? 'status-dot-open' : 'status-dot-closed'} />
-            <span style={{ fontSize:10, fontWeight:600, color: office.open ? '#16a34a' : '#dc2626' }}>
+            <span style={{ fontSize:10, fontWeight:600, color: office.open ? 'var(--status-open)' : 'var(--status-closed)' }}>
               {office.open ? 'Open' : 'Closed'}
             </span>
           </div>
         </div>
       </div>
-      <div style={{ display:'flex', alignItems:'center', gap:10, margin:'7px 0 0', padding:'5px 8px', background:'#f8fafc', borderRadius:7 }}>
+      <div style={{ display:'flex', alignItems:'center', gap:10, margin:'7px 0 0', padding:'5px 8px', background:'var(--slate-50)', borderRadius:7 }}>
         <div style={{ textAlign:'center' }}>
-          <div style={{ fontSize:12, fontWeight:700, color:'#1d4ed8' }}>{formatDist(office._distKm)}</div>
-          <div style={{ fontSize:9, color:'#94a3b8' }}>Distance</div>
+          <div style={{ fontSize:12, fontWeight:700, color:'var(--accent-blue)' }}>{formatDist(office._distKm)}</div>
+          <div style={{ fontSize:9, color:'var(--slate-400)' }}>Distance</div>
         </div>
-        <div style={{ width:1, height:20, background:'#e5e7eb' }} />
+        <div style={{ width:1, height:20, background:'var(--gray-200)' }} />
         <div style={{ textAlign:'center' }}>
-          <div style={{ fontSize:12, fontWeight:700, color:'#0f172a' }}>{etaMin(office._distKm)} min</div>
-          <div style={{ fontSize:9, color:'#94a3b8' }}>ETA</div>
+          <div style={{ fontSize:12, fontWeight:700, color:'var(--slate-900)' }}>{etaMin(office._distKm)} min</div>
+          <div style={{ fontSize:9, color:'var(--slate-400)' }}>ETA</div>
         </div>
         <div style={{ flex:1 }} />
         <button className="nav-btn" onClick={() => onNavigate(office)}>

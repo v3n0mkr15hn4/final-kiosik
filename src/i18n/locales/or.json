@@ -21,7 +21,9 @@
       "selected": "ଚୟିତ",
       "brandSubtitle": "ସ୍ମାର୍ଟ ଅର୍ବାନ ହେଲ୍ପଡେସ୍କ",
       "help": "ସାହାଯ୍ୟ",
-      "loadingSplash": "ସୁବିଧା ଲୋଡ୍ ହେଉଛି…"
+      "loadingSplash": "ସୁବିଧା ଲୋଡ୍ ହେଉଛି…",
+      "close": "ବନ୍ଦ କରନ୍ତୁ",
+      "delete": "ବିଲୋପ କରନ୍ତୁ"
     },
     "language": {
       "select": "ଭାଷା ଚୟନ କରନ୍ତୁ",
@@ -191,7 +193,11 @@
       "chooseFile": "ଫାଇଲ ଚୟନ କରନ୍ତୁ",
       "location": "ସ୍ଥାନ",
       "currentLocation": "ବର୍ତ୍ତମାନ ସ୍ଥାନ ବ୍ୟବହାର କରନ୍ତୁ",
-      "enterLocation": "ସ୍ଥାନ ହସ୍ତରେ ପ୍ରବେଶ କରନ୍ତୁ"
+      "enterLocation": "ସ୍ଥାନ ହସ୍ତରେ ପ୍ରବେଶ କରନ୍ତୁ",
+      "maxPhotos": "ସର୍ବାଧିକ 3 ଫଟୋ ଅନୁମୋଦିତ",
+      "locationFailed": "ଅବସ୍ଥାନ ପାଇବାରେ ଅସମର୍ଥ। ଦୟାକରି ହସ୍ତଚାଳିତ ଭାବେ ପ୍ରବେଶ କରନ୍ତୁ।",
+      "geoUnsupported": "ଏହି ବ୍ରାଉଜର୍ ଜିଓଲୋକେସନ୍ ସମର୍ଥନ କରେ ନାହିଁ।",
+      "noticeTitle": "ସୂଚନା"
     },
     "tracking": {
       "title": "ଅନୁରୋଧ ସ୍ଥିତି ଟ୍ରାକ୍ କରନ୍ତୁ",
@@ -708,7 +714,8 @@
       "enterAadhaarNumber": "12-ଅଙ୍କ ଆଧାର ନମ୍ବର",
       "ownershipTransferWarning": "⚠️ ମାଲିକାନା ସ୍ଥାନାନ୍ତରଣ ପାଇଁ ସହାୟକ ଦଲିଲ (ବିକ୍ରୟ ପତ୍ର / NOC) ଆବଶ୍ୟକ। ଦାଖଲ ପରେ ଅପଲୋଡର ଅନୁରୋଧ କରାଯିବ।",
       "enterNewOwnerName": "ନୂତନ ମାଲିକର ପୂର୍ଣ୍ଣ ନାମ",
-      "confirmUpdateMsg": "ସମସ୍ତ ପରିବର୍ତ୍ତନ ସେଭ୍ କରି ସୁନିଶ୍ଚିତକରଣ ରସିଦ ତିଆରି କରିବେ କି?"
+      "confirmUpdateMsg": "ସମସ୍ତ ପରିବର୍ତ୍ତନ ସେଭ୍ କରି ସୁନିଶ୍ଚିତକରଣ ରସିଦ ତିଆରି କରିବେ କି?",
+      "verifyOtpFirst": "ମୋବାଇଲ୍ ନମ୍ବର ପରିବର୍ତ୍ତନ ପାଇଁ ଦୟାକରି OTP ଯାଞ୍ଚ କରନ୍ତୁ"
     },
     "chatbot": {
       "elec1": "ନୂତନ ସଂଯୋଗ ପାଇଁ କିପରି ଆବେଦନ କରିବେ?",
@@ -846,6 +853,36 @@
       "indicatorLabel": "ହେ ସୁବିଧା",
       "activatedTitle": "ସୁବିଧା ସକ୍ରିୟ",
       "switchingToVoice": "ଭଏସ୍ ମୋଡ୍ କୁ ସ୍ୱିଚ୍ ହେଉଛି..."
+    },
+    "admin": {
+      "title": "ସୁବିଧା ଆଡମିନ୍ ପୋର୍ଟାଲ୍",
+      "credentialsHint": "କର୍ମଚାରୀ ID କିମ୍ବା ସରକାରୀ ଇମେଲ୍ ଲଗଇନ୍",
+      "mfaHint": "{{target}} ପାଇଁ MFA ଯାଞ୍ଚ",
+      "identifier": "କର୍ମଚାରୀ ID / ସରକାରୀ ଇମେଲ୍",
+      "password": "ପାସୱାର୍ଡ",
+      "continueMfa": "MFA କୁ ଅଗ୍ରସର ହୁଅନ୍ତୁ",
+      "validating": "ଯାଞ୍ଚ କରାଯାଉଛି…",
+      "mfaCode": "MFA କୋଡ୍",
+      "devMfaCode": "Dev MFA କୋଡ୍:",
+      "signIn": "ସାଇନ୍ ଇନ୍",
+      "verifying": "ଯାଞ୍ଚ କରାଯାଉଛି…",
+      "backToCreds": "ପ୍ରମାଣପତ୍ରକୁ ଫେରନ୍ତୁ",
+      "backToLanding": "ମୁଖ୍ୟ ପୃଷ୍ଠାକୁ ଫେରନ୍ତୁ",
+      "loginFailed": "ଆଡମିନ୍ ଲଗଇନ୍ ବିଫଳ ହେଲା।",
+      "mfaFailed": "MFA ଯାଞ୍ଚ ବିଫଳ ହେଲା।"
+    },
+    "keypad": {
+      "digit": "ଅଙ୍କ {{n}}"
+    },
+    "aadhaar": {
+      "closeScanner": "କ୍ୟାମେରା ସ୍କାନର୍ ବନ୍ଦ କରି ଫେରନ୍ତୁ"
+    },
+    "ai": {
+      "dismissMicWarning": "ମାଇକ୍ରୋଫୋନ୍ ଚେତାବନୀ ଖାରଜ କରନ୍ତୁ",
+      "closeAssistant": "AI ସହାୟକ ବନ୍ଦ କରନ୍ତୁ"
+    },
+    "filePreview": {
+      "close": "ପୂର୍ବାବଲୋକନ ବନ୍ଦ କରନ୍ତୁ"
     }
   }
 }

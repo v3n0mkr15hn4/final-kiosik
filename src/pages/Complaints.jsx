@@ -45,6 +45,7 @@ const Complaints = () => {
   const [geoLoading, setGeoLoading] = useState(false);
   const [submissionStep, setSubmissionStep] = useState(0);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [notice, setNotice] = useState('');
   const [useCurrentLocation, setUseCurrentLocation] = useState(false);
 
   const complaintIcons = {
@@ -82,7 +83,7 @@ const Complaints = () => {
   const handlePhotoCapture = (e) => {
     const files = Array.from(e.target.files);
     if (files.length + photos.length > 3) {
-      alert('Maximum 3 photos allowed');
+      setNotice(t('complaints.maxPhotos'));
       return;
     }
 
@@ -117,11 +118,11 @@ const Complaints = () => {
         (error) => {
           console.error('Location error:', error);
           setGeoLoading(false);
-          alert('Unable to get location. Please enter manually.');
+          setNotice(t('complaints.locationFailed'));
         }
       );
     } else {
-      alert('Geolocation is not supported by this browser.');
+      setNotice(t('complaints.geoUnsupported'));
     }
   };
 
@@ -495,6 +496,16 @@ const Complaints = () => {
         cancelText={t('app.cancel')}
         onConfirm={handleConfirmSubmit}
         onCancel={() => setShowConfirmModal(false)}
+      />
+
+      <Modal
+        isOpen={!!notice}
+        onClose={() => setNotice('')}
+        type="warning"
+        title={t('complaints.noticeTitle')}
+        message={notice}
+        confirmText={t('app.confirm')}
+        onConfirm={() => setNotice('')}
       />
     </VK>
   );

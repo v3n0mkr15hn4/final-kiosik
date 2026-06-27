@@ -16,7 +16,9 @@ const Button = ({
   type = 'button',
   ...props
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-kiosk transition-all duration-200 touch-manipulation select-none active:scale-95';
+  // Radius matches the `.btn` primitive (32px * --ui-scale) so React buttons and
+  // CSS-primitive buttons share one kiosk scale across the app.
+  const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-[calc(32px*var(--ui-scale))] transition-all duration-200 touch-manipulation select-none active:scale-95';
   
   const variants = {
     primary: 'bg-government-blue text-white hover:bg-blue-800 active:bg-blue-900 shadow-kiosk hover:shadow-kiosk-hover',
@@ -28,11 +30,13 @@ const Button = ({
     orange: 'bg-government-orange text-white hover:bg-orange-600 active:bg-orange-700 shadow-kiosk',
   };
 
+  // Sizes track the `.btn` / `.btn-xl` primitive kiosk scale (min-height 120px /
+  // 160px * --ui-scale, font 40px / 48px) so touch targets match across the app.
   const sizes = {
-    small: 'px-[calc(1rem*var(--ui-scale))] py-[calc(0.5rem*var(--ui-scale))] text-kiosk-sm min-h-[calc(44px*var(--ui-scale))]',
-    medium: 'px-[calc(1.5rem*var(--ui-scale))] py-[calc(0.75rem*var(--ui-scale))] text-kiosk-base min-h-[calc(52px*var(--ui-scale))]',
-    large: 'px-[calc(2rem*var(--ui-scale))] py-[calc(1rem*var(--ui-scale))] text-kiosk-lg min-h-[calc(60px*var(--ui-scale))]',
-    xlarge: 'px-[calc(2.5rem*var(--ui-scale))] py-[calc(1.25rem*var(--ui-scale))] text-kiosk-xl min-h-[calc(72px*var(--ui-scale))]',
+    small: 'px-[calc(1.25rem*var(--ui-scale))] py-[calc(0.75rem*var(--ui-scale))] text-kiosk-xl min-h-[calc(72px*var(--ui-scale))]',
+    medium: 'px-[calc(1.75rem*var(--ui-scale))] py-[calc(1rem*var(--ui-scale))] text-kiosk-2xl min-h-[calc(96px*var(--ui-scale))]',
+    large: 'px-[calc(3rem*var(--ui-scale))] py-[calc(1.5rem*var(--ui-scale))] text-kiosk-3xl min-h-[calc(120px*var(--ui-scale))]',
+    xlarge: 'px-[calc(4.5rem*var(--ui-scale))] py-[calc(2rem*var(--ui-scale))] text-kiosk-4xl min-h-[calc(160px*var(--ui-scale))]',
   };
 
   const disabledStyles = 'opacity-50 cursor-not-allowed pointer-events-none';

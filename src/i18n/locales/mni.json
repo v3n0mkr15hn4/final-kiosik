@@ -21,7 +21,9 @@
       "selected": "খনখ্রবা",
       "brandSubtitle": "স্মার্ট আরবান হেল্পডেস্ক",
       "help": "মতেং",
-      "loadingSplash": "সুবিধা লোড তৌরি…"
+      "loadingSplash": "সুবিধা লোড তৌরি…",
+      "close": "ক্লোজ তৌবা",
+      "delete": "ডিলিট তৌবা"
     },
     "language": {
       "select": "Select Language",
@@ -191,7 +193,11 @@
       "chooseFile": "ফাইল খল্লু",
       "location": "মফম",
       "currentLocation": "হৌজিক্কী মফম শিজিন্নবা",
-      "enterLocation": "মফমদু মশাগী মতেং শিজিন্নবা"
+      "enterLocation": "মফমদু মশাগী মতেং শিজিন্নবা",
+      "maxPhotos": "খ্বায়দগী য়াম্না ফোটো 3 য়াবা য়াই",
+      "locationFailed": "মফম ফংবা ঙমদ্রে। চানবীদুনা খুত্না হাপচিল্লু।",
+      "geoUnsupported": "ব্রাউজর অসিনা জিওলোকেসন সপোর্ট তৌদে।",
+      "noticeTitle": "খঙহন্নবা"
     },
     "tracking": {
       "title": "রিকুয়েস্টকী স্ট্যাটাস ট্রেক তৌবা",
@@ -708,7 +714,8 @@
       "enterAadhaarNumber": "12-ꯁꯤꯖꯥ ꯑꯥꯗꯥꯔ ꯅꯝꯕꯔ",
       "ownershipTransferWarning": "⚠️ ꯃꯄꯨ ꯑꯣꯏꯕ ꯁꯦꯟꯗꯣꯀꯄꯗ ꯃꯇꯦꯡ ꯄꯥꯡꯕ ꯗꯣꯀꯨꯃꯦꯟꯇ (ꯌꯣꯟꯅꯕ ꯗꯤꯗ / NOC) ꯇꯥꯕꯥ ꯌꯥꯏ꯫ ꯁꯥꯕꯃꯤꯠ ꯇꯧꯔꯕ ꯃꯇꯨꯡꯗ ꯑꯄꯂꯣꯗ ꯇꯧꯕ ꯐꯣꯡꯗꯣꯛꯂꯒꯅꯤ꯫",
       "enterNewOwnerName": "ꯑꯅꯧꯕ ꯃꯄꯨꯒꯤ ꯃꯄꯨꯡ ꯐꯥꯕ ꯃꯤꯡ",
-      "confirmUpdateMsg": "ꯑꯍꯣꯡꯕ ꯄꯨꯝꯅꯃꯛ ꯁꯦꯚ ꯇꯧꯕꯤꯗꯨꯅ ꯐꯣꯡꯗꯣꯀꯄꯒꯤ ꯔꯁꯤꯗ ꯁꯦꯝꯒꯠꯄꯔꯥ?"
+      "confirmUpdateMsg": "ꯑꯍꯣꯡꯕ ꯄꯨꯝꯅꯃꯛ ꯁꯦꯚ ꯇꯧꯕꯤꯗꯨꯅ ꯐꯣꯡꯗꯣꯀꯄꯒꯤ ꯔꯁꯤꯗ ꯁꯦꯝꯒꯠꯄꯔꯥ?",
+      "verifyOtpFirst": "মোবাইল নম্বর হোংদোকনবা OTP ভেরিফাই তৌবিয়ু"
     },
     "chatbot": {
       "elec1": "ꯑꯅꯧꯕ ꯀꯅꯦꯛꯁꯟꯒꯤ ꯐꯣꯡꯗꯣꯀꯄ ꯀꯔꯝꯅ ꯇꯧꯒꯗꯒꯦ?",
@@ -846,6 +853,36 @@
       "indicatorLabel": "ꯍꯩ ꯁꯨꯚꯤꯗꯥ",
       "activatedTitle": "ꯁꯨꯚꯤꯗꯥ ꯌꯥꯗꯒꯇꯂꯦ",
       "switchingToVoice": "ꯀꯗꯧ ꯃꯣꯗꯗ ꯁꯣꯏꯆ ꯇꯧꯔꯤ..."
+    },
+    "admin": {
+      "title": "সুবিধা এডমিন পোর্টেল",
+      "credentialsHint": "এমপ্লোয়ী ID নত্ত্রগা অফিসিয়েল ইমেল লগইন",
+      "mfaHint": "{{target}} গীদমক MFA ভেরিফিকেসন",
+      "identifier": "এমপ্লোয়ী ID / অফিসিয়েল ইমেল",
+      "password": "পাসৱার্ড",
+      "continueMfa": "MFA দা মখা চত্থরকউ",
+      "validating": "ভেলিডেট তৌরি…",
+      "mfaCode": "MFA কোড",
+      "devMfaCode": "Dev MFA কোড:",
+      "signIn": "সাইন ইন",
+      "verifying": "ভেরিফাই তৌরি…",
+      "backToCreds": "ক্রিডেন্সিয়েলদা হল্লকউ",
+      "backToLanding": "ল্যান্দিংদা হল্লকউ",
+      "loginFailed": "এডমিন লগইন মায় পাকখিদে।",
+      "mfaFailed": "MFA ভেরিফিকেসন মায় পাকখিদে।"
+    },
+    "keypad": {
+      "digit": "মশিং {{n}}"
+    },
+    "aadhaar": {
+      "closeScanner": "কেমেরা স্কেনর লোনথোক্তুনা হল্লকউ"
+    },
+    "ai": {
+      "dismissMicWarning": "মাইক্রোফোন চেকসিন থিংবা",
+      "closeAssistant": "AI মতেংগী ক্লোজ তৌবা"
+    },
+    "filePreview": {
+      "close": "প্রিভিউ ক্লোজ তৌবা"
     }
   }
 }

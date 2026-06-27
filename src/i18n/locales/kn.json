@@ -21,7 +21,9 @@
       "selected": "ಆಯ್ಕೆಮಾಡಲಾಗಿದೆ",
       "brandSubtitle": "ಸ್ಮಾರ್ಟ್ ಅರ್ಬನ್ ಹೆಲ್ಪ್‌ಡೆಸ್ಕ್",
       "help": "ಸಹಾಯ",
-      "loadingSplash": "SUVIDHA ಲೋಡ್ ಆಗುತ್ತಿದೆ…"
+      "loadingSplash": "SUVIDHA ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
+      "close": "ಮುಚ್ಚಿ",
+      "delete": "ಅಳಿಸಿ"
     },
     "language": {
       "select": "ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
@@ -191,7 +193,11 @@
       "chooseFile": "ಫೈಲ್ ಆಯ್ಕೆಮಾಡಿ",
       "location": "ಸ್ಥಳ",
       "currentLocation": "ಪ್ರಸ್ತುತ ಸ್ಥಳವನ್ನು ಬಳಸಿ",
-      "enterLocation": "ಸ್ಥಳವನ್ನು ಸ್ವಯಂ ನಮೂದಿಸಿ"
+      "enterLocation": "ಸ್ಥಳವನ್ನು ಸ್ವಯಂ ನಮೂದಿಸಿ",
+      "maxPhotos": "ಗರಿಷ್ಠ 3 ಫೋಟೋಗಳಿಗೆ ಅವಕಾಶವಿದೆ",
+      "locationFailed": "ಸ್ಥಳ ಪಡೆಯಲಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಕೈಯಾರೆ ನಮೂದಿಸಿ.",
+      "geoUnsupported": "ಈ ಬ್ರೌಸರ್ ಜಿಯೋಲೋಕೇಶನ್ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ.",
+      "noticeTitle": "ಸೂಚನೆ"
     },
     "tracking": {
       "title": "ಮನವಿ ಸ್ಥಿತಿಯನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ",
@@ -708,7 +714,8 @@
       "enterAadhaarNumber": "12-ಅಂಕಿಯ ಆಧಾರ್ ಸಂಖ್ಯೆ",
       "ownershipTransferWarning": "⚠️ ಮಾಲೀಕತ್ವ ವರ್ಗಾವಣೆಗೆ ಬೆಂಬಲ ದಾಖಲೆಗಳು (ಮಾರಾಟ ಪತ್ರ / NOC) ಅಗತ್ಯ. ಸಲ್ಲಿಕೆಯ ನಂತರ ಅಪ್‌ಲೋಡ್ ಕೋರಲಾಗುತ್ತದೆ.",
       "enterNewOwnerName": "ಹೊಸ ಮಾಲೀಕರ ಪೂರ್ಣ ಹೆಸರು",
-      "confirmUpdateMsg": "ಎಲ್ಲಾ ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ ಮತ್ತು ದೃಢೀಕರಣ ರಸೀದಿಯನ್ನು ಉತ್ಪಾದಿಸುವುದೇ?"
+      "confirmUpdateMsg": "ಎಲ್ಲಾ ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ ಮತ್ತು ದೃಢೀಕರಣ ರಸೀದಿಯನ್ನು ಉತ್ಪಾದಿಸುವುದೇ?",
+      "verifyOtpFirst": "ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ಬದಲಾವಣೆಗೆ OTP ಪರಿಶೀಲಿಸಿ"
     },
     "chatbot": {
       "elec1": "ಹೊಸ ಸಂಪರ್ಕಕ್ಕಾಗಿ ಅರ್ಜಿ ಸಲ್ಲಿಸುವುದು ಹೇಗೆ?",
@@ -846,6 +853,36 @@
       "indicatorLabel": "ಹೇ ಸುವಿಧಾ",
       "activatedTitle": "ಸುವಿಧಾ ಸಕ್ರಿಯಗೊಂಡಿದೆ",
       "switchingToVoice": "ಧ್ವನಿ ಮೋಡ್‌ಗೆ ಬದಲಾಯಿಸಲಾಗುತ್ತಿದೆ..."
+    },
+    "admin": {
+      "title": "ಸುವಿಧಾ ಆಡ್ಮಿನ್ ಪೋರ್ಟಲ್",
+      "credentialsHint": "ಉದ್ಯೋಗಿ ID ಅಥವಾ ಅಧಿಕೃತ ಇಮೇಲ್ ಲಾಗಿನ್",
+      "mfaHint": "{{target}} ಗಾಗಿ MFA ಪರಿಶೀಲನೆ",
+      "identifier": "ಉದ್ಯೋಗಿ ID / ಅಧಿಕೃತ ಇಮೇಲ್",
+      "password": "ಪಾಸ್‌ವರ್ಡ್",
+      "continueMfa": "MFA ಗೆ ಮುಂದುವರಿಯಿರಿ",
+      "validating": "ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…",
+      "mfaCode": "MFA ಕೋಡ್",
+      "devMfaCode": "Dev MFA ಕೋಡ್:",
+      "signIn": "ಸೈನ್ ಇನ್",
+      "verifying": "ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…",
+      "backToCreds": "ರುಜುವಾತುಗಳಿಗೆ ಹಿಂತಿರುಗಿ",
+      "backToLanding": "ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ",
+      "loginFailed": "ಆಡ್ಮಿನ್ ಲಾಗಿನ್ ವಿಫಲವಾಗಿದೆ.",
+      "mfaFailed": "MFA ಪರಿಶೀಲನೆ ವಿಫಲವಾಗಿದೆ."
+    },
+    "keypad": {
+      "digit": "ಅಂಕಿ {{n}}"
+    },
+    "aadhaar": {
+      "closeScanner": "ಕ್ಯಾಮೆರಾ ಸ್ಕ್ಯಾನರ್ ಮುಚ್ಚಿ ಹಿಂತಿರುಗಿ"
+    },
+    "ai": {
+      "dismissMicWarning": "ಮೈಕ್ರೋಫೋನ್ ಎಚ್ಚರಿಕೆ ತೆಗೆದುಹಾಕಿ",
+      "closeAssistant": "AI ಸಹಾಯಕ ಮುಚ್ಚಿ"
+    },
+    "filePreview": {
+      "close": "ಪೂರ್ವವೀಕ್ಷಣೆ ಮುಚ್ಚಿ"
     }
   }
 }

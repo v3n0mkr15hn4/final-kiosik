@@ -16,7 +16,8 @@ const Card = ({
   className = '',
   ...props
 }) => {
-  const baseStyles = 'relative flex flex-col items-center justify-center rounded-kiosk-lg transition-all duration-200 cursor-pointer touch-manipulation select-none';
+  // Radius matches the `.card` primitive (--r-lg = 28px * --ui-scale).
+  const baseStyles = 'relative flex flex-col items-center justify-center rounded-[calc(28px*var(--ui-scale))] transition-all duration-200 cursor-pointer touch-manipulation select-none';
 
   const variants = {
     default: `bg-white border-2 ${selected ? 'border-government-blue bg-blue-50' : 'border-gray-200'} hover:border-government-blue hover:shadow-kiosk-hover`,
@@ -25,11 +26,12 @@ const Card = ({
     gradient: 'bg-gradient-to-br from-government-blue to-government-lightBlue text-white shadow-kiosk hover:shadow-kiosk-hover',
   };
 
+  // Padding tracks the `.card` primitive (64px * --ui-scale at the default size).
   const sizes = {
-    small: 'p-4 min-h-[100px]',
-    medium: 'p-6 min-h-[140px]',
-    large: 'p-8 min-h-[180px]',
-    xlarge: 'p-10 min-h-[220px]',
+    small: 'p-[calc(32px*var(--ui-scale))] min-h-[calc(100px*var(--ui-scale))]',
+    medium: 'p-[calc(48px*var(--ui-scale))] min-h-[calc(140px*var(--ui-scale))]',
+    large: 'p-[calc(64px*var(--ui-scale))] min-h-[calc(180px*var(--ui-scale))]',
+    xlarge: 'p-[calc(80px*var(--ui-scale))] min-h-[calc(220px*var(--ui-scale))]',
   };
 
   const disabledStyles = 'opacity-50 cursor-not-allowed pointer-events-none';

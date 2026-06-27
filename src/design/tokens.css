@@ -48,6 +48,45 @@
   --cream:     oklch(0.965 0.022 75);
   --line:      oklch(0.90 0.012 80);
 
+  /* Neutral slate scale — dark surfaces (Aadhaar camera scanner, consent
+     dialog, office locator). Hex values kept so appearance is unchanged while
+     the values live in one place instead of being inlined per component. */
+  --slate-900: #0f172a;
+  --slate-800: #1e293b;
+  --slate-700: #334155;
+  --slate-600: #475569;
+  --slate-500: #64748b;
+  --slate-400: #94a3b8;
+  --slate-300: #cbd5e1;
+  --slate-200: #e2e8f0;
+  --slate-100: #f1f5f9;
+  --slate-50:  #f8fafc;
+  --gray-700:  #374151;
+
+  /* AI waveform bar colors — kept as hex because the canvas appends an alpha
+     suffix (color + 'ff' / '44') which only works with hex strings. */
+  --wave-listening:  #34d399;
+  --wave-speaking:   #60a5fa;
+  --wave-processing: #fbbf24;
+  --wave-idle:       #818cf8;
+
+  /* Accent colors used by the scanner/locator overlays */
+  --accent-blue:     #1d4ed8;
+  --accent-blue-400: #3b82f6;
+  --accent-blue-200: #bfdbfe;
+  --accent-blue-50:  #f0f7ff;
+  --accent-green:    #22c55e;
+  --accent-green-300:#86efac;
+  --accent-indigo:   #6366f1;
+  --accent-cyan-200: #a5f3fc;
+  --accent-cyan-400: #22d3ee;
+  --accent-red-300:  #fca5a5;
+  --accent-blue-100: #dbeafe;
+  --gray-200:        #e5e7eb;
+  --gray-50:         #fafafa;
+  --status-open:     #16a34a;
+  --status-closed:   #dc2626;
+
   /* Radius */
   --r-md: calc(18px * var(--ui-scale));
   --r-lg: calc(28px * var(--ui-scale));

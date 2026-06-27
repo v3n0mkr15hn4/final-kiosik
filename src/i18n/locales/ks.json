@@ -21,7 +21,9 @@
       "selected": "ژارنہٕ آمت",
       "brandSubtitle": "سمارٹ اربن ہیلپ ڈیسک",
       "help": "مدد",
-      "loadingSplash": "سُوِدھا لوڈ گژھان…"
+      "loadingSplash": "سُوِدھا لوڈ گژھان…",
+      "close": "بند کریو",
+      "delete": "مژھرٲوۍ"
     },
     "language": {
       "select": "Select Language",
@@ -191,7 +193,11 @@
       "chooseFile": "فائل ژارٕو",
       "location": "مقام",
       "currentLocation": "موجودٕ مقام استعمال کریو",
-      "enterLocation": "مقام دستی طور لِکھِو"
+      "enterLocation": "مقام دستی طور لِکھِو",
+      "maxPhotos": "زیادٕ کھوتہٕ زیادٕ 3 فوٹَن ہِنٛز اِجازت چھ",
+      "locationFailed": "لوکیشَن حاصِل کرنہٕ آسہٕ ناممکِن۔ مہربٲنی کرِتھ پانہٕ درج کریو۔",
+      "geoUnsupported": "یہ براوزر چھ نہٕ جیو لوکیشن سپورٹ کران۔",
+      "noticeTitle": "اطلاع"
     },
     "tracking": {
       "title": "درخواستَچ حالت ٹریک کریو",
@@ -708,7 +714,8 @@
       "enterAadhaarNumber": "12-عدد آدھار نمبر",
       "ownershipTransferWarning": "⚠️ مٲلِکی منتقِلی خٲترِ مدد دستاویز (فروخت نامہٕ / NOC) ضرور۔ جمع کرنہٕ پؠٹھ اَپلوڈٕک گذارٕش کرنہٕ یِیہِ۔",
       "enterNewOwnerName": "نوٚو مٲلِک پُورٕ ناو",
-      "confirmUpdateMsg": "تٔمام تبدیٖلی محفوظ کرِتھ تصدِیقی رسیٖت بناونہٕ چھُہ؟"
+      "confirmUpdateMsg": "تٔمام تبدیٖلی محفوظ کرِتھ تصدِیقی رسیٖت بناونہٕ چھُہ؟",
+      "verifyOtpFirst": "موبایل نمبر تبدیل کرنہٕ خٲطرٕ مہربٲنی کرِتھ OTP تصدیق کریو"
     },
     "chatbot": {
       "elec1": "نوٚس کنیکشن خٲترِ کیٚتھ گذارٕش کرنہٕ؟",
@@ -846,6 +853,36 @@
       "indicatorLabel": "ہے سہولت",
       "activatedTitle": "سہولت فعال",
       "switchingToVoice": "آواز موڈس طرف سوئچ گژھان چھُہ..."
+    },
+    "admin": {
+      "title": "سُودھا ایڈمن پورٹل",
+      "credentialsHint": "ملازِم ID یا سرکٲری ای میل لاگ اِن",
+      "mfaHint": "{{target}} خٲطرٕ MFA تصدیق",
+      "identifier": "ملازِم ID / سرکٲری ای میل",
+      "password": "پاس ورڈ",
+      "continueMfa": "MFA پؠٹھ جٲری تھٲوۍ",
+      "validating": "تصدیق گژھان…",
+      "mfaCode": "MFA کوڈ",
+      "devMfaCode": "Dev MFA کوڈ:",
+      "signIn": "سائن اِن",
+      "verifying": "تصدیق گژھان…",
+      "backToCreds": "سَنَدَن کُن واپس",
+      "backToLanding": "بُنیٛادی صفحَس کُن واپس",
+      "loginFailed": "ایڈمن لاگ اِن ناکام۔",
+      "mfaFailed": "MFA تصدیق ناکام۔"
+    },
+    "keypad": {
+      "digit": "ہِندسہٕ {{n}}"
+    },
+    "aadhaar": {
+      "closeScanner": "کیمرٕ سکینر بند کرِتھ واپس گژھیو"
+    },
+    "ai": {
+      "dismissMicWarning": "مائیکروفون ٲگاہی دور کریو",
+      "closeAssistant": "AI مددگار بند کریو"
+    },
+    "filePreview": {
+      "close": "پیش نظارٕ بند کریو"
     }
   }
 }

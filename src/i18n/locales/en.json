@@ -22,7 +22,9 @@
       "brandSubtitle": "Smart Urban Helpdesk",
       "help": "Help",
       "loadingSplash": "Loading SUVIDHA…",
-      "retry": "Try again"
+      "retry": "Try again",
+      "close": "Close",
+      "delete": "Delete"
     },
     "loading": {
       "verifyingDetails": "Verifying your details",
@@ -280,7 +282,11 @@
       "chooseFile": "Choose File",
       "location": "Location",
       "currentLocation": "Use Current Location",
-      "enterLocation": "Enter location manually"
+      "enterLocation": "Enter location manually",
+      "maxPhotos": "Maximum 3 photos allowed",
+      "locationFailed": "Unable to get location. Please enter manually.",
+      "geoUnsupported": "Geolocation is not supported by this browser.",
+      "noticeTitle": "Notice"
     },
     "tracking": {
       "title": "Track Request Status",
@@ -797,7 +803,8 @@
       "enterAadhaarNumber": "12-digit Aadhaar number",
       "ownershipTransferWarning": "⚠️ Ownership transfer requires supporting documents (sale deed / NOC). Upload will be requested after submission.",
       "enterNewOwnerName": "Full name of new owner",
-      "confirmUpdateMsg": "Save all changes and generate confirmation receipt?"
+      "confirmUpdateMsg": "Save all changes and generate confirmation receipt?",
+      "verifyOtpFirst": "Please verify OTP for mobile number change"
     },
     "chatbot": {
       "elec1": "How to apply for new connection?",
@@ -935,6 +942,36 @@
       "indicatorLabel": "Hey Suvidha",
       "activatedTitle": "Suvidha Activated",
       "switchingToVoice": "Switching to Voice Mode..."
+    },
+    "admin": {
+      "title": "SUVIDHA Admin Portal",
+      "credentialsHint": "Employee ID or official email login",
+      "mfaHint": "MFA verification for {{target}}",
+      "identifier": "Employee ID / Official Email",
+      "password": "Password",
+      "continueMfa": "Continue to MFA",
+      "validating": "Validating…",
+      "mfaCode": "MFA Code",
+      "devMfaCode": "Dev MFA code:",
+      "signIn": "Sign In",
+      "verifying": "Verifying…",
+      "backToCreds": "Back to credentials",
+      "backToLanding": "Back to landing",
+      "loginFailed": "Admin login failed.",
+      "mfaFailed": "MFA verification failed."
+    },
+    "keypad": {
+      "digit": "Digit {{n}}"
+    },
+    "aadhaar": {
+      "closeScanner": "Close camera scanner and go back"
+    },
+    "ai": {
+      "dismissMicWarning": "Dismiss microphone warning",
+      "closeAssistant": "Close AI assistant"
+    },
+    "filePreview": {
+      "close": "Close preview"
     }
   }
 }

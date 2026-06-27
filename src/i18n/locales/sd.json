@@ -21,7 +21,9 @@
       "selected": "چونڊيل",
       "brandSubtitle": "اسمارٽ اربن هيلپ ڊيسڪ",
       "help": "مدد",
-      "loadingSplash": "سُوِدها لوڊ ٿي رهي آهي…"
+      "loadingSplash": "سُوِدها لوڊ ٿي رهي آهي…",
+      "close": "بند ڪريو",
+      "delete": "ڊاهيو"
     },
     "language": {
       "select": "Select Language",
@@ -191,7 +193,11 @@
       "chooseFile": "فائل چونڊيو",
       "location": "هنڌ",
       "currentLocation": "موجوده هنڌ استعمال ڪريو",
-      "enterLocation": "هنڌ هٿ سان لکو"
+      "enterLocation": "هنڌ هٿ سان لکو",
+      "maxPhotos": "وڌ ۾ وڌ 3 تصويرن جي اجازت آهي",
+      "locationFailed": "مڪان حاصل ڪرڻ کان قاصر. مهرباني ڪري هٿ سان داخل ڪريو.",
+      "geoUnsupported": "هي برائوزر جيو لوڪيشن کي سپورٽ نٿو ڪري.",
+      "noticeTitle": "اطلاع"
     },
     "tracking": {
       "title": "درخواست جي حالت ٽريڪ ڪريو",
@@ -708,7 +714,8 @@
       "enterAadhaarNumber": "12-انگن وارو آدھار نمبر",
       "ownershipTransferWarning": "⚠️ ملڪيت منتقلي لاءِ مدد دستاويز (وڪرو نامو / NOC) گهربل. جمع ڪرائڻ بعد اپلوڊ جي درخواست ڪرائي ويندي.",
       "enterNewOwnerName": "نئين مالڪ جو پورو نالو",
-      "confirmUpdateMsg": "سڀ تبديليون محفوظ ڪري تصديقي رسيد ٺاهڻي آهي؟"
+      "confirmUpdateMsg": "سڀ تبديليون محفوظ ڪري تصديقي رسيد ٺاهڻي آهي؟",
+      "verifyOtpFirst": "موبائل نمبر تبديل ڪرڻ لاءِ مهرباني ڪري OTP جي تصديق ڪريو"
     },
     "chatbot": {
       "elec1": "نئين ڪنيڪشن لاءِ ڪيئن درخواست ڏجي؟",
@@ -846,6 +853,36 @@
       "indicatorLabel": "هي سهولت",
       "activatedTitle": "سهولت فعال",
       "switchingToVoice": "آواز موڊ ڏانهن سوئچ ٿي رهيو آهي..."
+    },
+    "admin": {
+      "title": "سُوِڌا ايڊمن پورٽل",
+      "credentialsHint": "ملازم ID يا سرڪاري اي ميل لاگ ان",
+      "mfaHint": "{{target}} لاءِ MFA تصديق",
+      "identifier": "ملازم ID / سرڪاري اي ميل",
+      "password": "پاس ورڊ",
+      "continueMfa": "MFA تي جاري رکھو",
+      "validating": "تصديق ٿي رهيو آهي…",
+      "mfaCode": "MFA ڪوڊ",
+      "devMfaCode": "Dev MFA ڪوڊ:",
+      "signIn": "سائن ان",
+      "verifying": "تصديق ٿي رهيو آهي…",
+      "backToCreds": "سندن ڏانهن واپس",
+      "backToLanding": "مک صفحي ڏانهن واپس",
+      "loginFailed": "ايڊمن لاگ ان ناڪام ٿيو.",
+      "mfaFailed": "MFA تصديق ناڪام ٿي."
+    },
+    "keypad": {
+      "digit": "انگ {{n}}"
+    },
+    "aadhaar": {
+      "closeScanner": "ڪيمرا اسڪينر بند ڪريو ۽ واپس وڃو"
+    },
+    "ai": {
+      "dismissMicWarning": "مائيڪروفون ڊيڄ رد ڪريو",
+      "closeAssistant": "AI مددگار بند ڪريو"
+    },
+    "filePreview": {
+      "close": "اڳ ڏيک بند ڪريو"
     }
   }
 }

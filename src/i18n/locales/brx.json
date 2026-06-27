@@ -21,7 +21,9 @@
       "selected": "सायखनाय",
       "brandSubtitle": "स्मार्ट शहर मदद केन्द्र",
       "help": "मदद",
-      "loadingSplash": "सुविधा लोड जादों…"
+      "loadingSplash": "सुविधा लोड जादों…",
+      "close": "बन्द खालाम",
+      "delete": "खोमोर"
     },
     "language": {
       "select": "Select Language",
@@ -191,7 +193,11 @@
       "chooseFile": "फाइल सायख",
       "location": "जायगा",
       "currentLocation": "दानि जायगाखौ बाहाय",
-      "enterLocation": "जायगाखौ गावनो लिख"
+      "enterLocation": "जायगाखौ गावनो लिख",
+      "maxPhotos": "जौबो गोबां 3 फोटोखौ हुकुम गनाङ",
+      "locationFailed": "जायगा मोनना हानाय। अननानै आखायजों हो।",
+      "geoUnsupported": "बे ब्राउजारआ जियोलोकेसनखौ हेफाजाब होआ।",
+      "noticeTitle": "मिथिनथि"
     },
     "tracking": {
       "title": "नांगौनायनि अवस्था ट्रेक खालाम",
@@ -708,7 +714,8 @@
       "enterAadhaarNumber": "12-आम्बार आधार आम्बार",
       "ownershipTransferWarning": "⚠️ मालिकनि हस्तान्तरणनि थाखाय गोनां दस्तावेज (फरायनि पत्र / NOC) गोनां। जमा खालामनि उनाव अपलोड थाखो जागोन।",
       "enterNewOwnerName": "गोदान मालिकनि गासै मुं",
-      "confirmUpdateMsg": "गासै सोलायनायखौ थाबाय आरो निश्चय रसीद बानानो?"
+      "confirmUpdateMsg": "गासै सोलायनायखौ थाबाय आरो निश्चय रसीद बानानो?",
+      "verifyOtpFirst": "मोबाइल नम्बर सोलायनायनि थाखाय अननानै OTP सत्यापन खालाम"
     },
     "chatbot": {
       "elec1": "गोदान जोड़नायनि थाखाय मा रां थाखोनो?",
@@ -846,6 +853,36 @@
       "indicatorLabel": "हे सुविधा",
       "activatedTitle": "सुविधा सक्रिय",
       "switchingToVoice": "रावसो जाहोनाव सोलायनाय जायो..."
+    },
+    "admin": {
+      "title": "सुविधा एडमिन पर्टेल",
+      "credentialsHint": "खामानिगिरि ID एबा सरकारी ईमेल लॉगिन",
+      "mfaHint": "{{target}} थाखाय MFA सत्यापन",
+      "identifier": "खामानिगिरि ID / सरकारी ईमेल",
+      "password": "पासवर्ड",
+      "continueMfa": "MFA आव सालायबाय थां",
+      "validating": "सत्यापन खालामनाय…",
+      "mfaCode": "MFA कोड",
+      "devMfaCode": "Dev MFA कोड:",
+      "signIn": "साइन इन",
+      "verifying": "सत्यापन खालामनाय…",
+      "backToCreds": "क्रेडेन्सियेलआव फिरिन",
+      "backToLanding": "गासै बिलाइआव फिरिन",
+      "loginFailed": "एडमिन लॉगिन फेल जादों।",
+      "mfaFailed": "MFA सत्यापन फेल जादों।"
+    },
+    "keypad": {
+      "digit": "अंक {{n}}"
+    },
+    "aadhaar": {
+      "closeScanner": "कैमेरा स्कैनार बन्द खालामनानै फिरिन"
+    },
+    "ai": {
+      "dismissMicWarning": "माइक्रोफोन सानथि खोमोर",
+      "closeAssistant": "AI मददगिरि बन्द खालाम"
+    },
+    "filePreview": {
+      "close": "गिबि नायनाय बन्द खालाम"
     }
   }
 }

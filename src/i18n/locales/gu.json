@@ -21,7 +21,9 @@
       "selected": "પસંદ કરેલ",
       "brandSubtitle": "સ્માર્ટ શહેરી હેલ્પડેસ્ક",
       "help": "મદદ",
-      "loadingSplash": "સુવિધા લોડ થઈ રહ્યું છે…"
+      "loadingSplash": "સુવિધા લોડ થઈ રહ્યું છે…",
+      "close": "બંધ કરો",
+      "delete": "કાઢી નાખો"
     },
     "language": {
       "select": "ભાષા પસંદ કરો",
@@ -191,7 +193,11 @@
       "chooseFile": "ફાઇલ પસંદ કરો",
       "location": "સ્થાન",
       "currentLocation": "વર્તમાન સ્થાનનો ઉપયોગ કરો",
-      "enterLocation": "સ્થાન જાતે દાખલ કરો"
+      "enterLocation": "સ્થાન જાતે દાખલ કરો",
+      "maxPhotos": "મહત્તમ 3 ફોટાની મંજૂરી છે",
+      "locationFailed": "સ્થાન મેળવી શકાયું નથી. કૃપા કરીને જાતે દાખલ કરો.",
+      "geoUnsupported": "આ બ્રાઉઝર જિયોલોકેશનને સપોર્ટ કરતું નથી.",
+      "noticeTitle": "સૂચના"
     },
     "tracking": {
       "title": "વિનંતી સ્થિતિ ટ્રેક કરો",
@@ -708,7 +714,8 @@
       "enterAadhaarNumber": "12-અંકનો આધાર નંબર",
       "ownershipTransferWarning": "⚠️ માલિકી ટ્રાન્સફર માટે સહાયક દસ્તાવેજો (વેચાણ ડીડ / NOC) જરૂરી. સબમિશન પછી અપલોડની વિનંતી કરવામાં આવશે.",
       "enterNewOwnerName": "નવા માલિકનું પૂરું નામ",
-      "confirmUpdateMsg": "બધા ફેરફારો સાચવો અને કન્ફર્મેશન રસીદ બનાવો?"
+      "confirmUpdateMsg": "બધા ફેરફારો સાચવો અને કન્ફર્મેશન રસીદ બનાવો?",
+      "verifyOtpFirst": "મોબાઇલ નંબર બદલવા માટે કૃપા કરીને OTP ચકાસો"
     },
     "chatbot": {
       "elec1": "નવા જોડાણ માટે કેવી રીતે અરજી કરવી?",
@@ -846,6 +853,36 @@
       "indicatorLabel": "હે સુવિધા",
       "activatedTitle": "સુવિધા સક્રિય",
       "switchingToVoice": "વોઈસ મોડ પર સ્વિચ થઈ રહ્યું છે..."
+    },
+    "admin": {
+      "title": "સુવિધા એડમિન પોર્ટલ",
+      "credentialsHint": "કર્મચારી ID અથવા સત્તાવાર ઇમેઇલ લોગિન",
+      "mfaHint": "{{target}} માટે MFA ચકાસણી",
+      "identifier": "કર્મચારી ID / સત્તાવાર ઇમેઇલ",
+      "password": "પાસવર્ડ",
+      "continueMfa": "MFA પર ચાલુ રાખો",
+      "validating": "માન્ય કરી રહ્યું છે…",
+      "mfaCode": "MFA કોડ",
+      "devMfaCode": "Dev MFA કોડ:",
+      "signIn": "સાઇન ઇન",
+      "verifying": "ચકાસી રહ્યું છે…",
+      "backToCreds": "ઓળખપત્રો પર પાછા",
+      "backToLanding": "મુખ્ય પૃષ્ઠ પર પાછા",
+      "loginFailed": "એડમિન લોગિન નિષ્ફળ થયું.",
+      "mfaFailed": "MFA ચકાસણી નિષ્ફળ થઈ."
+    },
+    "keypad": {
+      "digit": "અંક {{n}}"
+    },
+    "aadhaar": {
+      "closeScanner": "કૅમેરા સ્કેનર બંધ કરો અને પાછા જાઓ"
+    },
+    "ai": {
+      "dismissMicWarning": "માઇક્રોફોન ચેતવણી રદ કરો",
+      "closeAssistant": "AI સહાયક બંધ કરો"
+    },
+    "filePreview": {
+      "close": "પૂર્વાવલોકન બંધ કરો"
     }
   }
 }

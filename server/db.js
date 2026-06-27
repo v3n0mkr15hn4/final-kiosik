@@ -7,6 +7,7 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createEnterpriseTables, seedEnterpriseData } from './enterprise/schema.js';
+import { importSchemesFromCSV } from './scripts/importSchemes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -149,27 +150,27 @@ function createTables() {
       created_at TEXT DEFAULT (datetime('now'))
     );
 
-    -- Schemes database
+    -- Schemes database (imported from schemes_enriched.csv — see scripts/importSchemes.js)
     CREATE TABLE IF NOT EXISTS schemes (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
-      name_hi TEXT,
-      name_ta TEXT,
-      ministry TEXT,
+      slug TEXT,
       description TEXT,
-      desc_hi TEXT,
-      desc_ta TEXT,
-      eligibility TEXT,
       benefit TEXT,
+      eligibility TEXT,
+      application TEXT,
+      documents TEXT,
+      level TEXT,
       category TEXT,
-      status TEXT DEFAULT 'Active',
-      target_age_groups TEXT,
-      target_genders TEXT,
-      target_states TEXT,
-      target_income TEXT,
-      target_categories TEXT,
-      target_occupations TEXT,
-      base_match INTEGER DEFAULT 80
+      tags TEXT,
+      gender TEXT,
+      min_age INTEGER,
+      max_age INTEGER,
+      max_income INTEGER,
+      social_category TEXT,
+      occupation_keywords TEXT,
+      applicable_states TEXT,
+      status TEXT DEFAULT 'Active'
     );
 
     -- Government offices
@@ -356,33 +357,11 @@ function seedData() {
   });
   seedAlerts();
 
-  // ── Seed Schemes ──
-  const insertScheme = db.prepare(`
-    INSERT OR IGNORE INTO schemes 
-    (id, name, name_hi, name_ta, ministry, description, desc_hi, desc_ta, eligibility, benefit, category, status,
-     target_age_groups, target_genders, target_states, target_income, target_categories, target_occupations, base_match)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-
-  const schemes = [
-    ['PM-KISAN', 'PM-Kisan Samman Nidhi', 'पीएम-किसान सम्मान निधि', 'பிரதான மந்திரி கிசான் சம்மான் நிதி', 'Ministry of Agriculture', 'Direct income support of ₹6,000/year to small and marginal farmer families.', 'छोटे और सीमांत किसान परिवारों को ₹6,000/वर्ष की प्रत्यक्ष आय सहायता।', 'சிறு மற்றும் குறு விவசாயி குடும்பங்களுக்கு ₹6,000/ஆண்டு நேரடி வருமான ஆதரவு.', '["Small/marginal farmer","Indian citizen","Land ownership records"]', '₹6,000 per year in 3 installments', 'Agriculture', 'Active', '["18-25","26-35","36-45","46-60","60+"]', '["male","female","other"]', '["all"]', '["below-1L","1L-3L","3L-6L"]', '["all"]', '["farmer"]', 95],
-    ['PM-AWAS', 'Pradhan Mantri Awas Yojana', 'प्रधानमंत्री आवास योजना', 'பிரதான மந்திரி ஆவாஸ் யோஜனா', 'Ministry of Housing', 'Housing for all — financial assistance up to ₹2.67 lakh for constructing pucca houses.', 'सभी के लिए आवास — पक्के घर बनाने के लिए ₹2.67 लाख तक की वित्तीय सहायता।', 'அனைவருக்கும் வீடு — பக்கா வீடுகள் கட்ட ₹2.67 லட்சம் வரை நிதி உதவி.', '["BPL family","No pucca house","EWS/LIG category"]', 'Up to ₹2.67 lakh subsidy', 'Housing', 'Active', '["26-35","36-45","46-60","60+"]', '["male","female","other"]', '["all"]', '["below-1L","1L-3L","3L-6L"]', '["sc","st","obc","ews"]', '["all"]', 88],
-    ['MUDRA-LOAN', 'Pradhan Mantri MUDRA Yojana', 'प्रधानमंत्री मुद्रा योजना', 'பிரதான மந்திரி முத்ரா யோஜனா', 'Ministry of Finance', 'Collateral-free loans up to ₹10 lakh for small/micro enterprises.', 'छोटे/सूक्ष्म उद्यमों के लिए ₹10 लाख तक के गारंटी-मुक्त ऋण।', 'சிறு/நுண் நிறுவனங்களுக்கு ₹10 லட்சம் வரை உத்தரவாத இல்லா கடன்.', '["Non-corporate small business","Indian citizen","Business plan required"]', 'Loans up to ₹10 lakh', 'Finance', 'Active', '["18-25","26-35","36-45","46-60"]', '["male","female","other"]', '["all"]', '["below-1L","1L-3L","3L-6L","6L-10L"]', '["all"]', '["self-employed","street-vendor"]', 85],
-    ['AYUSHMAN', 'Ayushman Bharat (PM-JAY)', 'आयुष्मान भारत (PM-JAY)', 'ஆயுஷ்மான் பாரத் (PM-JAY)', 'Ministry of Health', 'Health coverage of ₹5 lakh/year/family for secondary and tertiary hospitalization.', 'माध्यमिक और तृतीयक अस्पताल में भर्ती के लिए ₹5 लाख/वर्ष/परिवार का स्वास्थ्य कवरेज।', 'இரண்டாம் மற்றும் மூன்றாம் நிலை மருத்துவமனை தங்கலுக்கு ₹5 லட்சம்/ஆண்டு/குடும்ப சுகாதார காப்பீடு.', '["BPL family","No existing health insurance","SECC listed"]', '₹5 lakh health cover per family', 'Healthcare', 'Active', '["all"]', '["male","female","other"]', '["all"]', '["below-1L","1L-3L"]', '["sc","st","obc","ews"]', '["all"]', 90],
-    ['SUKANYA', 'Sukanya Samriddhi Yojana', 'सुकन्या समृद्धि योजना', 'சுகன்யா சம்ரிதி யோஜனா', 'Ministry of Finance', 'Savings scheme for girl child with attractive interest rate and tax benefits.', 'आकर्षक ब्याज दर और कर लाभ के साथ बालिकाओं के लिए बचत योजना।', 'கவர்ச்சிகரமான வட்டி விகிதம் மற்றும் வரிச் சலுகைகளுடன் பெண் குழந்தைக்கான சேமிப்புத் திட்டம்.', '["Girl child below 10 years","Parent/guardian opens account","Max 2 accounts per family"]', 'Up to 8.2% interest + tax-free maturity', 'Women & Child', 'Active', '["all"]', '["female"]', '["all"]', '["all"]', '["all"]', '["all"]', 80],
-    ['UJJWALA', 'Pradhan Mantri Ujjwala Yojana', 'प्रधानमंत्री उज्ज्वला योजना', 'பிரதான மந்திரி உஜ்வலா யோஜனா', 'Ministry of Petroleum', 'Free LPG connections and subsidized refills for BPL households.', 'बीपीएल परिवारों के लिए मुफ्त एलपीजी कनेक्शन और सब्सिडी वाले रीफिल।', 'BPL குடும்பங்களுக்கு இலவச எல்பிஜி இணைப்பு மற்றும் மானிய நிரப்புதல்கள்.', '["BPL household","Adult woman of household","No existing LPG connection"]', 'Free LPG connection + subsidized refills', 'Energy', 'Active', '["26-35","36-45","46-60","60+"]', '["female"]', '["all"]', '["below-1L","1L-3L"]', '["sc","st","obc","ews"]', '["homemaker","daily-wage"]', 87],
-    ['NSP', 'National Scholarship Portal', 'राष्ट्रीय छात्रवृत्ति पोर्टल', 'தேசிய உதவித்தொகை இணையதளம்', 'Ministry of Education', 'Central scholarships for students from minority communities, SC/ST/OBC, and merit-based.', 'अल्पसंख्यक समुदायों, SC/ST/OBC और मेरिट आधारित छात्रों के लिए केंद्रीय छात्रवृत्ति।', 'சிறுபான்மை சமூகங்கள், SC/ST/OBC மற்றும் தகுதி அடிப்படையிலான மாணவர்களுக்கான மத்திய உதவித்தொகை.', '["Student enrolled in recognized institution","Income below ₹2.5 lakh","Minimum 50% attendance"]', '₹10,000 - ₹50,000 per year', 'Education', 'Active', '["18-25"]', '["male","female","other"]', '["all"]', '["below-1L","1L-3L"]', '["sc","st","obc","ews"]', '["student"]', 92],
-    ['PM-SVA', 'PM SVANidhi (Street Vendors)', 'पीएम स्वानिधि (स्ट्रीट वेंडर)', 'PM சுவநிதி (தெருக்கடை வணிகர்)', 'Ministry of Housing', 'Working capital loan up to ₹50,000 for street vendors at subsidized rates.', 'स्ट्रीट वेंडरों के लिए रियायती दरों पर ₹50,000 तक का कार्यशील पूंजी ऋण।', 'தெருக்கடை வணிகர்களுக்கு மானிய விகிதத்தில் ₹50,000 வரை செயல்பாட்டு மூலதன கடன்.', '["Street vendor with vending certificate","Age 18+","Valid ID"]', 'Loan up to ₹50,000', 'Urban Livelihood', 'Active', '["18-25","26-35","36-45","46-60"]', '["male","female","other"]', '["all"]', '["below-1L","1L-3L"]', '["all"]', '["street-vendor"]', 93],
-    ['OLD-AGE', 'Indira Gandhi National Old Age Pension', 'इंदिरा गांधी राष्ट्रीय वृद्धावस्था पेंशन', 'இந்திரா காந்தி தேசிய முதியோர் ஓய்வூதியம்', 'Ministry of Rural Development', 'Monthly pension of ₹200-₹500 for senior citizens from BPL families.', 'बीपीएल परिवारों के वरिष्ठ नागरिकों के लिए ₹200-₹500 का मासिक पेंशन।', 'BPL குடும்பங்களின் மூத்த குடிமக்களுக்கு ₹200-₹500 மாத ஓய்வூதியம்.', '["Age 60+ years","BPL family","Not receiving any other pension"]', '₹200-₹500 per month', 'Social Security', 'Active', '["60+"]', '["male","female","other"]', '["all"]', '["below-1L","1L-3L"]', '["all"]', '["retired","unemployed"]', 90],
-    ['MGNREGA', 'MGNREGA', 'मनरेगा', 'மகாத்மா காந்தி தேசிய ஊரக வேலைவாய்ப்பு உறுதித்திட்டம்', 'Ministry of Rural Development', 'Guaranteed 100 days of wage employment per year to rural households.', 'ग्रामीण परिवारों को प्रति वर्ष 100 दिनों के वेतन रोजगार की गारंटी।', 'கிராமப்புற குடும்பங்களுக்கு ஆண்டுக்கு 100 நாட்கள் ஊதிய வேலைவாய்ப்பு உத்தரவாதம்.', '["Adult member of rural household","Willing to do unskilled manual work","Job card holder"]', '100 days guaranteed employment', 'Employment', 'Active', '["18-25","26-35","36-45","46-60"]', '["male","female","other"]', '["all"]', '["below-1L","1L-3L"]', '["all"]', '["daily-wage","unemployed","farmer"]', 88],
-  ];
-
-  const seedSchemes = db.transaction(() => {
-    for (const s of schemes) {
-      insertScheme.run(...s);
-    }
-  });
-  seedSchemes();
+  // ── Seed Schemes (from schemes_enriched.csv, only if table is empty) ──
+  const schemeCount = db.prepare('SELECT COUNT(*) AS c FROM schemes').get().c;
+  if (schemeCount === 0) {
+    importSchemesFromCSV(db);
+  }
 
   console.log('  ✅  Database seeded successfully');
 }

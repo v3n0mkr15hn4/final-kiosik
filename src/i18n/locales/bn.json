@@ -21,7 +21,9 @@
       "selected": "নির্বাচিত",
       "brandSubtitle": "স্মার্ট শহুরে হেল্পডেস্ক",
       "help": "সাহায্য",
-      "loadingSplash": "সুবিধা লোড হচ্ছে…"
+      "loadingSplash": "সুবিধা লোড হচ্ছে…",
+      "close": "বন্ধ করুন",
+      "delete": "মুছুন"
     },
     "language": {
       "select": "ভাষা নির্বাচন করুন",
@@ -191,7 +193,11 @@
       "chooseFile": "ফাইল নির্বাচন করুন",
       "location": "স্থান",
       "currentLocation": "বর্তমান অবস্থান ব্যবহার করুন",
-      "enterLocation": "ম্যানুয়ালি স্থান লিখুন"
+      "enterLocation": "ম্যানুয়ালি স্থান লিখুন",
+      "maxPhotos": "সর্বোচ্চ ৩টি ছবি অনুমোদিত",
+      "locationFailed": "অবস্থান পাওয়া যায়নি। অনুগ্রহ করে হাতে লিখুন।",
+      "geoUnsupported": "এই ব্রাউজার জিওলোকেশন সমর্থন করে না।",
+      "noticeTitle": "বিজ্ঞপ্তি"
     },
     "tracking": {
       "title": "অনুরোধের অবস্থা ট্র্যাক করুন",
@@ -708,7 +714,8 @@
       "enterAadhaarNumber": "12-সংখ্যার আধার নম্বর",
       "ownershipTransferWarning": "⚠️ মালিকানা স্থানান্তরের জন্য সহায়ক নথি (বিক্রয় দলিল / NOC) প্রয়োজন। জমা দেওয়ার পরে আপলোডের অনুরোধ করা হবে।",
       "enterNewOwnerName": "নতুন মালিকের সম্পূর্ণ নাম",
-      "confirmUpdateMsg": "সমস্ত পরিবর্তন সংরক্ষণ করে নিশ্চিতকরণ রসিদ তৈরি করবেন?"
+      "confirmUpdateMsg": "সমস্ত পরিবর্তন সংরক্ষণ করে নিশ্চিতকরণ রসিদ তৈরি করবেন?",
+      "verifyOtpFirst": "মোবাইল নম্বর পরিবর্তনের জন্য অনুগ্রহ করে OTP যাচাই করুন"
     },
     "chatbot": {
       "elec1": "নতুন সংযোগের জন্য কীভাবে আবেদন করবেন?",
@@ -846,6 +853,36 @@
       "indicatorLabel": "হে সুবিধা",
       "activatedTitle": "সুবিধা সক্রিয়",
       "switchingToVoice": "ভয়েস মোডে স্যুইচ করা হচ্ছে..."
+    },
+    "admin": {
+      "title": "সুবিধা অ্যাডমিন পোর্টাল",
+      "credentialsHint": "কর্মচারী ID বা সরকারি ইমেল দিয়ে লগইন",
+      "mfaHint": "{{target}} এর জন্য MFA যাচাই",
+      "identifier": "কর্মচারী ID / সরকারি ইমেল",
+      "password": "পাসওয়ার্ড",
+      "continueMfa": "MFA তে এগিয়ে যান",
+      "validating": "যাচাই করা হচ্ছে…",
+      "mfaCode": "MFA কোড",
+      "devMfaCode": "Dev MFA কোড:",
+      "signIn": "সাইন ইন",
+      "verifying": "যাচাই করা হচ্ছে…",
+      "backToCreds": "শংসাপত্রে ফিরে যান",
+      "backToLanding": "হোম পেজে ফিরে যান",
+      "loginFailed": "অ্যাডমিন লগইন ব্যর্থ হয়েছে।",
+      "mfaFailed": "MFA যাচাই ব্যর্থ হয়েছে।"
+    },
+    "keypad": {
+      "digit": "অঙ্ক {{n}}"
+    },
+    "aadhaar": {
+      "closeScanner": "ক্যামেরা স্ক্যানার বন্ধ করুন এবং ফিরে যান"
+    },
+    "ai": {
+      "dismissMicWarning": "মাইক্রোফোন সতর্কতা বাতিল করুন",
+      "closeAssistant": "AI সহায়ক বন্ধ করুন"
+    },
+    "filePreview": {
+      "close": "প্রিভিউ বন্ধ করুন"
     }
   }
 }
