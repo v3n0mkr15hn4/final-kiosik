@@ -191,9 +191,9 @@ header .spacer{flex:1}
            ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="this.classList.remove('over')">
         <div class="drop-icon">📎</div>
         <div class="drop-label">Tap to select a photo or document</div>
-        <div class="drop-sub">JPEG or PNG · max 10 MB</div>
+        <div class="drop-sub">PDF, DOC, DOCX, JPEG, PNG · max 10 MB</div>
       </div>
-      <input type="file" id="file-input" accept="image/jpeg,image/png" style="display:none" onchange="handleFileSelect(this)">
+      <input type="file" id="file-input" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp" style="display:none" onchange="handleFileSelect(this)">
 
       <div id="file-preview" class="file-preview" style="display:none">
         <img id="preview-img" src="" alt="">
@@ -498,8 +498,13 @@ function handleFileSelect(input) {
 }
 
 function setFile(file) {
-  if (!['image/jpeg','image/jpg','image/png'].includes(file.type.toLowerCase())) {
-    showErr('Only JPEG/PNG files are allowed.');
+  const allowedTypes = [
+    'application/pdf', 'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'image/jpeg', 'image/jpg', 'image/png', 'image/webp',
+  ];
+  if (!allowedTypes.includes(file.type.toLowerCase())) {
+    showErr('Only PDF, DOC, DOCX, JPEG, PNG, or WEBP files are allowed.');
     return;
   }
   if (file.size > 10 * 1024 * 1024) {

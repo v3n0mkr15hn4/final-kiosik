@@ -63,14 +63,27 @@ create policy "portal read documents"
 -- Run this separately if the Storage SQL API is available:
 -- (In Supabase dashboard → Storage → New Bucket → name: uploads, public: true)
 --
--- OR uncomment and run (10MB limit — if you already created the bucket via
--- the dashboard with the old 5MB default, run the UPDATE below instead):
+-- OR uncomment and run (10MB limit, matches the QR/local-disk upload path's
+-- allowlist — PDF/DOC/DOCX/JPEG/PNG/WEBP, not just images. If you already
+-- created the bucket via the dashboard with the old image-only default,
+-- run the UPDATE below instead):
 -- insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
--- values ('uploads', 'uploads', true, 10485760, array['image/jpeg','image/jpg','image/png'])
+-- values ('uploads', 'uploads', true, 10485760, array[
+--   'application/pdf', 'application/msword',
+--   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+--   'image/jpeg', 'image/jpg', 'image/png', 'image/webp'
+-- ])
 -- on conflict (id) do nothing;
 
--- If the bucket already exists with the old 5MB limit, run this to bump it:
--- update storage.buckets set file_size_limit = 10485760 where id = 'uploads';
+-- If the bucket already exists with the old 5MB/image-only limits, run this:
+-- update storage.buckets set
+--   file_size_limit = 10485760,
+--   allowed_mime_types = array[
+--     'application/pdf', 'application/msword',
+--     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+--     'image/jpeg', 'image/jpg', 'image/png', 'image/webp'
+--   ]
+-- where id = 'uploads';
 
 -- ── 4. Storage RLS (run AFTER creating bucket) ────────────────────────────
 -- create policy "anon upload to uploads"
