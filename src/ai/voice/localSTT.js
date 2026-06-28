@@ -155,6 +155,11 @@ export function getWhisperLoadProgress() {
   return _loadProgress;
 }
 
+/** Returns true if ANY Whisper model is loaded and ready. */
+export function isWhisperLoaded() {
+  return Object.keys(_pipes).length > 0;
+}
+
 // ── Audio utilities ───────────────────────────────────────────────────────────
 
 function resampleTo16k(audioData, sourceRate) {
