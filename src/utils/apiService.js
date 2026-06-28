@@ -114,6 +114,9 @@ export const adminAuthAPI = {
 export const otpAPI = {
   sendOtp: ({ uid, mobile }) => api.post('/otp/send-otp', { uid, mobile }),
   verifyOtp: ({ uid, mobile, otp }) => api.post('/otp/verify-otp', { uid, mobile, otp }),
+  // Firebase Phone Auth — client verifies code with Firebase, server verifies ID token
+  verifyFirebase: ({ idToken, uid, mobile }) =>
+    api.post('/otp/verify-firebase', { idToken, uid, mobile }),
 };
 
 // â”€â”€â”€ Service Requests â”€â”€â”€ Supabase direct write (portal-visible), Express fallback â”€â”€â”€

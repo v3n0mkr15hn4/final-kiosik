@@ -30,7 +30,8 @@
     "react-i18next": "^17.0.8",
     "react-map-gl": "^8.1.1",
     "react-router-dom": "^7.15.1",
-    "sarvamai": "^1.1.7"
+    "sarvamai": "^1.1.7",
+    "firebase": "^11.10.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",

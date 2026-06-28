@@ -3,6 +3,7 @@ import rateLimit from 'express-rate-limit';
 import jwt from 'jsonwebtoken';
 import { createHash, randomBytes, randomInt } from 'crypto';
 import { formatFast2SmsActionMessage, sendFast2SmsOtp } from '../services/fast2sms.js';
+import { verifyFirebaseIdToken } from '../services/firebaseAdmin.js';
 
 const router = Router();
 
@@ -301,6 +302,66 @@ router.post('/verify-otp', (req, res) => {
     getJwtSecret(),
     { expiresIn: '2h' }
   );
+
+  return res.json({
+    success: true,
+    data: formatCitizen(citizen),
+    token,
+  });
+});
+
+// ── POST /verify-firebase — Firebase Phone Auth (replaces Fast2SMS OTP verify) ──
+// Client verifies OTP with Firebase SDK → gets ID token → sends here.
+// We verify the token (checks phone number + expiry + signature) then issue app JWT.
+router.post('/verify-firebase', verifyOtpLimiter, async (req, res) => {
+  const { idToken, uid, mobile } = req.body || {};
+  const cleanedUid    = String(uid    || '').replace(/\s/g, '');
+  const cleanedMobile = normalizeMobile(mobile);
+
+  if (!idToken || typeof idToken !== 'string' || idToken.length < 50) {
+    return res.status(400).json({ success: false, error: 'Firebase ID token is required.' });
+  }
+  if (!isValidAadhaar(cleanedUid)) {
+    return res.status(400).json({ success: false, error: 'Invalid Aadhaar number.' });
+  }
+  if (!isValidIndianMobile(cleanedMobile)) {
+    return res.status(400).json({ success: false, error: 'Invalid mobile number.' });
+  }
+
+  let verifiedPhone;
+  try {
+    verifiedPhone = await verifyFirebaseIdToken(idToken);
+  } catch (err) {
+    console.warn('[OTP/Firebase] Token verification failed:', err.message);
+    return res.status(401).json({ success: false, error: 'OTP verification failed. Token invalid or expired.' });
+  }
+
+  // Firebase returns E.164 (+919876543210) — strip country code for comparison
+  const firebaseMobile = verifiedPhone.replace(/^\+91/, '');
+  if (firebaseMobile !== cleanedMobile) {
+    console.warn('[OTP/Firebase] Phone mismatch', {
+      firebaseMobile: `**${firebaseMobile.slice(-4)}`,
+      provided: `**${cleanedMobile.slice(-4)}`,
+    });
+    return res.status(401).json({ success: false, error: 'Mobile number does not match the verified phone.' });
+  }
+
+  const db = req.app.locals.db;
+  const citizen = db.prepare('SELECT * FROM citizens WHERE uid = ?').get(cleanedUid);
+  if (!citizen || normalizeMobile(citizen.mobile) !== cleanedMobile) {
+    return res.status(401).json({ success: false, error: 'Aadhaar + mobile combination not found.' });
+  }
+
+  const token = jwt.sign(
+    { uid: cleanedUid, name: citizen.name, isAdmin: !!citizen.is_admin },
+    getJwtSecret(),
+    { expiresIn: '2h' }
+  );
+
+  console.log('[OTP/Firebase] Login success', {
+    aadhaar: `XXXX-XXXX-${cleanedUid.slice(-4)}`,
+    mobile: `**-****-${cleanedMobile.slice(-4)}`,
+  });
 
   return res.json({
     success: true,

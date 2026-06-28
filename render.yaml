@@ -22,6 +22,12 @@ services:
         generateValue: true
       - key: CORS_ORIGINS
         value: https://final-kiosik.vercel.app
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
     # No disk block — Render's free tier doesn't support persistent disks.
     # SQLite falls back to its default in-repo path (server/suvidha.db) via
     # db.js's DB_PATH env override added earlier — that file lives on the

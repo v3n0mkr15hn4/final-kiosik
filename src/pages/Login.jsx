@@ -5,7 +5,7 @@
 // verifyOtp, QR/biometric fallbacks, toast, TTS.
 // ──────────────────────────────────────────────────────────────────
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { lookupAadhaar, detectAccessibilityProfile, calculateAge } from '../utils/aadhaarDatabase';
@@ -100,6 +100,9 @@ export default function Login() {
     tts('Login successful.', { priority: 'warning', interrupt: true, staticKey: 'login_success' });
     finishLogin();
   };
+
+  // Invisible reCAPTCHA anchors to this button — Firebase Phone Auth requirement
+  const sendOtpBtnRef = useRef(null);
 
   const [step, setStep] = useState('aadhaar');       // 'aadhaar' | 'auth'
   const [aadhaarNumber, setAadhaarNumber] = useState('');
@@ -218,6 +221,7 @@ export default function Login() {
       const otpResult = await sendOtp({
         aadhaarUid: rec.uid,
         mobile: cleanedMobile,
+        buttonEl: sendOtpBtnRef.current,
       });
 
       if (!otpResult.success) {
@@ -568,6 +572,9 @@ export default function Login() {
 
   return (
     <VK helpBack onBack={() => setStep('aadhaar')}>
+      {/* Invisible Firebase reCAPTCHA anchor — zero size, required by Firebase Phone Auth */}
+      <div ref={sendOtpBtnRef} id="firebase-recaptcha-container" style={{ display: 'none' }} />
+
       <div className="card" style={{
         background: 'color-mix(in oklab, var(--ok) 8%, white)',
         borderColor: 'var(--ok)',

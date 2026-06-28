@@ -1,6 +1,7 @@
 ﻿import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import { adminAuthAPI, otpAPI } from '../utils/apiService';
 import { toCitizenMessage } from '../utils/safeError';
+import { sendFirebaseOtp, verifyFirebaseOtp } from '../utils/firebaseOtp';
 
 export const AuthContext = createContext(null);
 
@@ -90,26 +91,25 @@ export const AuthProvider = ({ children }) => {
     setAuthLoading(false);
   }, []);
 
-  const sendOtp = useCallback(async ({ aadhaarUid, mobile }) => {
+  // buttonElRef: ref to the "Send OTP" button — Firebase invisible reCAPTCHA anchors there
+  const sendOtp = useCallback(async ({ aadhaarUid, mobile, buttonEl }) => {
     setOtpLoading(true);
     try {
-      const response = await otpAPI.sendOtp({ uid: aadhaarUid, mobile });
-      if (!response?.success) {
-        return { success: false, error: response?.error || 'Failed to send OTP.' };
+      // Firebase sends the SMS free — no server call needed for this step
+      const result = await sendFirebaseOtp(mobile, buttonEl);
+      if (!result.success) {
+        return { success: false, error: result.error || 'Failed to send OTP.' };
       }
       return {
         success: true,
-        maskedMobile: response.maskedMobile,
-        resendAfterSeconds: response.resendAfterSeconds ?? 30,
-        expiresInSeconds: response.expiresInSeconds ?? 120,
+        maskedMobile: result.maskedMobile,
+        resendAfterSeconds: result.resendAfterSeconds ?? 30,
+        expiresInSeconds: result.expiresInSeconds ?? 300,
       };
     } catch (error) {
       return {
         success: false,
         error: toCitizenMessage(error, 'Failed to send OTP. Please try again.'),
-        retryAfterSeconds: error?.retryAfterSeconds ?? 0,
-        providerStatusCode: error?.providerStatusCode ?? null,
-        providerMessage: error?.providerMessage ?? null,
       };
     } finally {
       setOtpLoading(false);
@@ -119,7 +119,18 @@ export const AuthProvider = ({ children }) => {
   const verifyOtp = useCallback(async ({ otp, aadhaarUid, mobile }) => {
     setOtpLoading(true);
     try {
-      const response = await otpAPI.verifyOtp({ uid: aadhaarUid, mobile, otp });
+      // 1. Verify code with Firebase → get ID token
+      const firebaseResult = await verifyFirebaseOtp(otp);
+      if (!firebaseResult.success) {
+        return { success: false, error: firebaseResult.error || 'OTP verification failed.' };
+      }
+
+      // 2. Send Firebase ID token to server → server verifies + issues app JWT
+      const response = await otpAPI.verifyFirebase({
+        idToken: firebaseResult.idToken,
+        uid: aadhaarUid,
+        mobile,
+      });
       if (!response?.success || !response?.data) {
         return { success: false, error: response?.error || 'OTP verification failed.' };
       }
@@ -127,7 +138,7 @@ export const AuthProvider = ({ children }) => {
       writeSessionFromCitizen({
         citizen: response.data,
         token: response.token,
-        authMethod: 'phone_otp_sms',
+        authMethod: 'phone_otp_firebase',
       });
       setSessionFlags(readSessionFlags());
       return { success: true, data: response.data };
