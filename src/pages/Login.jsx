@@ -519,17 +519,25 @@ export default function Login() {
     return (
       <VK helpBack onBack={() => navigate('/')}>
         {/* Auth method tabs */}
-        <div style={{ display: 'flex', gap: 10, marginBottom: 32, padding: '4px', background: 'var(--surface-2)', borderRadius: 24 }}>
+        <div style={{
+          display: 'flex', gap: 'calc(16px * var(--ui-scale))',
+          marginBottom: 'calc(40px * var(--ui-scale))', padding: 'calc(10px * var(--ui-scale))',
+          background: 'var(--surface-2)', borderRadius: 'calc(28px * var(--ui-scale))',
+          maxWidth: 'calc(1400px * var(--ui-scale))', margin: '0 auto calc(40px * var(--ui-scale))',
+        }}>
           {TAB_CONFIG.map(tab => (
             <button
               key={tab.id}
               type="button"
               onClick={() => { setAuthTab(tab.id); setAltId(''); setAltError(''); setAltOtpSent(false); setAltOtp(''); setAltRecord(null); }}
               style={{
-                flex: 1, minHeight: 72, borderRadius: 20, border: 'none', cursor: 'pointer',
-                fontSize: 20, fontWeight: 700, transition: 'all 0.2s',
+                flex: 1, minHeight: 'calc(108px * var(--ui-scale))', borderRadius: 'calc(22px * var(--ui-scale))',
+                border: 'none', cursor: 'pointer',
+                fontSize: 'calc(30px * var(--ui-scale))', fontWeight: 800, transition: 'all 0.2s',
                 background: authTab === tab.id ? tab.color : 'transparent',
                 color: authTab === tab.id ? 'white' : 'var(--ink-700)',
+                boxShadow: authTab === tab.id ? '0 8px 24px rgba(0,0,0,0.18)' : 'none',
+                transform: authTab === tab.id ? 'scale(1.03)' : 'scale(1)',
               }}
               aria-pressed={authTab === tab.id}
             >
@@ -573,19 +581,6 @@ export default function Login() {
           disabled={aadhaarLoading}
         />
 
-        <div style={{
-          marginTop: 32, padding: 22,
-          background: 'var(--saffron-100)', borderRadius: 18,
-          border: '1.5px solid var(--saffron-300)',
-          maxWidth: 720, margin: '32px auto 0',
-        }}>
-          <div style={{ fontSize: 18, color: 'var(--saffron-700)', fontWeight: 600 }}>
-            🔒 Encrypted UIDAI lookup
-          </div>
-          <div className="meta" style={{ marginTop: 4 }}>
-            Your data is used only for verification · DPDP Act 2023 compliant
-          </div>
-        </div>
         </>)}
 
         {/* CA Number / Legacy Number tab (Gas) */}
@@ -620,7 +615,7 @@ export default function Login() {
               </div>
             </>) : (<>
               <div className="card" style={{ padding: 32, marginBottom: 24, background: 'color-mix(in oklab, var(--ok) 8%, white)', borderColor: 'var(--ok)' }}>
-                <div style={{ fontWeight: 800, fontSize: 24 }}>✅ {altRecord?.name}</div>
+                <div style={{ fontWeight: 800, fontSize: 24 }}> {altRecord?.name}</div>
                 <div style={{ marginTop: 8, fontSize: 20, color: 'var(--ink-500)' }}>
                   OTP sent to ****{altRecord?.mobile?.slice(-4)} · {altRecord?.dept}
                 </div>
@@ -672,7 +667,7 @@ export default function Login() {
               </div>
             </>) : (<>
               <div className="card" style={{ padding: 32, marginBottom: 24, background: 'color-mix(in oklab, var(--ok) 8%, white)', borderColor: 'var(--ok)' }}>
-                <div style={{ fontWeight: 800, fontSize: 24 }}>✅ {altRecord?.name}</div>
+                <div style={{ fontWeight: 800, fontSize: 24 }}> {altRecord?.name}</div>
                 <div style={{ marginTop: 8, fontSize: 20, color: 'var(--ink-500)' }}>
                   OTP sent to ****{altRecord?.mobile?.slice(-4)} · {altRecord?.dept}
                 </div>

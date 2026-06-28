@@ -12,6 +12,7 @@ import { LoadingScreen, SubmissionSteps } from '../components/loading';
 import { generateRequestId, getCurrentTimestamp } from '../utils/helpers';
 import { addReceipt } from '../utils/receipts';
 import { sleep } from '../utils/mockDelay';
+import { getCitizenProfile, buildFormPrefill } from '../utils/citizenProfile';
 
 /**
  * Consumer Profile / Credential Management — shared across all departments
@@ -30,13 +31,15 @@ const ConsumerProfile = () => {
   };
   const theme = themeColors[org] || themeColors.electricity;
 
-  // Mock profile data
+  // Profile data — prefilled from the logged-in citizen's Aadhaar record
+  const citizen = getCitizenProfile();
+  const citizenPrefill = buildFormPrefill(citizen);
   const [profileData, setProfileData] = useState({
-    name: sessionStorage.getItem('userName') || 'Rajesh Kumar',
-    mobile: sessionStorage.getItem('userMobile') || '9876543210',
-    email: 'rajesh.k@email.com',
-    address: '42, MG Road, Ward 3',
-    aadhaar: '9999-8888-7777',
+    name: citizenPrefill.name || sessionStorage.getItem('userName') || 'Rajesh Kumar',
+    mobile: citizenPrefill.mobile || sessionStorage.getItem('userMobile') || '9876543210',
+    email: citizenPrefill.email || 'rajesh.k@email.com',
+    address: citizenPrefill.address || '42, MG Road, Ward 3',
+    aadhaar: citizen?.uid ? `${citizen.uid.slice(0, 4)}-${citizen.uid.slice(4, 8)}-${citizen.uid.slice(8, 12)}` : '9999-8888-7777',
     consumerNumber: 'ELEC-GHY-2024-001234',
   });
 
@@ -209,13 +212,20 @@ const ConsumerProfile = () => {
               {showMasked ? 'Show Details' : 'Hide Details'}
             </button>
             {!isEditing ? (
-              <Button variant="outline" size="small" onClick={() => { setIsEditing(true); setEditData({ ...profileData }); }}>
+              <button
+                onClick={() => { setIsEditing(true); setEditData({ ...profileData }); }}
+                className="flex items-center gap-2 text-kiosk-sm font-semibold text-government-blue hover:text-blue-800 transition-colors touch-manipulation flex-shrink-0"
+              >
+                <Save className="w-5 h-5" />
                 Edit Profile
-              </Button>
+              </button>
             ) : (
-              <Button variant="ghost" size="small" onClick={() => { setIsEditing(false); setMobileChanged(false); }}>
+              <button
+                onClick={() => { setIsEditing(false); setMobileChanged(false); }}
+                className="flex items-center gap-2 text-kiosk-sm font-semibold text-gray-500 hover:text-gray-700 transition-colors touch-manipulation flex-shrink-0"
+              >
                 Cancel
-              </Button>
+              </button>
             )}
           </div>
 
@@ -309,30 +319,33 @@ const ConsumerProfile = () => {
               <p className="text-sm text-gray-500 mb-4">
                 {t('profile.ownershipTransferDesc')}
               </p>
-              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-kiosk">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
+              <div className="p-5 bg-gray-50 rounded-xl">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-4">
+                  <div className="p-4 rounded-xl bg-white">
                     <label className="text-kiosk-sm text-gray-500">{t('profile.newOwnerName')}</label>
                     <input
-                      className="w-full text-kiosk-base bg-white border rounded-lg px-3 py-2 mt-1"
+                      className="w-full text-kiosk-base font-semibold text-gray-800 bg-white border rounded-lg px-3 py-2 mt-1"
                       placeholder={t('profile.enterNewOwnerName')}
                     />
                   </div>
-                  <div>
+                  <div className="p-4 rounded-xl bg-white">
                     <label className="text-kiosk-sm text-gray-500">{t('profile.newOwnerAadhaar')}</label>
                     <input
-                      className="w-full text-kiosk-base bg-white border rounded-lg px-3 py-2 mt-1"
+                      className="w-full text-kiosk-base font-semibold text-gray-800 bg-white border rounded-lg px-3 py-2 mt-1"
                       placeholder={t('profile.enterAadhaarNumber')}
                       maxLength={12}
                     />
                   </div>
                 </div>
-                <p className="text-kiosk-sm text-yellow-700 mb-3">
-                  {t('profile.ownershipTransferWarning')}
-                </p>
+                <div className="flex items-start gap-2 mb-4 px-1">
+                  <span className="text-amber-500 mt-0.5"></span>
+                  <p className="text-kiosk-sm text-gray-500">
+                    {t('profile.ownershipTransferWarning')}
+                  </p>
+                </div>
                 <Button
                   variant="outline"
-                  size="medium"
+                  size="small"
                   onClick={() => {
                     const receiptData = {
                       requestId: generateRequestId(),
