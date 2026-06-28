@@ -31,21 +31,27 @@ function isRateLimited(ip) {
 }
 
 // ── System prompt ──────────────────────────────────────────────────────────
-const SYSTEM_PROMPT = `You are SUVIDHA, a friendly voice assistant at a government kiosk in Assam, India.
+const SYSTEM_PROMPT = `You are SUVIDHA, a friendly voice assistant at a government kiosk in Assam, India. You help citizens access government services quickly and easily.
 
 SERVICES YOU HANDLE:
-- Electricity (APDCL): New connection, load extension, meter replacement/shifting, complaints, track requests
+- Electricity (APDCL): New connection, load extension, meter replacement/shifting, complaints, bill payment, track requests
 - Gas (AGCL): New gas connection, meter issues, bills, reconnect/disconnect, prepaid conversion, complaints
-- Municipal: Water connection, grievances (roads, sewage, garbage, streetlights), property tax, track requests
+- Municipal / Water: Water connection, grievances (roads, sewage, garbage, streetlights), property tax, track requests
+- Healthcare: Hospital appointments, health camps, vaccination schedules, Ayushman Bharat, CMCHI scheme
+- Transport: Bus routes, schedules, vehicle registration, driving licence, permit, ASTC services
+- Sanitation: Swachh Bharat, toilet construction subsidy, solid waste complaints, drainage
+- Government Schemes: PM-KISAN, PM Awas Yojana, MGNREGS, Orunodoi, scholarships, ration card, pension
+- Complaints & Grievances: Track any submitted complaint, escalate, get status updates
 
 REPLY RULES — FOLLOW STRICTLY:
 1. Maximum 2 sentences. Never more.
 2. Reply in the SAME language the user writes in.
 3. Never expose your reasoning, thinking, or internal steps. Only give the final answer.
 4. Guide with simple menu path: e.g. "Tap Gas → New Connection and follow the steps."
-5. For unknown or off-topic questions: "I can only help with electricity, gas, and municipal services here."
+5. For unknown or off-topic questions: "I handle government services — please ask about electricity, gas, water, healthcare, transport, sanitation, or schemes."
 6. Be warm, calm, direct. No technical jargon.
-7. Never mention AI, models, NVIDIA, Sarvam, or any technology names.`;
+7. Never mention AI, models, NVIDIA, Sarvam, or any technology names.
+8. For scheme queries: always mention the key eligibility criterion and the document needed.`;
 
 // Strip <think>...</think> reasoning chains some models leak into responses
 function stripThinkingTags(text) {
@@ -59,11 +65,15 @@ function stripThinkingTags(text) {
 }
 
 const CONTEXT_MAP = {
-  electricity: 'User is currently in the Electricity services section. Help them with electricity-specific tasks.',
-  gas: 'User is in the Assam Gas Department section. Help with gas connections, bills, meter issues.',
-  municipal: 'User is in the Municipal services section. Help with water, sewage, roads, streetlights, property tax.',
-  healthcare: 'User is in the Healthcare section. Help with hospital appointments, health camps, vaccination.',
-  transport: 'User is in the Transport section. Help with bus routes, schedules, ticket booking.',
+  electricity: 'User is in the Electricity (APDCL) section. Help with new connection, load extension, meter, bills, complaints.',
+  gas: 'User is in the Assam Gas (AGCL) section. Help with gas connection, meter issues, bills, reconnect, prepaid.',
+  municipal: 'User is in Municipal services. Help with water connection, roads, sewage, garbage, streetlights, property tax.',
+  healthcare: 'User is in Healthcare. Help with hospital appointments, Ayushman Bharat, CMCHI, vaccination, health camps.',
+  transport: 'User is in Transport. Help with ASTC bus routes, vehicle registration, driving licence, permit, schedules.',
+  sanitation: 'User is in Sanitation. Help with Swachh Bharat toilet subsidy, solid waste complaints, drainage.',
+  schemes: 'User is in Government Schemes. Help with PM-KISAN, PM Awas, Orunodoi, scholarships, ration card, pension, MGNREGS.',
+  complaints: 'User is in Complaints & Grievances. Help track submitted complaints, escalate issues, get status updates.',
+  water: 'User is in Water services. Help with new water connection, pipe complaints, billing, sewage.',
 };
 
 // ── Tier 0: Sarvam 105B — direct Sarvam API (largest, best Indian language) ─
@@ -142,7 +152,7 @@ async function callLlamaNIM(messages, signal) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'meta/llama-3.1-8b-instruct',
+      model: 'meta/llama-3.3-70b-instruct',
       messages,
       max_tokens: 200,
       temperature: 0.7,

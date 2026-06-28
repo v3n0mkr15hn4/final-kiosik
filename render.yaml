@@ -21,7 +21,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGINS
-        sync: false
+        value: https://final-kiosik.vercel.app
     # No disk block — Render's free tier doesn't support persistent disks.
     # SQLite falls back to its default in-repo path (server/suvidha.db) via
     # db.js's DB_PATH env override added earlier — that file lives on the

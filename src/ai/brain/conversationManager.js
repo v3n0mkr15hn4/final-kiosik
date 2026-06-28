@@ -1,8 +1,12 @@
-﻿/**
+/**
  * conversationManager.js - Conversation Turn Manager
+ *
+ * AI calls route through /api/chat (server-side proxy) — NVIDIA key stays
+ * server-only, never in the browser bundle. callNvidiaAI removed from this
+ * file; the server's 4-tier cascade (Sarvam 105B → Sarvam NIM → Llama 70B
+ * → Gemma) handles model selection transparently.
  */
 
-import { callNvidiaAI } from '../api/nvidiaApi.js';
 import { buildMessages } from './promptBuilder.js';
 import {
   addMessage,
@@ -17,8 +21,30 @@ import { needsPivot, processWithEnglishPivot } from './translatePivot.js';
 // Pre-warm MiniLLM in background — first real use will be instant
 prewarmSemanticMatcher();
 
+/**
+ * POST user message to the server /api/chat proxy.
+ * Returns the plain-text reply string, or null on failure.
+ */
+async function callServerChatProxy(userMessage, language, currentPath) {
+  const apiBase = import.meta.env.VITE_API_BASE_URL || '/api';
+  const contextKey = (currentPath || '/').split('/').filter(Boolean)[0] || '';
+
+  const resp = await fetch(`${apiBase}/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: userMessage, language, context: contextKey }),
+    signal: AbortSignal.timeout(15_000),
+  });
+
+  if (!resp.ok) {
+    throw new Error(`Chat server error: ${resp.status}`);
+  }
+  const data = await resp.json();
+  return data.reply || null;
+}
+
 export async function processConversationTurn(userMessage, options = {}) {
-  const { currentPath = '/', language: inputLang, onChunk } = options;
+  const { currentPath = '/', language: inputLang } = options;
 
   if (!userMessage?.trim()) {
     return buildErrorResponse('Empty message received.');
@@ -42,6 +68,7 @@ export async function processConversationTurn(userMessage, options = {}) {
     const fastResponse = {
       intent,
       response: buildNavigationResponse(intent, language),
+      speechSummary: buildNavigationResponse(intent, language),
       language,
       confidence,
       action: path ? { type: 'NAVIGATE_PAGE', path } : null,
@@ -54,29 +81,21 @@ export async function processConversationTurn(userMessage, options = {}) {
     return fastResponse;
   }
 
-  const messages = buildMessages(userMessage, {
-    currentPath,
-    language,
-    includeKnowledge: true,
-  });
-
   let aiResponse;
   try {
     if (needsPivot(language)) {
-      // Open LLMs reason better in English than Assamese — pivot through
-      // English instead of asking the model to think in Assamese directly.
-      aiResponse = await processWithEnglishPivot(userMessage, messages, langInfo.sarvamCode || 'as-IN');
+      // Assamese: translate AS→EN, call server in EN, translate EN→AS
+      aiResponse = await processWithEnglishPivot(userMessage, language, currentPath, callServerChatProxy);
+      if (!aiResponse) aiResponse = buildOfflineResponse(language);
     } else {
-      // Always non-streaming: voice speaks after full reply; streaming prevents
-      // response_format:json_object which causes JSON parse failures
-      aiResponse = await callNvidiaAI(messages, {
-        stream: false,
-        jsonMode: true,
-      });
+      const reply = await callServerChatProxy(userMessage, language, currentPath);
+      aiResponse = reply
+        ? { response: reply, language }
+        : buildOfflineResponse(language);
     }
-    console.log('[ConversationManager] NVIDIA ok, intent:', aiResponse?.intent);
+    console.log('[ConversationManager] Server chat ok, lang:', language);
   } catch (err) {
-    console.error('[ConversationManager] AI call failed:', err);
+    console.error('[ConversationManager] AI call failed:', err.message);
     aiResponse = buildOfflineResponse(language);
   }
 
@@ -101,10 +120,6 @@ function normaliseAIResponse(raw, fallbackLanguage = 'en') {
   return {
     intent: raw.intent || 'general_response',
     response,
-    // Falls back to the full response if the model didn't return a separate
-    // summary (e.g. semantic fast-path responses never go through the LLM
-    // at all, so this field never exists there — that's fine, the fast-path
-    // responses are already short).
     speechSummary: raw.speechSummary || response,
     language: raw.language || fallbackLanguage,
     confidence: typeof raw.confidence === 'number' ? raw.confidence : 0.7,
@@ -112,6 +127,7 @@ function normaliseAIResponse(raw, fallbackLanguage = 'en') {
     followUp: raw.followUp || null,
     suggestions: Array.isArray(raw.suggestions) ? raw.suggestions : [],
     offline: raw.offline || false,
+    pivoted: raw.pivoted || false,
   };
 }
 
@@ -120,6 +136,7 @@ function buildErrorResponse(reason = '', language = 'en') {
   return {
     intent: 'error',
     response: text,
+    speechSummary: text,
     language,
     confidence: 0,
     action: null,
@@ -130,9 +147,15 @@ function buildErrorResponse(reason = '', language = 'en') {
 }
 
 function buildOfflineResponse(language = 'en') {
+  const msgs = {
+    hi: 'सेवा अभी उपलब्ध नहीं। कृपया मेनू का उपयोग करें।',
+    as: 'সেৱা এতিয়া উপলব্ধ নহয়। মেনু ব্যৱহাৰ কৰক।',
+  };
+  const text = msgs[language] || 'AI service is temporarily unavailable. Please use the menu to navigate services.';
   return {
     intent: 'service_degraded',
-    response: 'AI response generation is temporarily unavailable. Please try again or use the navigation menu.',
+    response: text,
+    speechSummary: text,
     language,
     confidence: 1,
     action: null,
@@ -142,8 +165,8 @@ function buildOfflineResponse(language = 'en') {
   };
 }
 
-export function generateGreeting(language = 'en', currentPath = '/') {
-  return "Hello! I'm SUVIDHA, your AI assistant for government services. How can I help you today?";
+export function generateGreeting(language = 'en') {
+  return "Hello! I'm SUVIDHA, your assistant for government services. How can I help you today?";
 }
 
 // Short response for semantic fast-path navigations (no LLM needed)

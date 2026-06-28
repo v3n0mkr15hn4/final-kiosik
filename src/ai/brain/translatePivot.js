@@ -1,18 +1,14 @@
 /**
  * translatePivot.js — Assamese → English → reason → English → Assamese
  *
- * Open LLMs (Llama, Gemma) reason far better in English than Assamese —
- * training data is overwhelmingly English. conversationManager.js currently
- * asks the model to think AND respond directly in Assamese (chat.js system
- * prompt: "reply in the SAME language"). This pivots through English for
- * the reasoning step, using the same sarvamTranslate() already wired for
- * Tier-2 bridge languages.
+ * Open LLMs reason far better in English than Assamese — training data is
+ * overwhelmingly English. This pivots through English for the reasoning step,
+ * using sarvamTranslate() already wired for Tier-2 bridge languages.
  *
- * Only engages for Assamese — other languages already get acceptable
- * direct-response quality and don't need the extra two network round-trips.
+ * Only engages for Assamese. chatProxy is the server /api/chat proxy
+ * injected by conversationManager.js — keeps AI key server-side.
  */
 import { sarvamTranslate } from '../api/sarvamApi.js';
-import { callNvidiaAI } from '../api/nvidiaApi.js';
 
 const PIVOT_LANGS = new Set(['as']);
 
@@ -24,48 +20,32 @@ export function needsPivot(language) {
 /**
  * Run one conversation turn through the English pivot.
  *
- * callNvidiaAI with jsonMode:true returns the structured envelope
- * { intent, response, speechSummary, language, confidence, action,
- * followUp, suggestions } (see conversationManager.js normaliseAIResponse).
- * `.response`, `.speechSummary`, and `.followUp` are natural-language text
- * needing translation — `.intent` and `.action.path` are keywords/routes,
- * translating those would break routing.
- *
- * @param {string} userMessage    - original-language transcript (Assamese)
- * @param {Array}  messages       - full message array as built by promptBuilder.js,
- *                                  with the latest user turn already in original language
- * @param {string} sourceLangCode - BCP-47, e.g. 'as-IN'
- * @returns {Promise<Object>} same envelope shape as callNvidiaAI, with
- *          .response/.followUp translated back to sourceLangCode
+ * @param {string}   userMessage  - original Assamese transcript
+ * @param {string}   language     - 'as' or 'as-IN'
+ * @param {string}   currentPath  - current route (e.g. '/electricity')
+ * @param {Function} chatProxy    - callServerChatProxy(msg, lang, path) → reply string
  */
-export async function processWithEnglishPivot(userMessage, messages, sourceLangCode = 'as-IN') {
+export async function processWithEnglishPivot(userMessage, language, currentPath, chatProxy) {
+  const sourceLangCode = language.includes('-') ? language : `${language}-IN`;
+
   const englishUserMessage = await sarvamTranslate(userMessage, sourceLangCode, 'en-IN');
 
-  const englishMessages = messages.map((m, i) => {
-    if (i === messages.length - 1 && m.role === 'user') {
-      return { ...m, content: englishUserMessage };
-    }
-    return m;
-  });
+  const englishReply = await chatProxy(englishUserMessage, 'en', currentPath);
+  if (!englishReply) return null;
 
-  const aiResponse = await callNvidiaAI(englishMessages, { stream: false, jsonMode: true });
-
-  if (!aiResponse?.response) return aiResponse;
-
-  const [translatedResponse, translatedSummary, translatedFollowUp] = await Promise.all([
-    sarvamTranslate(aiResponse.response, 'en-IN', sourceLangCode),
-    aiResponse.speechSummary
-      ? sarvamTranslate(aiResponse.speechSummary, 'en-IN', sourceLangCode)
-      : Promise.resolve(null),
-    aiResponse.followUp ? sarvamTranslate(aiResponse.followUp, 'en-IN', sourceLangCode) : Promise.resolve(null),
+  const [translatedResponse] = await Promise.all([
+    sarvamTranslate(englishReply, 'en-IN', sourceLangCode),
   ]);
 
   return {
-    ...aiResponse,
+    intent: 'general_response',
     response: translatedResponse,
-    speechSummary: translatedSummary || translatedResponse,
-    followUp: translatedFollowUp,
-    language: sourceLangCode.split('-')[0],
+    speechSummary: translatedResponse,
+    language: language.split('-')[0],
+    confidence: 0.8,
+    action: null,
+    followUp: null,
+    suggestions: [],
     pivoted: true,
   };
 }
