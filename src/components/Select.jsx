@@ -50,6 +50,28 @@ const Select = ({
     onChange?.({ target: { value: optionValue } });
   };
 
+  // This is a custom listbox, not a native <select> — fillField()'s native
+  // value-setter approach can't reach it. Voice-fill instead dispatches a
+  // 'voicefill' CustomEvent with the raw spoken text; resolve it here by
+  // fuzzy-matching against this Select's own options.
+  useEffect(() => {
+    if (!voiceField) return;
+    const el = rootRef.current?.querySelector(`[data-voice-field="${voiceField}"]`);
+    if (!el) return;
+    const handler = (e) => {
+      const spoken = (e.detail?.value || '').trim().toLowerCase();
+      if (!spoken) return;
+      const match = options.find((o) => {
+        const label = (o.label || o.name || '').toLowerCase();
+        const val = String(o.value ?? o.id ?? '').toLowerCase();
+        return label === spoken || val === spoken || label.includes(spoken) || spoken.includes(label);
+      });
+      if (match) selectOption(match.value ?? match.id);
+    };
+    el.addEventListener('voicefill', handler);
+    return () => el.removeEventListener('voicefill', handler);
+  }, [voiceField, options]);
+
   return (
     <div className={`w-full ${className}`} ref={rootRef}>
       {label && (

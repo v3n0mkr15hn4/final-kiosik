@@ -49,6 +49,7 @@ export default function Home() {
 
     speak(t('home.voiceWelcome',
       'Welcome. You can select a service, or say help. Available services: electricity, gas, water, municipal, healthcare, transport.'),
+      { staticKey: 'greet_dashboard' },
     ).catch(() => {});
 
     const NAV_COMMANDS = {
@@ -69,7 +70,8 @@ export default function Home() {
         const said = (text || '').toLowerCase();
         if (said.includes('help')) {
           speak(t('home.voiceHelp',
-            'Say a service name like electricity, gas, water, healthcare, transport, or track status.')).catch(() => {});
+            'Say a service name like electricity, gas, water, healthcare, transport, or track status.'),
+            { staticKey: 'greet_help_hint' }).catch(() => {});
           return;
         }
         const hit = Object.keys(NAV_COMMANDS).find((k) => said.includes(k));

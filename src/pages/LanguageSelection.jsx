@@ -86,7 +86,7 @@ export default function LanguageSelection() {
         <div style={styles.grid}>
           {LANGS.map((lang) => (
             <button
-              key={lang.sarvam}
+              key={lang.ui}
               type="button"
               onClick={() => handlePick(lang)}
               style={{ ...styles.card, direction: lang.rtl ? 'rtl' : 'ltr' }}

@@ -119,7 +119,8 @@ export default function ModeSelection() {
 
     const base = (i18n.language || 'en').toLowerCase().split('-')[0];
     const ttsMsg = MODE_TTS[base]?.[selectedMode] || MODE_TTS.en[selectedMode];
-    speak(ttsMsg, { language: i18n.language, priority: 'normal' }).catch(() => {});
+    const modeStaticKeys = { blind: 'mode_blind_login_hint', elderly: 'mode_elderly_select', normal: 'mode_normal_select', admin: 'mode_admin_select' };
+    speak(ttsMsg, { language: i18n.language, priority: 'normal', staticKey: modeStaticKeys[selectedMode] }).catch(() => {});
 
     if (selectedMode === 'admin') {
       navigate('/admin-login');

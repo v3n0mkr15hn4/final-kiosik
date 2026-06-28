@@ -31,6 +31,15 @@ export function fillField(fieldName, value) {
   const el = findField(fieldName);
   if (!el) return false;
 
+  // Custom listbox (Select.jsx) — not a native input, no .value to set.
+  // Hand the raw spoken text to its own 'voicefill' listener, which fuzzy
+  // matches against its option list.
+  if (el.tagName === 'BUTTON') {
+    el.dispatchEvent(new CustomEvent('voicefill', { bubbles: true, detail: { value } }));
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return true;
+  }
+
   // Use React's internal setter to trigger onChange
   const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
     window.HTMLInputElement.prototype, 'value'

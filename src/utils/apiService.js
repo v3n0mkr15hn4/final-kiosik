@@ -116,17 +116,52 @@ export const otpAPI = {
   verifyOtp: ({ uid, mobile, otp }) => api.post('/otp/verify-otp', { uid, mobile, otp }),
 };
 
-// â”€â”€â”€ Service Requests â”€â”€â”€
+// â”€â”€â”€ Service Requests â”€â”€â”€ Supabase direct write (portal-visible), Express fallback â”€â”€â”€
 export const serviceAPI = {
-  submit: (data) => api.post('/service-requests', data),
-  get: (requestId) => api.get(`/service-requests/${requestId}`),
-  list: (params) => api.get('/service-requests', { params }),
+  submit: async (data) => {
+    try {
+      const { submitToSupabase } = await import('./supabaseSync');
+      return await submitToSupabase(data);
+    } catch {
+      return api.post('/service-requests', data);
+    }
+  },
+  get: async (requestId) => {
+    try {
+      const { trackViaSupabase } = await import('./supabaseSync');
+      return await trackViaSupabase({ trackingId: requestId });
+    } catch {
+      return api.get(`/service-requests/${requestId}`);
+    }
+  },
+  list: async (params) => {
+    try {
+      const { trackViaSupabase } = await import('./supabaseSync');
+      return await trackViaSupabase({ mobile: params?.mobile });
+    } catch {
+      return api.get('/service-requests', { params });
+    }
+  },
 };
 
-// â”€â”€â”€ Complaints â”€â”€â”€
+// â”€â”€â”€ Complaints â”€â”€â”€ Supabase direct write (portal-visible), Express fallback â”€â”€â”€
 export const complaintAPI = {
-  submit: (data) => api.post('/complaints', data),
-  get: (complaintId) => api.get(`/complaints/${complaintId}`),
+  submit: async (data) => {
+    try {
+      const { submitToSupabase } = await import('./supabaseSync');
+      return await submitToSupabase({ ...data, org: data.org || 'complaint', receiptType: 'complaint' });
+    } catch {
+      return api.post('/complaints', data);
+    }
+  },
+  get: async (complaintId) => {
+    try {
+      const { trackViaSupabase } = await import('./supabaseSync');
+      return await trackViaSupabase({ trackingId: complaintId });
+    } catch {
+      return api.get(`/complaints/${complaintId}`);
+    }
+  },
 };
 
 // â”€â”€â”€ Transport â”€â”€â”€

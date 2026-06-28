@@ -1,5 +1,6 @@
 import { getAudio, setAudio } from './offlineAudioCache';
 import { VOICE_PROFILE } from '../config/voiceProfile';
+import { getStaticAudioUrl } from './staticAudioMap';
 
 const PRIORITY_ORDER = { error: 3, warning: 2, normal: 1 };
 
@@ -202,6 +203,15 @@ class TTSService {
     const cacheKey = this.getCacheKey(item.text, langInfo.code, item.options);
 
     try {
+      // 0. Static pre-recorded file — fastest, truly offline, no API
+      const staticKey = item.options?.staticKey;
+      if (staticKey) {
+        const staticUrl = getStaticAudioUrl(langInfo.originalLang, staticKey);
+        if (staticUrl) {
+          try { await this.playAudioFromObjectUrl(staticUrl, item.options?.volume); return; } catch { /* fall through to dynamic tiers */ }
+        }
+      }
+
       // 1. In-memory cache
       if (this.audioCache.has(cacheKey)) {
         try { await this.playAudioFromObjectUrl(this.audioCache.get(cacheKey), item.options?.volume); return; } catch { /* fall through */ }

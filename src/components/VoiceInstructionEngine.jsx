@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAccessibility } from './AccessibilityProvider';
 import { speak, stopTTS, setVoiceCommandActive } from '../utils/ttsService';
+import { ROUTE_STATIC_KEYS } from '../utils/staticAudioMap';
 
 const VOICE_TOGGLE_KEY = 'voiceInstructionsEnabled';
 
@@ -248,6 +249,7 @@ const VoiceInstructionEngine = () => {
       priority: userMode === 'blind' ? 'warning' : 'normal',
       language: i18n.language,
       cache: true,
+      staticKey: ROUTE_STATIC_KEYS[location.pathname],
     }).catch(() => {});
   }, [location.pathname, i18n.language, shouldSpeak, userMode]);
 
@@ -255,7 +257,8 @@ const VoiceInstructionEngine = () => {
     const previousMode = previousModeRef.current;
     if (previousMode !== userMode) {
       const message = getMessageByLanguage(MODE_MESSAGES[userMode], i18n.language);
-      speakIfEnabled(message, { priority: 'warning' });
+      const modeKeys = { blind: 'mode_blind', elderly: 'mode_elderly', normal: 'mode_normal' };
+      speakIfEnabled(message, { priority: 'warning', staticKey: modeKeys[userMode] });
       previousModeRef.current = userMode;
     }
   }, [userMode, i18n.language, shouldSpeak]);
@@ -264,7 +267,7 @@ const VoiceInstructionEngine = () => {
     const handleOffline = () => {
       onlineStatusRef.current = false;
       const message = getMessageByLanguage(ONLINE_MESSAGES.offline, i18n.language);
-      speakIfEnabled(message, { priority: 'error', interrupt: true, cache: false });
+      speakIfEnabled(message, { priority: 'error', interrupt: true, cache: false, staticKey: 'net_offline' });
     };
 
     const handleOnline = () => {
@@ -272,7 +275,7 @@ const VoiceInstructionEngine = () => {
       onlineStatusRef.current = true;
       if (wasOffline) {
         const message = getMessageByLanguage(ONLINE_MESSAGES.online, i18n.language);
-        speakIfEnabled(message, { priority: 'warning', cache: false });
+        speakIfEnabled(message, { priority: 'warning', cache: false, staticKey: 'net_restored' });
       }
     };
 
@@ -304,7 +307,7 @@ const VoiceInstructionEngine = () => {
       if (!shouldSpeak) return;
       const lang = getBaseLang(i18n.language);
       const msg = BACK_MESSAGES[lang] || BACK_MESSAGES.en;
-      speak(msg, { language: i18n.language, priority: 'normal' }).catch(() => {});
+      speak(msg, { language: i18n.language, priority: 'normal', staticKey: 'nav_back' }).catch(() => {});
     };
 
     window.addEventListener('voice:back-button-clicked', handleBackButton);
@@ -320,21 +323,21 @@ const VoiceInstructionEngine = () => {
       if (!shouldSpeak) return;
       const lang = getBaseLang(i18n.language);
       const msg = FORM_SUBMIT_MESSAGES[lang] || FORM_SUBMIT_MESSAGES.en;
-      speak(msg, { language: i18n.language, priority: 'normal' }).catch(() => {});
+      speak(msg, { language: i18n.language, priority: 'normal', staticKey: 'form_submitting' }).catch(() => {});
     };
 
     const handleFormSuccess = (event) => {
       if (!shouldSpeak) return;
       const lang = getBaseLang(i18n.language);
       const msg = FORM_SUCCESS_MESSAGES[lang] || FORM_SUCCESS_MESSAGES.en;
-      speak(msg, { language: i18n.language, priority: 'warning' }).catch(() => {});
+      speak(msg, { language: i18n.language, priority: 'warning', staticKey: 'form_success' }).catch(() => {});
     };
 
     const handleFormError = (event) => {
       if (!shouldSpeak) return;
       const lang = getBaseLang(i18n.language);
       const msg = FORM_ERROR_MESSAGES[lang] || FORM_ERROR_MESSAGES.en;
-      speak(msg, { language: i18n.language, priority: 'error' }).catch(() => {});
+      speak(msg, { language: i18n.language, priority: 'error', staticKey: 'form_error' }).catch(() => {});
     };
 
     window.addEventListener('voice:form-submit', handleFormSubmit);

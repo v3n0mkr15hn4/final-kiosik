@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { startSTT, stopSTT } from '../ai/voice/speechRecognition';
 import { useVoiceFormSubmit } from '../hooks/useVoiceFormSubmit';
+import { useVoiceFormWizard } from '../hooks/useVoiceFormWizard';
 import { Modal, Select } from '../components';
 import { VK, DD, I, ic } from '../components/kiosk';
 import { LoadingScreen, SubmissionSteps } from '../components/loading';
@@ -43,6 +44,18 @@ const MunicipalGrievance = () => {
   const sttLangCode = STT_LANG_MAP[(i18n.language || 'en').split('-')[0]] || 'hi-IN';
 
   useVoiceFormSubmit('municipal_grievance', () => { if (step === 2) handleSubmit(); });
+
+  const voiceWizard = useVoiceFormWizard({
+    fields: [
+      { name: 'name', optional: false },
+      { name: 'mobile', optional: false },
+      { name: 'state', optional: false },
+      { name: 'city', optional: false },
+      { name: 'ward', optional: true },
+      { name: 'description', optional: false },
+    ],
+    language: i18n.language,
+  });
 
   const toggleVoiceInput = useCallback(() => {
     if (isRecording) { stopSTT(); setIsRecording(false); return; }
@@ -238,9 +251,22 @@ const MunicipalGrievance = () => {
           </div>
         ) : (
           <div className="card">
-            <span className="badge b-info" style={{ marginBottom: 44 }}>
-              Category · {grievanceCategories.find(c => c.id === selectedCategory)?.label}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 44, flexWrap: 'wrap', gap: 16 }}>
+              <span className="badge b-info">
+                Category · {grievanceCategories.find(c => c.id === selectedCategory)?.label}
+              </span>
+              <button
+                type="button"
+                onClick={() => (voiceWizard.isActive ? voiceWizard.stop() : voiceWizard.start())}
+                className={`chip${voiceWizard.isActive ? ' act' : ''}`}
+                aria-label={voiceWizard.isActive ? 'Stop voice fill' : 'Fill form by voice'}
+              >
+                <I d={voiceWizard.isActive ? ic.x : ic.voice} size={28} />
+                {voiceWizard.isActive
+                  ? `Listening: ${voiceWizard.currentField || '...'}`
+                  : t('form.voiceFill', 'Fill by Voice')}
+              </button>
+            </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '36px 40px' }}>
               <div>

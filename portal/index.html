@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SUVIDHA Portal</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fefcf8;--surf:#faf5ee;--surf2:#f3ece0;
+  --primary:#2d1a6a;--accent:#f08e00;
+  --text:#1a1630;--muted:#524c6a;--faint:#847d9a;
+  --border:#e8dfd4;--danger:#d03020;--success:#2a9a58;
+  --elec:#e09200;--gas:#d86030;--muni:#2d1a6a;--health:#d03068;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.tricolor{height:6px;display:flex}
+.tricolor div{flex:1}
+.t-saf{background:#FF9933}.t-wht{background:#fff}.t-grn{background:#138808}
+header{background:var(--surf);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px}
+.logo-circle{width:36px;height:36px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:20px;flex-shrink:0}
+.brand{font-size:20px;font-weight:900;color:var(--primary);letter-spacing:3px}
+.brand-sub{font-size:11px;color:var(--faint);margin-top:1px}
+header .spacer{flex:1}
+.refresh-btn{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px;color:var(--muted);font-weight:600}
+.refresh-btn:hover{background:var(--border)}
+
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--border);background:var(--surf);padding:0 20px}
+.tab{padding:12px 18px;cursor:pointer;font-size:14px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.tab:hover:not(.active){color:var(--text)}
+.subtabs{display:flex;gap:8px;padding:12px 20px;background:var(--bg);border-bottom:1px solid var(--border)}
+.subtab{padding:5px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);border:1px solid var(--border);background:var(--surf)}
+.subtab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* STATS */
+.stats{display:flex;gap:12px;padding:16px 20px}
+.stat-card{flex:1;background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:12px 16px}
+.stat-num{font-size:28px;font-weight:900;color:var(--primary)}
+.stat-lbl{font-size:12px;color:var(--muted);font-weight:600;margin-top:2px}
+
+/* TABLE */
+.table-wrap{padding:0 20px 20px}
+.submissions-table{width:100%;border-collapse:collapse}
+.submissions-table th{text-align:left;font-size:12px;color:var(--faint);font-weight:700;letter-spacing:1px;padding:8px 12px;border-bottom:2px solid var(--border);text-transform:uppercase}
+.submissions-table td{padding:12px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:top}
+.submissions-table tr:hover td{background:var(--surf)}
+.submissions-table tr.expanded td{background:var(--surf)}
+.tracking-id{font-family:monospace;font-weight:700;font-size:13px;color:var(--primary)}
+.org-badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;color:#fff}
+.org-elec{background:var(--elec)} .org-gas{background:var(--gas)} .org-municipal{background:var(--muni)}
+.org-healthcare{background:var(--health)} .org-sanitation{background:#5a8a3a} .org-transport{background:#2a6a9a} .org-water{background:#1a8aa8} .org-complaint{background:#8a4a8a} .org-general{background:var(--faint)}
+.type-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;background:var(--surf2);color:var(--muted);border:1px solid var(--border)}
+.type-complaint{background:#fde8e8;color:var(--danger);border-color:#f5c6c6}
+.type-request{background:#e8f0ff;color:var(--primary);border-color:#c6d4f5}
+.docs-count{font-size:12px;color:var(--success);font-weight:700}
+.docs-none{font-size:12px;color:var(--faint)}
+.expand-row td{padding:0}
+.expand-inner{padding:16px 48px;background:var(--surf);border-top:1px solid var(--border)}
+.doc-thumb{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border:1px solid var(--border);border-radius:8px;margin-top:8px}
+.doc-icon{font-size:24px}
+.doc-info{flex:1}
+.doc-name{font-size:13px;font-weight:700;color:var(--text)}
+.doc-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.doc-link{font-size:12px;color:var(--primary);font-weight:600;text-decoration:none}
+.doc-link:hover{text-decoration:underline}
+.empty{text-align:center;padding:48px;color:var(--faint);font-size:15px}
+.loading{text-align:center;padding:48px;color:var(--muted)}
+.spinner{display:inline-block;width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.config-warning{background:#fde8e8;color:var(--danger);padding:16px 20px;font-size:14px;font-weight:600;text-align:center;border-bottom:1px solid #f5c6c6}
+
+/* UPLOAD PAGE */
+#upload-page{display:none;max-width:480px;margin:0 auto;padding:32px 20px}
+.upload-card{background:var(--surf);border:1px solid var(--border);border-radius:20px;padding:28px;box-shadow:0 4px 24px rgba(44,26,106,.08)}
+.upload-title{font-size:22px;font-weight:800;color:var(--text);text-align:center;margin-bottom:4px}
+.upload-tid{font-family:monospace;font-size:13px;color:var(--primary);font-weight:700;text-align:center;margin-bottom:20px}
+.token-status{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;font-size:14px;font-weight:600;margin-bottom:20px}
+.token-ok{background:#e8f9f0;color:var(--success);border:1px solid #b6e9d0}
+.token-err{background:#fde8e8;color:var(--danger);border:1px solid #f5c6c6}
+.drop-zone{border:2px dashed var(--border);border-radius:14px;padding:32px 20px;text-align:center;cursor:pointer;transition:.2s;background:#fff;margin-bottom:16px}
+.drop-zone:hover,.drop-zone.over{border-color:var(--primary);background:var(--surf2)}
+.drop-icon{font-size:48px;margin-bottom:8px}
+.drop-label{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px}
+.drop-sub{font-size:12px;color:var(--muted)}
+.file-preview{display:flex;align-items:center;gap:12px;padding:12px;background:#fff;border:1px solid var(--border);border-radius:12px;margin-bottom:16px}
+.file-preview img{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--border)}
+.file-preview .fi{flex:1}
+.file-preview .fname{font-size:14px;font-weight:700;color:var(--text)}
+.file-preview .fsize{font-size:12px;color:var(--muted);margin-top:2px}
+.progress-bar{height:8px;background:var(--surf2);border-radius:4px;overflow:hidden;margin-bottom:16px}
+.progress-fill{height:100%;background:var(--primary);border-radius:4px;transition:width .3s}
+.upload-btn{width:100%;padding:16px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:12px}
+.upload-btn:disabled{background:var(--faint);cursor:not-allowed}
+.upload-btn:not(:disabled):hover{background:#3d2480}
+.success-screen{text-align:center;padding:24px 0}
+.success-icon{font-size:64px;margin-bottom:12px}
+.success-msg{font-size:20px;font-weight:800;color:var(--success);margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--muted);line-height:1.6}
+.err-msg{color:var(--danger);font-size:13px;text-align:center;margin-bottom:12px;padding:10px;background:#fde8e8;border-radius:8px;border:1px solid #f5c6c6}
+
+/* Responsive */
+@media(max-width:600px){
+  .stats{flex-direction:column}
+  .submissions-table{font-size:12px}
+  .submissions-table th,.submissions-table td{padding:8px 6px}
+  .tab{padding:10px 10px;font-size:13px}
+}
+</style>
+</head>
+<body>
+<div class="tricolor"><div class="t-saf"></div><div class="t-wht"></div><div class="t-grn"></div></div>
+
+<!-- DASHBOARD -->
+<div id="dashboard-page">
+  <header>
+    <div class="logo-circle">S</div>
+    <div>
+      <div class="brand">SUVIDHA</div>
+      <div class="brand-sub">Department Portal — Government of India</div>
+    </div>
+    <div class="spacer"></div>
+    <button class="refresh-btn" onclick="loadDashboard()">⟳ Refresh</button>
+  </header>
+
+  <div id="config-warning" class="config-warning" style="display:none">
+    ⚠️ Supabase not configured. Edit SUPABASE_URL / SUPABASE_ANON_KEY at the bottom of this file.
+  </div>
+
+  <div class="tabs" id="org-tabs">
+    <div class="tab active" data-org="all" onclick="switchOrg('all')">📋 All</div>
+    <div class="tab" data-org="electricity" onclick="switchOrg('electricity')">⚡ Electricity</div>
+    <div class="tab" data-org="gas" onclick="switchOrg('gas')">🔥 Gas</div>
+    <div class="tab" data-org="municipal" onclick="switchOrg('municipal')">🏛 Municipal</div>
+    <div class="tab" data-org="water" onclick="switchOrg('water')">💧 Water</div>
+    <div class="tab" data-org="healthcare" onclick="switchOrg('healthcare')">🏥 Healthcare</div>
+    <div class="tab" data-org="sanitation" onclick="switchOrg('sanitation')">🧹 Sanitation</div>
+    <div class="tab" data-org="transport" onclick="switchOrg('transport')">🚌 Transport</div>
+    <div class="tab" data-org="complaint" onclick="switchOrg('complaint')">📢 Complaints</div>
+  </div>
+  <div class="subtabs">
+    <div class="subtab active" data-type="all" onclick="switchType('all')">All</div>
+    <div class="subtab" data-type="request" onclick="switchType('request')">Requests</div>
+    <div class="subtab" data-type="complaint" onclick="switchType('complaint')">Complaints</div>
+  </div>
+
+  <div class="stats" id="stats-row">
+    <div class="stat-card"><div class="stat-num" id="stat-total">—</div><div class="stat-lbl">Total Submissions</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-pending">—</div><div class="stat-lbl">Pending</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-docs">—</div><div class="stat-lbl">Docs Uploaded</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-today">—</div><div class="stat-lbl">Today</div></div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="submissions-table">
+      <thead>
+        <tr>
+          <th>Tracking ID</th>
+          <th>Department</th>
+          <th>Type</th>
+          <th>Citizen</th>
+          <th>Submitted</th>
+          <th>Documents</th>
+        </tr>
+      </thead>
+      <tbody id="submissions-body">
+        <tr><td colspan="6" class="loading"><div class="spinner"></div><br>Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- UPLOAD PAGE -->
+<div id="upload-page">
+  <div class="tricolor" style="margin:0 -20px 24px;height:4px"><div class="t-saf"></div><div class="t-wht"></div><div class="t-grn"></div></div>
+  <div style="text-align:center;margin-bottom:20px">
+    <div class="logo-circle" style="margin:0 auto 8px;width:48px;height:48px;font-size:26px">S</div>
+    <div class="brand" style="font-size:18px">SUVIDHA Upload Portal</div>
+  </div>
+  <div class="upload-card">
+    <div class="upload-title">📄 Upload Document</div>
+    <div class="upload-tid" id="up-tid"></div>
+
+    <div id="token-status" class="token-status token-ok" style="display:none"></div>
+    <div id="upload-loading" style="text-align:center;padding:20px"><div class="spinner"></div><br>Verifying secure link…</div>
+
+    <div id="upload-form" style="display:none">
+      <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()"
+           ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="this.classList.remove('over')">
+        <div class="drop-icon">📎</div>
+        <div class="drop-label">Tap to select a photo or document</div>
+        <div class="drop-sub">JPEG or PNG · max 5 MB</div>
+      </div>
+      <input type="file" id="file-input" accept="image/jpeg,image/png" style="display:none" onchange="handleFileSelect(this)">
+
+      <div id="file-preview" class="file-preview" style="display:none">
+        <img id="preview-img" src="" alt="">
+        <div class="fi">
+          <div class="fname" id="preview-name"></div>
+          <div class="fsize" id="preview-size"></div>
+        </div>
+        <span onclick="clearFile()" style="cursor:pointer;color:var(--faint);font-size:20px">✕</span>
+      </div>
+
+      <div id="err-msg" class="err-msg" style="display:none"></div>
+
+      <div id="progress-wrap" style="display:none">
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+        <div style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:12px">Uploading…</div>
+      </div>
+
+      <button class="upload-btn" id="upload-btn" onclick="doUpload()" disabled>Upload Document</button>
+      <div style="font-size:12px;color:var(--faint);text-align:center">
+        Expires in <span id="countdown" style="font-weight:700;color:var(--accent)">5:00</span>
+      </div>
+    </div>
+
+    <div id="success-screen" class="success-screen" style="display:none">
+      <div class="success-icon">✅</div>
+      <div class="success-msg">Document Uploaded!</div>
+      <div class="success-sub">
+        Linked to <strong id="success-tid"></strong><br>
+        Your kiosk receipt will update automatically.<br><br>
+        <span style="color:var(--faint);font-size:12px">You may close this page.</span>
+      </div>
+    </div>
+
+    <div id="expired-screen" style="display:none;text-align:center;padding:20px">
+      <div style="font-size:48px;margin-bottom:12px">⏱</div>
+      <div style="font-size:16px;font-weight:700;color:var(--muted);margin-bottom:8px">QR code expired</div>
+      <div style="font-size:13px;color:var(--faint)">Return to the kiosk and generate a new QR code.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://xzpewkcymnzfverrpvfj.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_rnhDHn_ICkiljFRX71GRjQ_SQkBXRHl';
+
+const CONFIGURED = SUPABASE_URL.startsWith('http') && SUPABASE_ANON_KEY.length > 20;
+const sb = CONFIGURED ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+if (!CONFIGURED) document.getElementById('config-warning').style.display = 'block';
+
+// ─── Route detection ──────────────────────────────────────────────────────────
+const params = new URLSearchParams(window.location.search);
+const UP_TID = params.get('tid');
+const UP_TOK = params.get('tok');
+const UP_ORG = params.get('org') || 'electricity';
+
+if (UP_TID && UP_TOK) {
+  document.getElementById('dashboard-page').style.display = 'none';
+  document.getElementById('upload-page').style.display = 'block';
+  initUpload();
+} else if (CONFIGURED) {
+  loadDashboard();
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+let currentOrg = 'all';
+let currentType = 'all';
+let allSubmissions = [];
+
+function switchOrg(org) {
+  currentOrg = org;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.org === org));
+  renderTable();
+}
+function switchType(type) {
+  currentType = type;
+  document.querySelectorAll('.subtab').forEach(t => t.classList.toggle('active', t.dataset.type === type));
+  renderTable();
+}
+
+async function loadDashboard() {
+  if (!sb) return;
+  document.getElementById('submissions-body').innerHTML =
+    '<tr><td colspan="6" class="loading"><div class="spinner"></div><br>Loading…</td></tr>';
+
+  const {data, error} = await sb
+    .from('submissions')
+    .select('*, documents(*)')
+    .order('submitted_at', {ascending: false})
+    .limit(200);
+
+  if (error) {
+    document.getElementById('submissions-body').innerHTML =
+      `<tr><td colspan="6" class="empty">⚠️ ${error.message}</td></tr>`;
+    return;
+  }
+
+  allSubmissions = data || [];
+  renderTable();
+  updateStats();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('submissions-body');
+  let rows = allSubmissions;
+
+  if (currentOrg !== 'all') rows = rows.filter(r => r.org === currentOrg);
+  if (currentType === 'request') rows = rows.filter(r => !isComplaint(r));
+  if (currentType === 'complaint') rows = rows.filter(r => isComplaint(r));
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">No submissions found.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = rows.map((row, i) => {
+    const docs = row.documents || [];
+    const docsCell = docs.length
+      ? `<span class="docs-count">📎 ${docs.length} doc${docs.length > 1 ? 's' : ''}</span>`
+      : `<span class="docs-none">—</span>`;
+    const orgClass = `org-${row.org}`;
+    const typeClass = isComplaint(row) ? 'type-complaint' : 'type-request';
+    const typeLabel = formatType(row.receipt_type);
+    const date = row.submitted_at ? new Date(row.submitted_at).toLocaleString('en-IN', {dateStyle:'short', timeStyle:'short'}) : '—';
+    return `
+      <tr onclick="toggleExpand(${i})" style="cursor:pointer">
+        <td><span class="tracking-id">${row.tracking_id || '—'}</span></td>
+        <td><span class="org-badge ${orgClass}">${orgIcon(row.org)} ${capitalize(row.org)}</span></td>
+        <td><span class="type-badge ${typeClass}">${typeLabel}</span></td>
+        <td>${row.consumer_name || '—'}</td>
+        <td style="font-size:12px;color:var(--muted)">${date}</td>
+        <td>${docsCell}</td>
+      </tr>
+      <tr id="expand-${i}" class="expand-row" style="display:none">
+        <td colspan="6">
+          <div class="expand-inner">
+            ${expandContent(row)}
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function toggleExpand(i) {
+  const row = document.getElementById(`expand-${i}`);
+  row.style.display = row.style.display === 'none' ? '' : 'none';
+}
+
+function expandContent(row) {
+  const docs = row.documents || [];
+  const docsHtml = docs.length
+    ? docs.map(d => {
+        const url = d.storage_path
+          ? `${SUPABASE_URL}/storage/v1/object/public/uploads/${d.storage_path}`
+          : null;
+        const date = d.uploaded_at ? new Date(d.uploaded_at).toLocaleString('en-IN') : '';
+        return `
+          <div class="doc-thumb">
+            <div class="doc-icon">📄</div>
+            <div class="doc-info">
+              <div class="doc-name">${d.file_name}</div>
+              <div class="doc-meta">${formatBytes(d.file_size_bytes)} · ${date}</div>
+            </div>
+            ${url ? `<a class="doc-link" href="${url}" target="_blank">View ↗</a>` : ''}
+          </div>`;
+      }).join('')
+    : '<div style="color:var(--faint);font-size:13px;padding:8px 0">No documents uploaded yet.</div>';
+
+  return `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <div style="font-size:11px;color:var(--faint);font-weight:700;letter-spacing:1px;margin-bottom:8px">SUBMISSION DETAILS</div>
+        <div style="font-size:13px;color:var(--muted);line-height:2">
+          <b style="color:var(--text)">Tracking ID:</b> <code style="color:var(--primary)">${row.tracking_id || '—'}</code><br>
+          <b style="color:var(--text)">Reference:</b> ${row.ref_id || '—'}<br>
+          <b style="color:var(--text)">Service:</b> ${row.receipt_type || '—'}<br>
+          <b style="color:var(--text)">Consumer:</b> ${row.consumer_name || '—'}
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--faint);font-weight:700;letter-spacing:1px;margin-bottom:8px">UPLOADED DOCUMENTS</div>
+        ${docsHtml}
+      </div>
+    </div>`;
+}
+
+function updateStats() {
+  const today = new Date().toDateString();
+  const total = allSubmissions.length;
+  const pending = allSubmissions.filter(r => !(r.documents && r.documents.length)).length;
+  const withDocs = allSubmissions.filter(r => r.documents && r.documents.length).length;
+  const todayCount = allSubmissions.filter(r => r.submitted_at && new Date(r.submitted_at).toDateString() === today).length;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-pending').textContent = pending;
+  document.getElementById('stat-docs').textContent = withDocs;
+  document.getElementById('stat-today').textContent = todayCount;
+}
+
+function isComplaint(r) {
+  return (r.receipt_type || '').toLowerCase().includes('complaint');
+}
+function formatType(t) {
+  if (!t) return 'Request';
+  if (t.toLowerCase().includes('complaint')) return 'Complaint';
+  if (t.toLowerCase().includes('new connection')) return 'New Connection';
+  if (t.toLowerCase().includes('meter')) return 'Meter Service';
+  if (t.toLowerCase().includes('bill')) return 'Bill Dispute';
+  return t;
+}
+function orgIcon(org) { return {electricity:'⚡',gas:'🔥',municipal:'🏛',water:'💧',healthcare:'🏥',sanitation:'🧹',transport:'🚌',complaint:'📢'}[org] || '📋'; }
+function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+function formatBytes(b) { if (!b) return ''; if (b < 1024) return b + 'B'; if (b < 1048576) return (b/1024).toFixed(1)+'KB'; return (b/1048576).toFixed(1)+'MB'; }
+
+// ─── UPLOAD PAGE ──────────────────────────────────────────────────────────────
+let selectedFile = null;
+let countdownTimer = null;
+let secsLeft = 300;
+let tokenValid = false;
+
+async function initUpload() {
+  document.getElementById('up-tid').textContent = UP_TID;
+
+  if (!sb) {
+    document.getElementById('upload-loading').style.display = 'none';
+    showErr('Portal not configured.');
+    return;
+  }
+
+  const {data, error} = await sb
+    .from('upload_tokens')
+    .select('expires_at, used')
+    .eq('token', UP_TOK)
+    .single();
+
+  document.getElementById('upload-loading').style.display = 'none';
+  const statusEl = document.getElementById('token-status');
+  statusEl.style.display = 'flex';
+
+  if (error || !data) {
+    statusEl.className = 'token-status token-err';
+    statusEl.textContent = '❌ Invalid or expired link. Return to the kiosk.';
+    return;
+  }
+  if (data.used) {
+    statusEl.className = 'token-status token-err';
+    statusEl.textContent = '❌ This QR code has already been used.';
+    return;
+  }
+  const exp = new Date(data.expires_at).getTime();
+  const remaining = Math.floor((exp - Date.now()) / 1000);
+  if (remaining <= 0) {
+    showExpired();
+    return;
+  }
+
+  tokenValid = true;
+  secsLeft = remaining;
+  statusEl.className = 'token-status token-ok';
+  statusEl.textContent = '✅ Secure link verified';
+  document.getElementById('upload-form').style.display = 'block';
+
+  startCountdown();
+}
+
+function startCountdown() {
+  updateCountdownDisplay();
+  countdownTimer = setInterval(() => {
+    secsLeft--;
+    updateCountdownDisplay();
+    if (secsLeft <= 0) {
+      clearInterval(countdownTimer);
+      if (!document.getElementById('success-screen').style.display || document.getElementById('success-screen').style.display === 'none') {
+        showExpired();
+      }
+    }
+  }, 1000);
+}
+
+function updateCountdownDisplay() {
+  const m = Math.floor(secsLeft / 60);
+  const s = secsLeft % 60;
+  const el = document.getElementById('countdown');
+  if (el) el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  if (secsLeft < 60 && el) el.style.color = 'var(--danger)';
+}
+
+function showExpired() {
+  document.getElementById('upload-form').style.display = 'none';
+  document.getElementById('expired-screen').style.display = 'block';
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.add('over');
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('over');
+  if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+}
+function handleFileSelect(input) {
+  if (input.files[0]) setFile(input.files[0]);
+}
+
+function setFile(file) {
+  if (!['image/jpeg','image/jpg','image/png'].includes(file.type.toLowerCase())) {
+    showErr('Only JPEG/PNG files are allowed.');
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    showErr('File exceeds 5 MB limit.');
+    return;
+  }
+  hideErr();
+  selectedFile = file;
+  document.getElementById('file-preview').style.display = 'flex';
+  document.getElementById('drop-zone').style.display = 'none';
+  document.getElementById('preview-name').textContent = file.name;
+  document.getElementById('preview-size').textContent = formatBytes(file.size) + ' · ' + file.type.split('/')[1].toUpperCase();
+  const reader = new FileReader();
+  reader.onload = e => { document.getElementById('preview-img').src = e.target.result; };
+  reader.readAsDataURL(file);
+  document.getElementById('upload-btn').disabled = false;
+}
+
+function clearFile() {
+  selectedFile = null;
+  document.getElementById('file-preview').style.display = 'none';
+  document.getElementById('drop-zone').style.display = 'block';
+  document.getElementById('preview-img').src = '';
+  document.getElementById('upload-btn').disabled = true;
+  document.getElementById('file-input').value = '';
+  hideErr();
+}
+
+function showErr(msg) {
+  const el = document.getElementById('err-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function hideErr() {
+  document.getElementById('err-msg').style.display = 'none';
+}
+
+async function doUpload() {
+  if (!selectedFile || !tokenValid || !sb) return;
+  document.getElementById('upload-btn').disabled = true;
+  document.getElementById('progress-wrap').style.display = 'block';
+  hideErr();
+
+  const ext = selectedFile.name.split('.').pop().toLowerCase();
+  const storagePath = `${UP_ORG}/${UP_TID}/${Date.now()}.${ext}`;
+
+  let prog = 0;
+  const progTimer = setInterval(() => {
+    prog = Math.min(prog + 3, 85);
+    document.getElementById('progress-fill').style.width = prog + '%';
+  }, 100);
+
+  try {
+    const {error: storageErr} = await sb.storage
+      .from('uploads')
+      .upload(storagePath, selectedFile, {
+        contentType: selectedFile.type,
+        upsert: false,
+      });
+    if (storageErr) throw storageErr;
+
+    clearInterval(progTimer);
+    document.getElementById('progress-fill').style.width = '70%';
+
+    const {error: dbErr} = await sb.from('documents').insert({
+      tracking_id: UP_TID,
+      file_name: selectedFile.name,
+      file_size_bytes: selectedFile.size,
+      mime_type: selectedFile.type,
+      storage_path: storagePath,
+    });
+    if (dbErr) throw dbErr;
+
+    document.getElementById('progress-fill').style.width = '90%';
+
+    await sb.from('upload_tokens')
+      .update({used: true})
+      .eq('token', UP_TOK);
+
+    clearInterval(countdownTimer);
+    document.getElementById('progress-fill').style.width = '100%';
+
+    setTimeout(() => {
+      document.getElementById('upload-form').style.display = 'none';
+      document.getElementById('token-status').style.display = 'none';
+      const s = document.getElementById('success-screen');
+      document.getElementById('success-tid').textContent = UP_TID;
+      s.style.display = 'block';
+    }, 400);
+
+  } catch (err) {
+    clearInterval(progTimer);
+    document.getElementById('progress-wrap').style.display = 'none';
+    document.getElementById('upload-btn').disabled = false;
+    showErr('Upload failed: ' + (err.message || String(err)));
+  }
+}
+
+function formatBytes(b) { if (!b) return ''; if (b < 1024) return b+'B'; if (b < 1048576) return (b/1024).toFixed(1)+'KB'; return (b/1048576).toFixed(1)+'MB'; }
+</script>
+</body>
+</html>

@@ -18,6 +18,15 @@ import { pipeline, env } from '@huggingface/transformers';
 env.allowLocalModels = false;
 env.useBrowserCache = true;
 
+// NOTE: do NOT set env.backends.onnx.wasm.wasmPaths = '/' here. Vite's dev
+// server refuses to import .mjs files from /public as ES modules ("should
+// not be imported from source code... only referenced via HTML tags") and
+// throws a 500 that blocks the whole UI. Confirmed live — breaks the app on
+// every load. The ~50-80MB duplicate onnxruntime-web runtime (one bundled
+// by transformers.js, one by vad-web) is accepted as known tech debt; fixing
+// it requires a different approach (e.g. a Vite plugin or CDN-hosted wasm),
+// not a raw /public override.
+
 const MODEL_ID = 'Xenova/whisper-small';
 
 // Whisper uses full English language names, not ISO codes

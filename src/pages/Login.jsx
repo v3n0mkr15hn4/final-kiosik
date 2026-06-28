@@ -71,14 +71,14 @@ export default function Login() {
     const record = ALT_AUTH_DB[key] || ALT_AUTH_DB[altId.trim()];
     if (!record) {
       setAltError('ID not found. Try: CA-001234, LN-45678, MC-001, WC-GHY-2025');
-      tts('ID not found. Please check and try again.', { priority: 'error' });
+      tts('ID not found. Please check and try again.', { priority: 'error', staticKey: 'login_id_not_found' });
       return;
     }
     setAltRecord(record);
     setAltError('');
     setAltOtpSent(true);
     toast.success(`OTP sent to ****${record.mobile.slice(-4)}`);
-    tts(`OTP sent to registered mobile. Please enter the 6-digit OTP.`, { priority: 'warning' });
+    tts(`OTP sent to registered mobile. Please enter the 6-digit OTP.`, { priority: 'warning', staticKey: 'login_otp_sent_full' });
   };
 
   const handleAltVerify = () => {
@@ -97,7 +97,7 @@ export default function Login() {
     sessionStorage.setItem('autoDetectedMode', 'normal');
     sessionStorage.setItem('userAge', '35');
     toast.success('Login successful.');
-    tts('Login successful.', { priority: 'warning', interrupt: true });
+    tts('Login successful.', { priority: 'warning', interrupt: true, staticKey: 'login_success' });
     finishLogin();
   };
 
@@ -143,7 +143,7 @@ export default function Login() {
       const msg = 'Please enter a valid 12-digit Aadhaar number';
       setAadhaarError(msg);
       toast.error(msg);
-      tts('Invalid Aadhaar number.', { priority: 'error', interrupt: true, cache: false });
+      tts('Invalid Aadhaar number.', { priority: 'error', interrupt: true, cache: false, staticKey: 'login_invalid_aadhaar' });
       return;
     }
 
@@ -178,7 +178,7 @@ export default function Login() {
     }
 
     toast.success('Aadhaar verified. Continue with mobile OTP.');
-    tts('Aadhaar verified successfully.', { priority: 'warning' });
+    tts('Aadhaar verified successfully.', { priority: 'warning', staticKey: 'login_aadhaar_verified' });
 
     // Auto-send OTP once Aadhaar verified
     setTimeout(() => handleSendOtp(record, /^\d{10}$/.test(record.mobile || '') ? record.mobile : ''), 200);
@@ -236,7 +236,7 @@ export default function Login() {
       setOtpError('');
       setResendTimer(otpResult.resendAfterSeconds || 30);
       toast.success('OTP sent successfully.');
-      tts('OTP sent successfully.', { priority: 'warning' });
+      tts('OTP sent successfully.', { priority: 'warning', staticKey: 'login_otp_sent' });
     } catch (error) {
       const msg = toCitizenMessage(error, 'Failed to send OTP. Please try again.');
       setOtpError(msg);
@@ -278,7 +278,7 @@ export default function Login() {
       const msg = response.error || 'OTP verification failed.';
       setOtpError(msg);
       toast.error(msg);
-      tts('OTP verification failed.', { priority: 'error', interrupt: true, cache: false });
+      tts('OTP verification failed.', { priority: 'error', interrupt: true, cache: false, staticKey: 'err_general_1' });
       return;
     }
 
@@ -289,7 +289,7 @@ export default function Login() {
     sessionStorage.setItem('citizenData', JSON.stringify({ ...(aadhaarRecord || {}), ...userData }));
 
     toast.success('Login successful.');
-    tts('Login successful.', { priority: 'warning', interrupt: true });
+    tts('Login successful.', { priority: 'warning', interrupt: true, staticKey: 'login_success' });
     finishLogin();
   };
 
@@ -302,7 +302,7 @@ export default function Login() {
     sessionStorage.setItem('userAge', calculateAge((aadhaarRecord || data).dob).toString());
     sessionStorage.setItem('citizenData', JSON.stringify({ ...(aadhaarRecord || {}), ...data }));
     toast.success('Login successful.');
-    tts('Login successful.', { priority: 'warning', interrupt: true });
+    tts('Login successful.', { priority: 'warning', interrupt: true, staticKey: 'login_success' });
     finishLogin();
   };
 

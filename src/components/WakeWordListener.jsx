@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Mic } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAccessibility } from './AccessibilityProvider';
+import { speak as ttsSpeak, isVoiceEnabled } from '../utils/ttsService';
 
 const getBaseLang = (language) => (language || 'en').toLowerCase().split('-')[0];
 
@@ -46,7 +47,13 @@ const WakeWordListener = () => {
     sessionStorage.setItem('userMode', 'blind');
     sessionStorage.setItem('voiceNavAlwaysOn', 'true');
 
-    speak(t('wakeword.activationMessage'));
+    // Activation feedback must always be audible — bypass the session voiceEnabled
+    // gate by falling back to Web Speech directly when ttsService voice is off.
+    if (isVoiceEnabled()) {
+      ttsSpeak(t('wakeword.activationMessage'), { staticKey: 'greet_wake' }).catch(() => speak(t('wakeword.activationMessage')));
+    } else {
+      speak(t('wakeword.activationMessage'));
+    }
 
     // Reset detection indicator after 3s
     setTimeout(() => setDetected(false), 3000);

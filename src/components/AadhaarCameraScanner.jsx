@@ -89,12 +89,12 @@ export default function AadhaarCameraScanner({ onSuccess, onClose }) {
         }
         setStatus('scanning');
         scanStartRef.current = Date.now();
-        speak('Camera ready. Please hold your Aadhaar card steady in front of the camera.');
+        speak('Camera ready. Please hold your Aadhaar card steady in front of the camera.', { staticKey: 'aadhaar_camera_ready' });
       } catch {
         if (!active) return;
         setErrorMsg('Camera access denied. Please allow camera permission.');
         setStatus('error');
-        speak('Camera access denied. Please allow camera permission or use manual Aadhaar entry.');
+        speak('Camera access denied. Please allow camera permission or use manual Aadhaar entry.', { staticKey: 'aadhaar_camera_denied' });
       }
     }
 
@@ -110,7 +110,7 @@ export default function AadhaarCameraScanner({ onSuccess, onClose }) {
       if (result.consentToken) {
         setConsentToken(result.consentToken);
         setConsentGiven(true);
-        speak('Consent recorded. Opening camera now.');
+        speak('Consent recorded. Opening camera now.', { staticKey: 'aadhaar_consent_ok' });
       } else {
         setErrorMsg('Consent issue failed. Please try again.');
       }
@@ -119,7 +119,7 @@ export default function AadhaarCameraScanner({ onSuccess, onClose }) {
       const ts = Date.now().toString();
       setConsentToken(`${ts}.offline`);
       setConsentGiven(true);
-      speak('Opening camera now.');
+      speak('Opening camera now.', { staticKey: 'aadhaar_camera_open' });
     } finally {
       setConsentLoading(false);
     }
@@ -130,7 +130,7 @@ export default function AadhaarCameraScanner({ onSuccess, onClose }) {
     clearInterval(intervalRef.current);
     stopCamera();
     setStatus('found');
-    speak('Aadhaar card detected. Verifying...');
+    speak('Aadhaar card detected. Verifying...', { staticKey: 'aadhaar_detected' });
 
     try {
       const result = await authAPI.verifyQR({
@@ -189,7 +189,7 @@ export default function AadhaarCameraScanner({ onSuccess, onClose }) {
         ocrAttemptedRef.current = true;
         clearInterval(intervalRef.current);
         setStatus('ocr');
-        speak('QR code not detected. Trying visual card recognition...');
+        speak('QR code not detected. Trying visual card recognition...', { staticKey: 'aadhaar_qr_fallback' });
 
         const canvas2 = document.createElement('canvas');
         const v = videoRef.current;
@@ -238,7 +238,7 @@ If any field is not visible, use empty string.`;
 
         setErrorMsg('Could not read card. Please enter Aadhaar number manually.');
         setStatus('error');
-        speak('Could not read the Aadhaar card. Please use the keypad to enter your Aadhaar number.');
+        speak('Could not read the Aadhaar card. Please use the keypad to enter your Aadhaar number.', { staticKey: 'aadhaar_ocr_failed' });
       }
     }, SCAN_INTERVAL_MS);
 

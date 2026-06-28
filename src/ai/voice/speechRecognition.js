@@ -12,6 +12,8 @@
 import { sarvamSTT, getSarvamCode } from '../api/sarvamApi.js';
 import { getSTTLangCode } from '../brain/multilingualProcessor.js';
 import { whisperTranscribe, loadWhisper, isWhisperLoaded } from './localSTT.js';
+import { startVAD, stopVAD } from './vadDetector.js';
+import { stopTTS, isSpeaking } from '../../utils/ttsService.js';
 
 // Languages where Sarvam bridges through Hindi — local Whisper is more accurate
 const WHISPER_PREFERRED_LANGS = new Set([
@@ -57,6 +59,7 @@ function cleanupStream() {
   if (_silenceFrame) { cancelAnimationFrame(_silenceFrame); _silenceFrame = null; }
   if (_silenceCtx) { try { _silenceCtx.close(); } catch { /* ok */ } _silenceCtx = null; }
   _silenceAnalyser = null;
+  stopVAD();
 
   if (_stream) {
     _stream.getTracks().forEach((t) => t.stop());
@@ -132,49 +135,18 @@ export function startBrowserSTT(opts = {}) {
   }
 }
 
-// ── Tier 2: Sarvam STT with silence-energy-based flushing ────────────────────
+// ── Tier 2: Sarvam STT with neural VAD-based flushing ────────────────────────
+// Silero VAD replaces the old RMS-energy loop, which misfired on kiosk
+// ambient noise (AC hum, crowd, fluorescent buzz). VAD also enables barge-in:
+// if the kiosk is mid-TTS and the user starts talking, we cut TTS instantly.
 
 function attachSilenceDetector(stream, onSilence) {
-  try {
-    _silenceCtx = new (window.AudioContext || window.webkitAudioContext)();
-    _silenceAnalyser = _silenceCtx.createAnalyser();
-    _silenceAnalyser.fftSize = 256;
-    _silenceCtx.createMediaStreamSource(stream).connect(_silenceAnalyser);
-    const data = new Uint8Array(_silenceAnalyser.frequencyBinCount);
-
-    let silenceStart = 0;
-    let chunkStart = Date.now();
-
-    const tick = () => {
-      if (!_silenceAnalyser) return;
-      _silenceAnalyser.getByteFrequencyData(data);
-      let sum = 0;
-      for (let i = 0; i < data.length; i++) sum += data[i] * data[i];
-      const rms = Math.sqrt(sum / data.length);
-      const now = Date.now();
-      const chunkAge = now - chunkStart;
-
-      if (rms < SILENCE_THRESHOLD) {
-        if (!silenceStart) silenceStart = now;
-        const silenceAge = now - silenceStart;
-        if (silenceAge >= SILENCE_HOLD_MS && chunkAge >= MIN_CHUNK_MS) {
-          silenceStart = 0;
-          chunkStart = now;
-          onSilence();
-          return; // detector reattaches after flush
-        }
-      } else {
-        silenceStart = 0;
-        if (chunkAge >= MAX_CHUNK_MS) {
-          chunkStart = now;
-          onSilence();
-          return;
-        }
-      }
-      _silenceFrame = requestAnimationFrame(tick);
-    };
-    _silenceFrame = requestAnimationFrame(tick);
-  } catch { /* AudioContext unavailable */ }
+  startVAD(stream, {
+    onSpeechStart: () => {
+      if (isSpeaking()) stopTTS(); // barge-in
+    },
+    onSpeechEnd: () => onSilence(),
+  }).catch(() => { /* VAD unavailable — MAX_CHUNK_MS hard cap still flushes */ });
 }
 
 async function runSarvamChunk(localSessionId) {
