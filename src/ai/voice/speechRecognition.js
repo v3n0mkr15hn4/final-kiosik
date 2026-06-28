@@ -20,6 +20,11 @@ const WHISPER_PREFERRED_LANGS = new Set([
   'ur', 'mai', 'kok', 'doi', 'ne', 'sa', 'brx', 'ks', 'mni', 'sat', 'sd',
 ]);
 
+// Tier-1 languages that also have a real Whisper model entry (WHISPER_LANG_MAP
+// in localSTT.js) — used only when offline, so Sarvam/browser STT stays
+// preferred whenever a network is actually available.
+const OFFLINE_FALLBACK_LANGS = new Set(['en', 'hi', 'as']);
+
 let _recognition = null;
 let _mediaRecorder = null;
 let _stream = null;
@@ -328,6 +333,18 @@ export function startSTT(opts = {}) {
 
   // Tier-2 languages → local Whisper (browser Web Speech has no model for these)
   if (WHISPER_PREFERRED_LANGS.has(baseLang)) {
+    const localSessionId = ++_sessionId;
+    runWhisperChunk(localSessionId);
+    return true;
+  }
+
+  // Offline + a language Whisper natively supports (en/hi/as/etc, see
+  // WHISPER_LANG_MAP in localSTT.js) → skip straight to Whisper. Browser Web
+  // Speech isn't reliably offline either — most browsers proxy it through
+  // Google's cloud STT — and Sarvam obviously needs a network. Without this
+  // branch, going offline on en/hi/as just silently fails instead of falling
+  // back to the one path that's genuinely local.
+  if (!navigator.onLine && OFFLINE_FALLBACK_LANGS.has(baseLang)) {
     const localSessionId = ++_sessionId;
     runWhisperChunk(localSessionId);
     return true;
