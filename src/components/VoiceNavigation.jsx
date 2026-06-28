@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle } from 'lucide-react';
-import { speechToText, textToSpeech } from '../utils/sarvamAPI';
+import { speechToText } from '../utils/sarvamAPI';
 import { getSarvamLangCode, isSTTSupported, isTTSSupported } from '../utils/languageConfig';
 import {
   announceNavigation,
