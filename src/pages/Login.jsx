@@ -233,12 +233,10 @@ export default function Login() {
     setAadhaarError('');
     setAadhaarNumber((prev) => {
       const next = (prev + digit).slice(0, 12);
-      // Speak digit count after groups of 4 for blind users
-      if (next.length % 4 === 0) {
-        tts(`${next.length} digits entered`, { priority: 'normal', cache: false });
-      }
+      // Never speak individual Aadhaar digits — privacy at public kiosk.
+      // Only announce completion so blind users know to submit.
       if (next.length === 12) {
-        tts('12 digits entered. Press submit to verify.', { priority: 'warning', cache: false });
+        tts('Aadhaar complete. Press the green tick to verify.', { priority: 'warning', cache: false });
       }
       return next;
     });
@@ -345,13 +343,30 @@ export default function Login() {
         maskedMob = validation.maskedMobile || maskMobile(cleanedMobile);
       }
 
-      const otpResult = await sendOtp({
-        aadhaarUid: rec.uid,
-        mobile: cleanedMobile,
-        buttonEl: sendOtpBtnRef.current,
-      });
+      let otpResult;
+      try {
+        otpResult = await sendOtp({
+          aadhaarUid: rec.uid,
+          mobile: cleanedMobile,
+          buttonEl: sendOtpBtnRef.current,
+        });
+      } catch {
+        otpResult = { success: false, error: 'Firebase unavailable' };
+      }
 
       if (!otpResult.success) {
+        // Demo fallback: if Firebase fails (no project setup / wrong domain),
+        // allow login with demo OTP 123456 for hackathon presentation
+        if (localRecord) {
+          setMaskedMobileValue(maskedMob);
+          setOtpSent(true);
+          setOtp('');
+          setOtpError('');
+          setResendTimer(30);
+          toast.success('Demo OTP mode — use 123456');
+          tts('Demo mode. Enter 1 2 3 4 5 6 to continue.', { priority: 'warning', cache: false });
+          return;
+        }
         const msg = otpResult.error || 'Failed to send OTP.';
         setOtpError(msg);
         if (Number(otpResult.retryAfterSeconds) > 0) {
@@ -391,6 +406,21 @@ export default function Login() {
       const msg = 'Please enter a valid 6-digit OTP.';
       setOtpError(msg);
       toast.error(msg);
+      return;
+    }
+
+    // Demo bypass: local demo records accept OTP 123456 regardless of Firebase
+    const localDemoRecord = aadhaarRecord?.uid ? aadhaarDB[aadhaarRecord.uid] : null;
+    if (localDemoRecord && otp === '123456') {
+      await mockDelayRange(1200, 1800);
+      const profile = detectAccessibilityProfile(localDemoRecord);
+      sessionStorage.setItem('autoDetectedMode', profile);
+      sessionStorage.setItem('userAge', calculateAge(localDemoRecord.dob).toString());
+      sessionStorage.setItem('citizenData', JSON.stringify(localDemoRecord));
+      completeCitizenSession({ citizen: localDemoRecord, token: null, authMethod: 'otp_demo' });
+      toast.success('Login successful.');
+      tts('Login successful.', { priority: 'warning', interrupt: true, staticKey: 'login_success' });
+      finishLogin();
       return;
     }
 
@@ -539,6 +569,7 @@ export default function Login() {
           onKey={handleAadhaarKey}
           onBackspace={handleAadhaarBackspace}
           onSubmit={handleAadhaarLookup}
+          speakDigits={false}
           disabled={aadhaarLoading}
         />
 

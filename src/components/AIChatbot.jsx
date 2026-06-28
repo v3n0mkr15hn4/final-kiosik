@@ -8,6 +8,7 @@ import SYSTEM_PROMPT from '../ai/prompts/systemPrompt';
 import { I, ic } from './kiosk';
 import { AiTypingBubble } from './loading';
 import { mockDelayRange } from '../utils/mockDelay';
+import { searchFAQ } from '../utils/offlineFAQ';
 
 const extractContext = (pathname) => {
   if (pathname.includes('electric')) return 'electricity';
@@ -198,7 +199,15 @@ const AIChatbot = () => {
       return { response: replyText, language: data.language || userLang, action: null };
     } catch (err) {
       console.error('[Chatbot] API call failed:', err.message);
-      return { response: t('chatbot.unavailable'), intent: 'error', action: null };
+      // Offline FAQ fallback — search 500 standard Q&As locally
+      const pageCtx = extractContext(location.pathname);
+      const faqMatch = searchFAQ(userMessage, pageCtx || null);
+      if (faqMatch) {
+        setLastProvider('offline_faq');
+        if (onChunk) onChunk(faqMatch.a, faqMatch.a);
+        return { response: faqMatch.a, intent: 'faq_offline', action: null };
+      }
+      return { response: t('chatbot.unavailable', 'I could not connect to the server. Please check your internet connection or ask a simpler question.'), intent: 'error', action: null };
     }
   }, [location.pathname, userLang, t]);
 

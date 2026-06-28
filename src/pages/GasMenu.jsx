@@ -1,11 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { VK, DD, I, ic } from '../components/kiosk';
+import { speak } from '../utils/ttsService';
 
 const GasMenu = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      speak(
+        t('gas.voiceIntro', 'Assam Gas services. You can apply for new connection, report meter issues, view bills, reconnect, or register a complaint. Tap any option to continue.'),
+        { language: i18n.language, priority: 'page', staticKey: 'gas_menu_intro' },
+      ).catch(() => {});
+    }, 600);
+    return () => clearTimeout(timer);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const services = [
     {

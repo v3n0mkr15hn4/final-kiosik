@@ -1,11 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { VK, DD, I, ic } from '../components/kiosk';
+import { speak } from '../utils/ttsService';
 
 const ElectricityMenu = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      speak(
+        t('electricity.voiceIntro', 'Electricity services. You can apply for new connection, report meter issues, pay bills, register complaints, or track your request. Tap any option to continue.'),
+        { language: i18n.language, priority: 'page', staticKey: 'elec_menu_intro' },
+      ).catch(() => {});
+    }, 600);
+    return () => clearTimeout(timer);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const mainServices = [
     {

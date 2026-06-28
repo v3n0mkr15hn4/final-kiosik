@@ -1,11 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { VK, DD, I, ic } from '../components/kiosk';
+import { speak } from '../utils/ttsService';
 
 const MunicipalMenu = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      speak(
+        t('municipal.voiceIntro', 'Municipal services. You can apply for water connection, pay property tax, report road or garbage issues, or track your complaint.'),
+        { language: i18n.language, priority: 'page', staticKey: 'muni_menu_intro' },
+      ).catch(() => {});
+    }, 600);
+    return () => clearTimeout(timer);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const services = [
     {
