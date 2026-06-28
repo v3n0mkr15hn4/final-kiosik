@@ -33,16 +33,43 @@ const QRUpload = ({
   const uploadUrl = sessionInfo?.uploadUrl;
   const kioskPin = sessionInfo?.pin;
 
-  const handleShowQR = async () => {
+  const handleShowQR = () => {
+    // Render the QR instantly from client-generated values — sessionId, pin,
+    // and uploadUrl are all derivable here, same logic the server uses
+    // (server/routes/upload.js:66-77). The server call only persists the
+    // pinHash for later validation when the phone uploads; it doesn't
+    // produce any value the QR itself needs. Previously this awaited the
+    // network call before rendering anything, so a slow/offline kiosk
+    // showed nothing instead of a scannable code.
     setShowQR(true);
     setUploadStatus('waiting');
     setErrorMessage('');
+
+    const sessionId = uploadId || `UP-${Date.now().toString(36).toUpperCase()}`;
+    const pin = String(Math.floor(100000 + Math.random() * 900000));
+    const uploadUrl = `${window.location.origin}/mobile-upload/${sessionId}`;
+    setSessionInfo({ sessionId, pin, uploadUrl });
+
+    persistSession(sessionId, pin);
+  };
+
+  // Persists the session server-side so the phone's pin entry can be
+  // validated later. Retries on reconnect if the kiosk is offline right now —
+  // the QR is already showing and scannable, this just makes the upload
+  // actually work once a network exists on at least one side of the
+  // kiosk/phone pair.
+  const persistSession = async (sessionId, pin) => {
     try {
-      const response = await uploadAPI.createSession(uploadId);
-      setSessionInfo(response);
-    } catch (error) {
-      setUploadStatus('error');
-      setErrorMessage(error?.error || 'Unable to start upload session.');
+      await uploadAPI.createSession(sessionId, pin);
+      setErrorMessage('');
+    } catch {
+      setErrorMessage('Kiosk is offline — this code will activate once it reconnects.');
+      const retry = () => {
+        uploadAPI.createSession(sessionId, pin)
+          .then(() => { setErrorMessage(''); window.removeEventListener('online', retry); })
+          .catch(() => {});
+      };
+      window.addEventListener('online', retry);
     }
   };
 

@@ -287,7 +287,7 @@ export const alertAPI = {
 
 // â”€â”€â”€ Upload â”€â”€â”€
 export const uploadAPI = {
-  createSession: (sessionId) => api.post('/upload', { sessionId }),
+  createSession: (sessionId, pin) => api.post('/upload', { sessionId, pin }),
   getStatus: (sessionId) => api.get(`/upload/${sessionId}/status`),
   uploadFiles: (sessionId, formData) =>
     api.post(`/upload/${sessionId}/files`, formData, {

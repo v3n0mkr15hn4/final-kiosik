@@ -64,7 +64,11 @@ const getPublicBaseUrl = (req) => {
 router.post('/', (req, res) => {
   const db = req.app.locals.db;
   const sessionId = req.body.sessionId || `UP-${Date.now().toString(36).toUpperCase()}`;
-  const pin = String(Math.floor(100000 + Math.random() * 900000));
+  // Accept a client-generated pin so it matches what's already rendered on
+  // the kiosk screen (QR generation no longer waits for this request to
+  // complete — see QRUpload.jsx). Falls back to generating one server-side
+  // only for callers that don't supply it.
+  const pin = /^\d{6}$/.test(req.body.pin || '') ? req.body.pin : String(Math.floor(100000 + Math.random() * 900000));
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
   const pinHash = hashPin(sessionId, pin);
 
