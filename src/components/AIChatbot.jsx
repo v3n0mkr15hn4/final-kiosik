@@ -328,7 +328,8 @@ const AIChatbot = () => {
       {isOpen && (
         <div
           style={{
-            position: 'fixed', right: 0, top: 0, bottom: 0, width: 'calc(900px * var(--ui-scale))',
+            position: 'fixed', right: 0, top: 0, bottom: 0,
+            width: 'min(calc(900px * var(--ui-scale)), 100vw)',
             background: 'var(--surface-0)', borderLeft: '1px solid var(--line)',
             boxShadow: '-40px 0 90px rgba(20,16,31,.28)',
             display: 'flex', flexDirection: 'column', zIndex: 9000,

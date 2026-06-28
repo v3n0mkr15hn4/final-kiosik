@@ -28,7 +28,7 @@ const deriveSpeaker = (langCode) =>
 const DEFAULT_STATE = {
   language: 'en-IN',
   speaker: deriveSpeaker('en-IN'),
-  voiceEnabled: false,
+  voiceEnabled: true,  // kiosk default: voice always on; user can turn off via bottom bar
   isLoggedIn: false,
   userType: null,        // 'citizen' | 'guest' | 'admin'
   aadhaarVerified: false,

@@ -305,7 +305,8 @@ const VoiceNavigation = () => {
         : window.location.pathname.includes('municipal') ? 'municipal'
         : '';
 
-      const resp = await fetch('/api/chat', {
+      const apiBase = import.meta.env.VITE_API_BASE_URL || '/api';
+      const resp = await fetch(`${apiBase}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text, language: lang, context: pageCtx }),

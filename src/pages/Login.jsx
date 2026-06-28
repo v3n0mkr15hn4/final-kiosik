@@ -44,6 +44,17 @@ export default function Login() {
   const toast = useToast();
   const { setLoggedIn, setUserType, setAadhaarVerified } = useSession();
 
+  // Speak page intro on mount — critical for blind kiosk users
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      speak(
+        t('login.voiceIntro', 'Welcome to SUVIDHA. Please enter your 12-digit Aadhaar number to continue. Tap the number pad below to enter each digit.'),
+        { language: i18n.language, priority: 'page', staticKey: 'login_page_intro' },
+      ).catch(() => {});
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const finishLogin = () => {
     setLoggedIn(true);
     setUserType('citizen');
