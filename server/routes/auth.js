@@ -127,9 +127,13 @@ function verifyConsentToken(token, sessionId) {
 const AADHAAR_DECODER_URL = process.env.AADHAAR_DECODER_URL || 'http://localhost:5001';
 
 async function decodeSecureQrV2(digitString) {
+  const secret = process.env.DECODER_API_SECRET || 'suvidha-decoder-dev-2026';
   const resp = await fetch(`${AADHAAR_DECODER_URL}/decode-secure-qr`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Decoder-Secret': secret,
+    },
     body: JSON.stringify({ qrText: digitString }),
     signal: AbortSignal.timeout(8000),
   });
@@ -209,16 +213,22 @@ async function parseUidaiQrText(rawText) {
   // cards issued since ~2018. Decoded via flask-aadhaar (pyaadhaar).
   if (/^\d{50,}$/.test(trimmed)) {
     const decoded = await decodeSecureQrV2(trimmed);
+    const addr = decoded.address || {};
     return {
-      uid: '', // v2 Secure QR doesn't embed the full UID, only last-4 elsewhere — leave blank, not guessable
+      uid: '', // v2 Secure QR doesn't embed the full UID — leave blank
       name: decoded.name || '',
       gender: decoded.gender || '',
       dob: decoded.dob || '',
-      district: decoded.address?.district || '',
-      state: decoded.address?.state || '',
-      pincode: decoded.address?.pincode || '',
+      // Pass full address so fallback citizenData and form prefill get all fields
+      house:    addr.house    || '',
+      street:   addr.street   || '',
+      locality: addr.locality || '',
+      district: addr.district || '',
+      state:    addr.state    || '',
+      pincode:  addr.pincode  || '',
+      aadhaar_last_digits: decoded.aadhaar_last_digits || '',
       xmlStr: null,
-      hasSignature: false, // v2 Secure QR has its own embedded signature scheme, not the v1 XML <Signature> block
+      hasSignature: false,
     };
   }
 
@@ -367,7 +377,14 @@ router.post('/aadhaar/verify-qr', async (req, res) => {
       name: parsed.name || 'Citizen',
       gender: parsed.gender || '',
       dob: parsed.dob || '',
-      address: { district: parsed.district, state: parsed.state, pincode: parsed.pincode },
+      address: {
+        house:    parsed.house    || '',
+        street:   parsed.street   || '',
+        landmark: parsed.locality || '',
+        district: parsed.district || '',
+        state:    parsed.state    || '',
+        pincode:  parsed.pincode  || '',
+      },
     };
   }
 

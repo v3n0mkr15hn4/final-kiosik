@@ -129,5 +129,45 @@ router.post(
   }
 );
 
+// ── Physical Aadhaar QR scanner (scanner_service.py) ─────────────────────────
+// No JWT — accepted from localhost only. Python daemon decodes Aadhaar Secure QR
+// via pyaadhaar and POSTs structured fields here. Frontend polls /latest to prefill forms.
+
+let _aadhaarScan = null; // { data, receivedAt }
+const AADHAAR_SCAN_TTL_MS = 60_000;
+
+router.post('/aadhaar-scan', (req, res) => {
+  const ip = (req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '').split(',')[0].trim();
+  if (!['::1', '127.0.0.1', '::ffff:127.0.0.1'].includes(ip)) {
+    return res.status(403).json({ error: 'Forbidden — localhost only.' });
+  }
+  const { name, dob, gender, address, aadhaar_last_digits } = req.body || {};
+  if (!name) return res.status(400).json({ error: 'name required' });
+
+  _aadhaarScan = {
+    data: {
+      name,
+      dob: dob || '',
+      gender: gender || '',
+      address: address || {},
+      aadhaar_last_digits: aadhaar_last_digits || '',
+    },
+    receivedAt: Date.now(),
+  };
+  return res.json({ success: true });
+});
+
+// Consume-once: returns scan result then clears it. TTL 60s.
+router.get('/aadhaar-scan/latest', (req, res) => {
+  if (!_aadhaarScan) return res.json({ data: null });
+  if (Date.now() - _aadhaarScan.receivedAt > AADHAAR_SCAN_TTL_MS) {
+    _aadhaarScan = null;
+    return res.json({ data: null });
+  }
+  const scan = _aadhaarScan;
+  _aadhaarScan = null;
+  return res.json({ data: scan.data });
+});
+
 export default router;
 

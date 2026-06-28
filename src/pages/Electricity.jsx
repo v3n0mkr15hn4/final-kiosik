@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
@@ -15,6 +15,7 @@ import {
 import { VK } from '../components/kiosk';
 import { LoadingScreen, SubmissionSteps } from '../components/loading';
 import QRUpload from '../components/QRUpload';
+import AadhaarScanPrefillButton from '../components/AadhaarScanPrefillButton';
 import { states, cities, wards, serviceCategories } from '../utils/constants';
 import { generateRequestId, getCurrentTimestamp } from '../utils/helpers';
 import { addReceipt } from '../utils/receipts';
@@ -64,6 +65,10 @@ const Electricity = () => {
     ...prefill,
     description: '',
   });
+  const handleAadhaarFields = useCallback((fields) => {
+    setFormData(prev => ({ ...prev, ...fields }));
+  }, []);
+
   const [files, setFiles] = useState([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -283,6 +288,9 @@ const Electricity = () => {
             </div>
 
             <div className="space-y-6">
+              {/* Aadhaar card scan — fills name, gender, DOB, address, pincode automatically */}
+              <AadhaarScanPrefillButton onFields={handleAadhaarFields} />
+
               {/* Personal Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Input

@@ -1,4 +1,5 @@
 services:
+  # ── Express API (Node.js) ─────────────────────────────────────────────────
   - type: web
     name: suvidha-backend
     runtime: node
@@ -27,6 +28,28 @@ services:
       - key: FIREBASE_CLIENT_EMAIL
         sync: false
       - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      # Flask Aadhaar decoder URL — set after Flask service is deployed
+      - key: AADHAAR_DECODER_URL
+        value: https://suvidha-aadhaar-decoder.onrender.com
+      # Shared secret between Express and Flask — must match Flask service
+      - key: DECODER_API_SECRET
+        generateValue: true
+
+  # ── Flask Aadhaar Decoder (Python) ───────────────────────────────────────
+  - type: web
+    name: suvidha-aadhaar-decoder
+    runtime: python
+    plan: free
+    rootDir: server/flask-aadhaar
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 30
+    healthCheckPath: /health
+    envVars:
+      - key: RENDER
+        value: "true"
+      # Must match the DECODER_API_SECRET set on suvidha-backend above
+      - key: DECODER_API_SECRET
         sync: false
     # No disk block — Render's free tier doesn't support persistent disks.
     # SQLite falls back to its default in-repo path (server/suvidha.db) via

@@ -290,6 +290,17 @@ app.use('/api/*', (req, res) => {
   res.status(404).json({ success: false, error: 'API endpoint not found.' });
 });
 
+// ─── Local kiosk mode — serve React build ─────────────────────────────────
+// Only active when SERVE_STATIC=true (physical kiosk, not Render/Vercel).
+// Run `npm run build` in root first, then start server with SERVE_STATIC=true.
+if (process.env.SERVE_STATIC === 'true') {
+  const distPath = path.join(__dirname, '..', 'dist');
+  app.use(express.static(distPath));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
+
 // ─── Global Error Handler ──────────────────────────────────────────────────
 app.use((err, req, res, _next) => {
   // Never expose internal error details to clients unless explicitly

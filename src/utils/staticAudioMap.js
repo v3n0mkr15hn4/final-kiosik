@@ -17,6 +17,7 @@ export const STATIC_AUDIO_MAP = {
   aadhaar_camera_ready:     'aadhar/aadhaar_camera_ready.mp3',
   aadhaar_consent_ok:       'aadhar/aadhaar_consent_ok.mp3',
   aadhaar_detected:         'aadhar/aadhaar_detected.mp3',
+  aadhaar_form_filled:      'aadhar/aadhaar_form_filled.mp3',
   aadhaar_ocr_failed:       'aadhar/aadhaar_ocr_failed.mp3',
   aadhaar_qr_fallback:      'aadhar/aadhaar_qr_fallback.mp3',
   // AS-only (no EN equivalent recorded yet — fallback to en will skip these)
@@ -61,6 +62,7 @@ export const STATIC_AUDIO_MAP = {
   greet_wake:               'greet/greet_wake.mp3',
 
   // ── Login / Auth ──────────────────────────────────────────────────────────
+  login_page_intro:         'login/login_page_intro.mp3',
   login_aadhaar_verified:   'login/login_aadhaar_verified.mp3',
   login_id_not_found:       'login/login_id_not_found.mp3',
   login_invalid_aadhaar:    'login/login_invalid_aadhaar.mp3',
@@ -96,6 +98,9 @@ export const STATIC_AUDIO_MAP = {
   net_restored:             'network/net_restored.mp3',
 
   // ── Page announcements ────────────────────────────────────────────────────
+  elec_menu_intro:          'page/elec_menu_intro.mp3',
+  gas_menu_intro:           'page/gas_menu_intro.mp3',
+  muni_menu_intro:          'page/muni_menu_intro.mp3',
   page_complaints:          'page/page_complaints.mp3',
   page_electricity:         'page/page_electricity.mp3',
   page_family_profile:      'page/page_family_profile.mp3',
