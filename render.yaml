@@ -22,9 +22,13 @@ services:
         generateValue: true
       - key: CORS_ORIGINS
         sync: false
-      - key: DB_PATH
-        value: /var/data/suvidha.db
-    disk:
-      name: suvidha-data
-      mountPath: /var/data
-      sizeGB: 1
+    # No disk block — Render's free tier doesn't support persistent disks.
+    # SQLite falls back to its default in-repo path (server/suvidha.db) via
+    # db.js's DB_PATH env override added earlier — that file lives on the
+    # service's ephemeral filesystem, reset on every redeploy/restart.
+    # Fine for this app's actual critical data: citizen submissions go to
+    # Supabase first (apiService.js), not this local DB. What's ephemeral
+    # here is admin accounts, schemes seed data (reseeded on boot anyway),
+    # audit logs, and OTP state — acceptable for a free-tier demo deploy.
+    # Upgrade to a paid Render plan + restore the disk block if persistent
+    # local DB state matters later.
