@@ -172,7 +172,7 @@ const AIChatbot = () => {
     try {
       setLastProvider('sarvam-105b');
       const [resp] = await Promise.all([
-        fetch('/api/chat', {
+        fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/chat`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
