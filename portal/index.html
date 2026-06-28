@@ -191,7 +191,7 @@ header .spacer{flex:1}
            ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="this.classList.remove('over')">
         <div class="drop-icon">📎</div>
         <div class="drop-label">Tap to select a photo or document</div>
-        <div class="drop-sub">JPEG or PNG · max 5 MB</div>
+        <div class="drop-sub">JPEG or PNG · max 10 MB</div>
       </div>
       <input type="file" id="file-input" accept="image/jpeg,image/png" style="display:none" onchange="handleFileSelect(this)">
 
@@ -502,8 +502,8 @@ function setFile(file) {
     showErr('Only JPEG/PNG files are allowed.');
     return;
   }
-  if (file.size > 5 * 1024 * 1024) {
-    showErr('File exceeds 5 MB limit.');
+  if (file.size > 10 * 1024 * 1024) {
+    showErr('File exceeds 10 MB limit.');
     return;
   }
   hideErr();

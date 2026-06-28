@@ -149,7 +149,7 @@ export const rateLimit = (key, maxCalls = 5, windowMs = 60000) => {
 
 // File upload security validation
 export const validateUploadSecurity = (file) => {
-  const maxSize = 5 * 1024 * 1024; // 5MB
+  const maxSize = 10 * 1024 * 1024; // 10MB
   const allowedTypes = [
     'application/pdf',
     'application/msword',
@@ -163,7 +163,7 @@ export const validateUploadSecurity = (file) => {
   const errors = [];
   
   if (file.size > maxSize) {
-    errors.push('File exceeds 5MB limit');
+    errors.push('File exceeds 10MB limit');
   }
   
   if (!allowedTypes.includes(file.type)) {

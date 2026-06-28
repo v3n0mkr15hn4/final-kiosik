@@ -63,10 +63,14 @@ create policy "portal read documents"
 -- Run this separately if the Storage SQL API is available:
 -- (In Supabase dashboard → Storage → New Bucket → name: uploads, public: true)
 --
--- OR uncomment and run:
+-- OR uncomment and run (10MB limit — if you already created the bucket via
+-- the dashboard with the old 5MB default, run the UPDATE below instead):
 -- insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
--- values ('uploads', 'uploads', true, 5242880, array['image/jpeg','image/jpg','image/png'])
+-- values ('uploads', 'uploads', true, 10485760, array['image/jpeg','image/jpg','image/png'])
 -- on conflict (id) do nothing;
+
+-- If the bucket already exists with the old 5MB limit, run this to bump it:
+-- update storage.buckets set file_size_limit = 10485760 where id = 'uploads';
 
 -- ── 4. Storage RLS (run AFTER creating bucket) ────────────────────────────
 -- create policy "anon upload to uploads"
