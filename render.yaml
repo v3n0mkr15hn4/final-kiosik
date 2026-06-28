@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: suvidha-backend
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8080
+      - key: SARVAM_API_KEY
+        sync: false
+      - key: NVIDIA_API_KEY
+        sync: false
+      - key: FAST2SMS_API_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false
+      - key: DB_PATH
+        value: /var/data/suvidha.db
+    disk:
+      name: suvidha-data
+      mountPath: /var/data
+      sizeGB: 1

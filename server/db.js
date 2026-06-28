@@ -15,7 +15,12 @@ const __dirname = path.dirname(__filename);
 let db;
 
 export function initDB() {
-  db = new Database(path.join(__dirname, 'suvidha.db'));
+  // DB_PATH lets deployments with a separate persistent disk (Render, Railway,
+  // etc.) point SQLite at mounted storage instead of the code directory —
+  // mounting a disk directly over __dirname would wipe the app's own files.
+  // Defaults to the original in-repo location for local dev, unchanged.
+  const dbPath = process.env.DB_PATH || path.join(__dirname, 'suvidha.db');
+  db = new Database(dbPath);
 
   // Enable WAL mode for better concurrency
   db.pragma('journal_mode = WAL');
