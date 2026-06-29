@@ -276,7 +276,8 @@ class TTSService {
     return new Promise((resolve, reject) => {
       const audio = new Audio(objectUrl);
       audio.preload = 'auto';
-      audio.volume = Math.max(0, Math.min(1, Number(volume)));
+      const parsedVolume = Number(volume);
+      audio.volume = Math.max(0, Math.min(1, Number.isFinite(parsedVolume) ? parsedVolume : 1));
       this.currentAudio = audio;
       this.currentObjectUrl = objectUrl;
 
