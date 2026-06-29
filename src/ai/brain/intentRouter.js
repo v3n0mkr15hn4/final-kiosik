@@ -12,9 +12,10 @@ const REQUIRES_CONFIRMATION = new Set([
   'SUBMIT_FORM', 'PAY_BILL', 'DELETE_DATA', 'ADMIN_ACTION',
 ]);
 
-// Single source of truth lives in navigationRegistry.js. Re-exported here so
-// existing importers keep working.
-export { INTENT_TO_PATH } from './navigationRegistry.js';
+// Single source of truth lives in navigationRegistry.js. Imported (local binding,
+// so the default export below can reference it) and re-exported for existing importers.
+import { INTENT_TO_PATH } from './navigationRegistry.js';
+export { INTENT_TO_PATH };
 
 /**
  * Route an AI response to an executable action.

@@ -20,23 +20,10 @@ const WakeWordListener = () => {
   const recognitionRef = useRef(null);
   const restartTimeoutRef = useRef(null);
 
+  // Pretrained-model voice only (ttsService). No robotic browser SpeechSynthesis.
+  // Language/speaker are forced by the session config inside ttsService.
   const speak = useCallback((text) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      const lang = getBaseLang(localStorage.getItem('i18nextLng') || 'en');
-      const langMap = {
-        en: 'en-IN', hi: 'hi-IN', ta: 'ta-IN', te: 'te-IN',
-        kn: 'kn-IN', ml: 'ml-IN', mr: 'mr-IN', gu: 'gu-IN',
-        bn: 'bn-IN', or: 'or-IN', pa: 'pa-IN', as: 'as-IN',
-        ur: 'hi-IN', ks: 'hi-IN', sd: 'hi-IN', mai: 'hi-IN',
-        kok: 'hi-IN', doi: 'hi-IN', ne: 'hi-IN', sa: 'hi-IN',
-        mni: 'hi-IN', sat: 'hi-IN',
-      };
-      utterance.lang = langMap[lang] || 'hi-IN';
-      utterance.rate = 0.9;
-      window.speechSynthesis.speak(utterance);
-    }
+    ttsSpeak(text, { interrupt: true });
   }, []);
 
   const activateBlindMode = useCallback(() => {

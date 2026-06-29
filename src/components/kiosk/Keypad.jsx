@@ -3,17 +3,14 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { speak } from '../../utils/ttsService';
 
 const KEYS = [1, 2, 3, 4, 5, 6, 7, 8, 9, '⌫', 0, '✓'];
 
-// Speak digit via browser speechSynthesis — works offline, no import needed
+// Digit feedback routes through ttsService — pretrained-model voice only, no
+// robotic browser SpeechSynthesis. Silent if no pretrained voice is available.
 function speakDigit(text) {
-  if (!('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.rate = 1.1;
-  u.volume = 0.9;
-  window.speechSynthesis.speak(u);
+  speak(String(text), { interrupt: true });
 }
 
 export default function Keypad({

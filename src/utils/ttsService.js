@@ -235,12 +235,11 @@ class TTSService {
               return;
             }
           }
-        } catch { /* Sarvam unavailable — fall through to Web Speech */ }
+        } catch { /* Sarvam unavailable — fall through (stays silent if no other pretrained tier) */ }
       }
 
       // 3. Offline MMS-TTS model (currently Hindi only — see offlineTTS.js).
-      // Covers the gap Browser SpeechSynthesis leaves: that tier depends on
-      // the device having a Hindi voice installed, which isn't guaranteed.
+      // Pretrained, on-device. Only pretrained voice available offline for Hindi.
       try {
         const { isOfflineTTSSupported, synthesizeOffline } = await import('../ai/voice/offlineTTS.js');
         if (isOfflineTTSSupported(langInfo.originalLang)) {
@@ -250,11 +249,13 @@ class TTSService {
           return;
         }
       } catch (offlineErr) {
-        console.warn('[TTS] Offline model failed, using Web Speech:', offlineErr.message);
+        console.warn('[TTS] Offline model failed, staying silent:', offlineErr.message);
       }
 
-      // 5. Browser Web Speech (always available, lower quality)
-      await this.playFallback(item.text, langInfo.code);
+      // No pretrained voice available (no recording, Sarvam not used/failed, no
+      // offline model for this language) → stay silent. The app NEVER uses the
+      // robotic browser Web Speech voice — only pretrained-model audio plays.
+      console.debug('[TTS] No pretrained voice for this line — staying silent:', item.text.slice(0, 60));
     } finally {
       window.dispatchEvent(new CustomEvent('suvidha:tts-ended', { detail: { text: item.text } }));
       item.options?.onEnd?.();
@@ -287,28 +288,6 @@ class TTSService {
     });
   }
 
-  playFallback(text, languageCode) {
-    return new Promise((resolve) => {
-      if (!('speechSynthesis' in window)) { resolve(true); return; }
-
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = languageCode;
-      utterance.rate = 0.9;
-      utterance.volume = 1;
-
-      const voices = window.speechSynthesis.getVoices();
-      const langBase = languageCode.split('-')[0];
-      const match = voices.find(v => v.lang.startsWith(languageCode))
-        || voices.find(v => v.lang.startsWith(langBase))
-        || voices.find(v => v.lang.startsWith('hi'));
-      if (match) utterance.voice = match;
-
-      utterance.onend = () => resolve(true);
-      utterance.onerror = () => resolve(true);
-      window.speechSynthesis.speak(utterance);
-    });
-  }
 }
 
 const ttsService = new TTSService();
