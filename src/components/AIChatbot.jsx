@@ -111,7 +111,7 @@ const AIChatbot = () => {
         provider: 'local',
       }]);
       // Read welcome aloud
-      setTimeout(() => naturalSpeak(welcomeText, { language: userLang }), 400);
+      setTimeout(() => naturalSpeak(welcomeText, { language: userLang, staticKey: 'greet_ai_intro' }), 400);
     }
   }, [isOpen, messages.length, userLang]);
 
@@ -264,7 +264,7 @@ const AIChatbot = () => {
       stopBargeInListener();
       if (spokenText?.trim()) sendMessage(spokenText);
     }, userLang);
-    naturalSpeak(replyText, { language: finalResponse?.language || userLang, priority: 'normal' })
+    naturalSpeak(replyText, { language: finalResponse?.language || userLang, priority: 'normal', chatbot: true })
       .finally(() => stopBargeInListener());
   }, [isTyping, i18n.language, userLang, callNvidiaChat, executeAction, lastProvider, t]);
 
@@ -316,7 +316,7 @@ const AIChatbot = () => {
     const lastBot = [...messages].reverse().find(m => m.type === 'bot');
     if (!lastBot) return;
     setIsSpeakingReply(true);
-    naturalSpeak(lastBot.text, { language: i18n.language, interrupt: true })
+    naturalSpeak(lastBot.text, { language: i18n.language, interrupt: true, chatbot: true })
       .finally(() => setIsSpeakingReply(false));
   };
 

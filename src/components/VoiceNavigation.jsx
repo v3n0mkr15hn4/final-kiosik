@@ -311,12 +311,12 @@ const VoiceNavigation = () => {
           showFeedback('Session ended');
         } else if (action === 'HELP') {
           const helpMsg = helpMessages[lang] || helpMessages.en;
-          import('../utils/naturalVoice').then(m => m.naturalSpeak(helpMsg, { language: lang }));
+          import('../utils/naturalVoice').then(m => m.naturalSpeak(helpMsg, { language: lang, staticKey: 'greet_help_hint' }));
           showFeedback('Here to help!');
         } else {
           navigate(action);
           const pageName = getPageName(action);
-          announceNavigation(pageName, lang);
+          announceNavigation(pageName, lang, action);
           showFeedback(`→ ${pageName}`);
         }
         return;
@@ -343,9 +343,9 @@ const VoiceNavigation = () => {
       const data = await resp.json();
       const reply = data.reply || '';
 
-      // Speak the response
+      // Speak the response — dynamic chatbot answer → Sarvam TTS
       stopTTS();
-      import('../utils/naturalVoice').then(m => m.naturalSpeak(reply, { language: lang, interrupt: true }));
+      import('../utils/naturalVoice').then(m => m.naturalSpeak(reply, { language: lang, interrupt: true, chatbot: true }));
       showFeedback(reply.slice(0, 60) + (reply.length > 60 ? '…' : ''));
 
       // Execute action if returned

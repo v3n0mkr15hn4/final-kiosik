@@ -1,11 +1,15 @@
 /**
- * Chat Route — 4-tier cascade optimised for Indian languages
+ * Chat Route — translate-bridge architecture
  *
- * Model priority:
- *   0. sarvam-105b  — Sarvam API direct (105B params, best Indian language AI)
- *   1. sarvamai/sarvam-m  — NVIDIA NIM (24B, fast Indian language fallback)
- *   2. meta/llama-3.1-8b-instruct — NVIDIA NIM (English fallback)
- *   3. google/gemma-2-2b-it  — HuggingFace (last resort)
+ * Sarvam is used ONLY for translation here (STT/TTS happen client-side via
+ * ttsService / speechRecognition). The answer engine is NVIDIA NIM:
+ *
+ *   1. Non-English input  → Sarvam translate → English
+ *   2. English prompt     → NVIDIA NIM (Llama 3.3-70b, HF Gemma-2 fallback)
+ *   3. English reply      → Sarvam translate → original language
+ *
+ * This keeps one consistent English-reasoning model instead of juggling
+ * Sarvam's own multilingual chat models.
  */
 
 import { Router } from 'express';
@@ -76,68 +80,38 @@ const CONTEXT_MAP = {
   water: 'User is in Water services. Help with new water connection, pipe complaints, billing, sewage.',
 };
 
-// ── Tier 0: Sarvam 105B — direct Sarvam API (largest, best Indian language) ─
-async function callSarvam105B(messages, signal) {
+// ── Sarvam translate — used as a bridge in/out of NVIDIA, not for chat ──────
+async function translateViaSarvam(text, sourceLangCode, targetLangCode, signal) {
   const SARVAM_KEY = process.env.SARVAM_API_KEY;
-  if (!SARVAM_KEY) return null;
+  if (!SARVAM_KEY || !text?.trim() || sourceLangCode === targetLangCode) return null;
 
-  const response = await fetch('https://api.sarvam.ai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'api-subscription-key': SARVAM_KEY,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'sarvam-105b',
-      messages,
-      max_tokens: 300,
-      temperature: 0.5,
-      top_p: 1,
-      stream: false,
-    }),
-    signal,
-  });
-
-  if (!response.ok) {
-    const err = await response.text().catch(() => '');
-    console.warn('[Chat] Sarvam 105B unavailable:', response.status, err.slice(0, 120));
+  try {
+    const response = await fetch('https://api.sarvam.ai/translate', {
+      method: 'POST',
+      headers: {
+        'api-subscription-key': SARVAM_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        input: text,
+        source_language_code: sourceLangCode,
+        target_language_code: targetLangCode,
+        model: 'mayura:v1',
+        mode: 'formal',
+        enable_preprocessing: false,
+      }),
+      signal,
+    });
+    if (!response.ok) {
+      console.warn('[Chat] Sarvam translate unavailable:', response.status);
+      return null;
+    }
+    const data = await response.json();
+    return data?.translated_text?.trim() || null;
+  } catch (e) {
+    if (e.name !== 'AbortError') console.warn('[Chat] Sarvam translate failed:', e.message);
     return null;
   }
-
-  const data = await response.json();
-  return data?.choices?.[0]?.message?.content?.trim() || null;
-}
-
-// ── Tier 1: Sarvam AI via NVIDIA NIM (24B, fast fallback) ────────────────
-async function callSarvamNIM(messages, signal) {
-  const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY;
-  if (!NVIDIA_API_KEY) return null;
-
-  const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${NVIDIA_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'sarvamai/sarvam-m',
-      messages,
-      max_tokens: 250,
-      temperature: 0.6,
-      top_p: 0.9,
-      stream: false,
-    }),
-    signal,
-  });
-
-  if (!response.ok) {
-    const err = await response.text().catch(() => '');
-    console.warn('[Chat] Sarvam NIM unavailable:', response.status, err.slice(0, 120));
-    return null;
-  }
-
-  const data = await response.json();
-  return data?.choices?.[0]?.message?.content?.trim() || null;
 }
 
 // ── Llama-3.1-8b via NVIDIA NIM (secondary) ───────────────────────────────
@@ -235,56 +209,40 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // Build system prompt with page context
+    // Build system prompt with page context — NVIDIA always reasons in English;
+    // translation in/out of the user's language happens via Sarvam below.
     let systemPrompt = SYSTEM_PROMPT;
     const contextInfo = CONTEXT_MAP[context];
     systemPrompt += contextInfo ? `\n\nCurrent context: ${contextInfo}` : '\n\nUser is on the home screen. Give a friendly overview of available services if asked.';
-
-    if (language && language !== 'en') {
-      const langNames = { hi: 'Hindi', as: 'Assamese', bn: 'Bengali', ta: 'Tamil', te: 'Telugu', kn: 'Kannada' };
-      const langName = langNames[language] || language;
-      systemPrompt += `\n\nIMPORTANT: The user prefers ${langName}. If they write in ${langName}, respond in ${langName}. If they write in English, respond in English.`;
-    }
-
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: sanitized },
-    ];
+    systemPrompt += '\n\nIMPORTANT: Always reply in English. The text you write will be translated separately.';
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 12000);
 
+    // 0. Bridge into English via Sarvam translate (no-op if already English)
+    const sarvamLangCode = `${language}-IN`;
+    let englishMessage = sanitized;
+    if (language && language !== 'en') {
+      const translatedIn = await translateViaSarvam(sanitized, sarvamLangCode, 'en-IN', controller.signal);
+      if (translatedIn) englishMessage = translatedIn;
+    }
+
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: englishMessage },
+    ];
+
     let reply = null;
-    let provider = 'sarvam-105b';
+    let provider = 'llama-nim';
 
-    // 0. Try Sarvam 105B direct — largest, best Indian language model
+    // 1. NVIDIA NIM — Llama-3.3-70b, the answer engine
     try {
-      reply = await callSarvam105B(messages, controller.signal);
+      reply = await callLlamaNIM(messages, controller.signal);
     } catch (e) {
-      if (e.name !== 'AbortError') console.warn('[Chat] Sarvam 105B failed:', e.message);
+      if (e.name !== 'AbortError') console.warn('[Chat] Llama NIM call failed:', e.message);
     }
 
-    // 1. Fallback: Sarvam-M via NVIDIA NIM (24B)
-    if (!reply) {
-      provider = 'sarvam-nim';
-      try {
-        reply = await callSarvamNIM(messages, controller.signal);
-      } catch (e) {
-        if (e.name !== 'AbortError') console.warn('[Chat] Sarvam NIM call failed:', e.message);
-      }
-    }
-
-    // 2. Fallback: Llama-3.1-8b via NVIDIA
-    if (!reply) {
-      provider = 'llama-nim';
-      try {
-        reply = await callLlamaNIM(messages, controller.signal);
-      } catch (e) {
-        if (e.name !== 'AbortError') console.warn('[Chat] Llama NIM call failed:', e.message);
-      }
-    }
-
-    // 3. Last resort: HuggingFace Gemma-2
+    // 2. Last resort: HuggingFace Gemma-2
     if (!reply) {
       provider = 'huggingface';
       try {
@@ -318,7 +276,14 @@ router.post('/', async (req, res) => {
       });
     }
 
-    const cleanReply = stripThinkingTags(reply);
+    let cleanReply = stripThinkingTags(reply);
+
+    // 3. Bridge back out of English via Sarvam translate
+    if (language && language !== 'en') {
+      const translatedOut = await translateViaSarvam(cleanReply, 'en-IN', sarvamLangCode);
+      if (translatedOut) cleanReply = translatedOut;
+    }
+
     console.log(`[Chat] Reply via ${provider} | lang=${language} | ctx=${context || 'home'}`);
     return res.json({ reply: cleanReply, language, provider: 'suvidha-ai' });
 

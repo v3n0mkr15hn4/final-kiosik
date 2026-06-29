@@ -1,0 +1,102 @@
+/* ──────────────────────────────────────────────────────────────────
+   On-screen virtual keyboard — global, touch-triggered.
+   Lives inside .kiosk-stage, so it scales with --kiosk-scale and sizes
+   itself with --ui-scale, matching the .keypad primitive.
+   ────────────────────────────────────────────────────────────────── */
+
+.osk {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9500;
+  display: flex;
+  flex-direction: column;
+  gap: calc(16px * var(--ui-scale));
+  padding: calc(28px * var(--ui-scale)) calc(40px * var(--ui-scale))
+           calc(36px * var(--ui-scale));
+  background: var(--surface-0, #fff);
+  border-top: calc(2px * var(--ui-scale)) solid var(--line);
+  border-top-left-radius: calc(36px * var(--ui-scale));
+  border-top-right-radius: calc(36px * var(--ui-scale));
+  box-shadow: 0 calc(-12px * var(--ui-scale)) calc(48px * var(--ui-scale))
+              rgba(15, 23, 42, 0.18);
+  animation: osk-slide-up 0.18s ease-out;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+@keyframes osk-slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.osk-row {
+  display: flex;
+  justify-content: center;
+  gap: calc(16px * var(--ui-scale));
+}
+
+.osk-key {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: calc(120px * var(--ui-scale));
+  border: calc(2px * var(--ui-scale)) solid var(--line);
+  border-radius: calc(24px * var(--ui-scale));
+  background: white;
+  color: var(--indigo-900);
+  font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+  font-size: calc(44px * var(--ui-scale));
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.08s ease, background 0.08s ease, box-shadow 0.08s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.osk-key:hover {
+  background: var(--surface-1);
+}
+
+/* Visual press feedback (matches .keypad button:active) */
+.osk-key:active {
+  transform: scale(0.96);
+  background: var(--surface-2);
+  box-shadow: inset 0 calc(3px * var(--ui-scale)) calc(8px * var(--ui-scale))
+              rgba(15, 23, 42, 0.12);
+}
+
+/* Wider control keys */
+.osk-key--wide  { flex: 1.6 1 0; }
+.osk-key--space { flex: 6 1 0; letter-spacing: 0.06em; }
+
+.osk-key--func {
+  font-size: calc(32px * var(--ui-scale));
+  font-weight: 600;
+  background: var(--surface-1);
+}
+
+.osk-key--shift.is-active {
+  background: var(--indigo-900);
+  color: white;
+  border-color: var(--indigo-900);
+}
+
+.osk-key--backspace {
+  background: var(--surface-2);
+  color: var(--err);
+}
+
+.osk-key--enter {
+  background: var(--ok);
+  color: white;
+  border-color: var(--ok);
+  font-weight: 700;
+}
+.osk-key--enter:hover { background: var(--ok); filter: brightness(0.96); }
+
+.osk-key--hide {
+  background: var(--surface-2);
+  color: var(--ink-700);
+}

@@ -10,6 +10,25 @@
  */
 
 import ttsService, { speak as rawSpeak, stopTTS, isVoiceEnabled } from './ttsService';
+import { ROUTE_STATIC_KEYS } from './staticAudioMap';
+
+// Route → pre-recorded navigation-confirmation key. App navigation MUST use
+// these static MP3s, never Sarvam or Web Speech. Sarvam is reserved for the
+// dynamic chatbot answer only (chatbot: true in ttsService).
+const NAV_STATIC_KEYS = {
+  '/home': 'nav_home',
+  '/electricity': 'nav_electricity',
+  '/gas': 'nav_gas',
+  '/water': 'nav_water',
+  '/municipal': 'nav_municipal',
+  '/complaints': 'nav_complaints',
+  '/schemes': 'nav_schemes',
+  '/track-status': 'nav_track',
+  '/login': 'nav_login',
+  '/office-locator': 'nav_office_locator',
+};
+
+export const getNavStaticKey = (route) => NAV_STATIC_KEYS[route] || 'nav_fallback';
 
 // ─── Warm phrase banks ────────────────────────────────────────────────────────
 
@@ -142,10 +161,11 @@ export function naturalSpeak(text, options = {}) {
   return rawSpeak(processed, { ...options, language: lang, pace });
 }
 
-export function announceNavigation(pageName, language = 'en') {
+export function announceNavigation(pageName, language = 'en', route = '') {
   const lang = getLang(language);
   const prefix = pick(PHRASES.navigating[lang] || PHRASES.navigating.en);
-  return rawSpeak(`${prefix} ${pageName}.`, { language: lang, interrupt: false });
+  // staticKey forces the pre-recorded nav MP3; the text is only a fallback label.
+  return rawSpeak(`${prefix} ${pageName}.`, { language: lang, interrupt: false, staticKey: getNavStaticKey(route) });
 }
 
 export function speakPageIntro(pathname, language = 'en', options = {}) {
@@ -153,12 +173,12 @@ export function speakPageIntro(pathname, language = 'en', options = {}) {
   const intros = PAGE_INTROS[pathname];
   if (!intros) return Promise.resolve();
   const text = intros[lang] || intros.en;
-  return rawSpeak(text, { language: lang, priority: 'normal', ...options });
+  return rawSpeak(text, { language: lang, priority: 'normal', staticKey: ROUTE_STATIC_KEYS[pathname], ...options });
 }
 
 export function announceGoBack(language = 'en') {
   const lang = getLang(language);
-  return rawSpeak(pick(PHRASES.goingBack[lang] || PHRASES.goingBack.en), { language: lang });
+  return rawSpeak(pick(PHRASES.goingBack[lang] || PHRASES.goingBack.en), { language: lang, staticKey: 'nav_back' });
 }
 
 export function announceLogout(language = 'en') {
@@ -168,7 +188,7 @@ export function announceLogout(language = 'en') {
 
 export function announceNotUnderstood(language = 'en') {
   const lang = getLang(language);
-  return rawSpeak(pick(PHRASES.notUnderstood[lang] || PHRASES.notUnderstood.en), { language: lang });
+  return rawSpeak(pick(PHRASES.notUnderstood[lang] || PHRASES.notUnderstood.en), { language: lang, staticKey: 'nav_fallback' });
 }
 
 export function announceListening(language = 'en') {
@@ -178,7 +198,7 @@ export function announceListening(language = 'en') {
 
 export function announceConfirm(language = 'en') {
   const lang = getLang(language);
-  return rawSpeak(pick(PHRASES.commandConfirm[lang] || PHRASES.commandConfirm.en), { language: lang, interrupt: true });
+  return rawSpeak(pick(PHRASES.commandConfirm[lang] || PHRASES.commandConfirm.en), { language: lang, interrupt: true, staticKey: 'action_confirmed' });
 }
 
 // ─── Barge-In Detection ───────────────────────────────────────────────────────

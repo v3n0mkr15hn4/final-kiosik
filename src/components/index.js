@@ -10,6 +10,7 @@ export { default as Modal } from './Modal';
 export { default as Timeline } from './Timeline';
 export { default as Header } from './Header';
 export { default as NumericKeypad } from './NumericKeypad';
+export { default as OnScreenKeyboard } from './OnScreenKeyboard';
 export { default as AccessibilityProvider } from './AccessibilityProvider';
 export { useAccessibility } from './AccessibilityProvider';
 export { default as AccessibilityToolbar } from './AccessibilityToolbar';

@@ -10,6 +10,7 @@ import EmergencyQuickAccess from './components/EmergencyQuickAccess';
 import ScreenReaderOverlay from './components/ScreenReaderOverlay';
 import VoiceNavigation from './components/VoiceNavigation';
 import AIChatbot from './components/AIChatbot';
+import OnScreenKeyboard from './components/OnScreenKeyboard';
 import useIdleRearm from './hooks/useIdleRearm';
 
 // Eagerly loaded pages
@@ -151,6 +152,9 @@ function AIShell({ children }) {
       {/* ScreenReaderOverlay only for blind mode — avoids duplicate voice with VoiceNavigation */}
       {isBlind && <ScreenReaderOverlay />}
       <VoiceNavigation />
+
+      {/* Global on-screen keyboard — inert until a text field is focused */}
+      <OnScreenKeyboard />
 
       {children}
 

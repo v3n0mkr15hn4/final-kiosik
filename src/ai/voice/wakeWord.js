@@ -72,12 +72,15 @@ export function startWakeWordDetection(onWakeWord, language = 'en') {
   };
 
   recognition.onerror = (e) => {
-    const ignorable = new Set(['no-speech', 'aborted', 'audio-capture']);
+    // 'network' = Web Speech can't reach Google's online ASR backend (offline /
+    // blocked). It's expected on a kiosk with no internet — don't spam the log,
+    // and back off harder so we're not hammering a dead endpoint every 2s.
+    const ignorable = new Set(['no-speech', 'aborted', 'audio-capture', 'network']);
     if (!ignorable.has(e.error)) {
       console.warn('[WakeWord] Error:', e.error);
     }
     _isActive = false;
-    scheduleRestart(localSession);
+    scheduleRestart(localSession, e.error === 'network' ? 15000 : 2000);
   };
 
   recognition.onend = () => {
@@ -97,14 +100,14 @@ export function startWakeWordDetection(onWakeWord, language = 'en') {
   }
 }
 
-function scheduleRestart(localSession) {
+function scheduleRestart(localSession, delay = 2000) {
   if (_pausedForConversation) return;
   clearTimeout(_restartTimeout);
   _restartTimeout = setTimeout(() => {
     if (!_pausedForConversation && localSession === _sessionId) {
       startWakeWordDetection(_onWakeWord, _language);
     }
-  }, 2000);
+  }, delay);
 }
 
 /**
